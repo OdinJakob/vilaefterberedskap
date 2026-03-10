@@ -1,14 +1,98 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useMemo } from "react";
+import { CalcInput, calculateRest } from "@/lib/calculations";
+import RestForm, { DEFAULT_INPUT } from "@/components/RestForm";
+import ResultDisplay from "@/components/ResultDisplay";
+import DetailedBreakdown from "@/components/DetailedBreakdown";
+import ExampleScenarios from "@/components/ExampleScenarios";
+import InfoBox from "@/components/InfoBox";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Shield } from "lucide-react";
 
-const Index = () => {
+export default function Index() {
+  const [input, setInput] = useState<CalcInput>({ ...DEFAULT_INPUT });
+  const [showDetailed, setShowDetailed] = useState(false);
+
+  const isComplete =
+    input.activeWorkStart !== "" &&
+    input.activeWorkEnd !== "" &&
+    input.workDayStart !== "" &&
+    input.workDayEnd !== "";
+
+  const result = useMemo(() => {
+    if (!isComplete) return null;
+    return calculateRest(input);
+  }, [input, isComplete]);
+
+  const handleReset = () => {
+    setInput({ ...DEFAULT_INPUT });
+    setShowDetailed(false);
+  };
+
+  const handleExampleSelect = (exInput: CalcInput) => {
+    setInput({ ...exInput });
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card">
+        <div className="container py-6">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-primary p-2.5">
+              <Shield className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">Vila vid beredskap</h1>
+              <p className="text-sm text-muted-foreground">
+                Räkna ut vilken vila du ska och får ta ut efter aktivt arbete under beredskap
+              </p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="container py-6 space-y-6 pb-20">
+        {/* Disclaimer */}
+        <div className="bg-muted/50 rounded-lg p-4 border border-border/50">
+          <p className="text-sm text-muted-foreground">
+            Det här verktyget är ett stöd för att räkna ut ledighet efter störning under
+            beredskap. Slutlig bedömning görs tillsammans med chef enligt gällande regler
+            och lokala rutiner.
+          </p>
+        </div>
+
+        {/* Form */}
+        <RestForm input={input} onChange={setInput} onReset={handleReset} />
+
+        {/* Show detailed toggle */}
+        {isComplete && (
+          <div className="flex items-center gap-2">
+            <Switch
+              id="detailed"
+              checked={showDetailed}
+              onCheckedChange={setShowDetailed}
+            />
+            <Label htmlFor="detailed" className="text-sm text-muted-foreground cursor-pointer">
+              Visa detaljerad uträkning
+            </Label>
+          </div>
+        )}
+
+        {/* Results */}
+        {result && (
+          <>
+            <ResultDisplay result={result} workDayStart={input.workDayStart} />
+            {showDetailed && <DetailedBreakdown result={result} />}
+          </>
+        )}
+
+        {/* Examples */}
+        <ExampleScenarios onSelect={handleExampleSelect} />
+
+        {/* Info */}
+        <InfoBox />
+      </main>
     </div>
   );
-};
-
-export default Index;
+}

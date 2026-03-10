@@ -1,0 +1,146 @@
+import { CalcResult, formatHours, formatHoursShort } from "@/lib/calculations";
+import { Clock, Shield, AlertTriangle, Info } from "lucide-react";
+
+interface ResultDisplayProps {
+  result: CalcResult;
+  workDayStart: string;
+}
+
+export default function ResultDisplay({ result, workDayStart }: ResultDisplayProps) {
+  return (
+    <div className="space-y-4 animate-fade-in">
+      {/* Ska vara ledig */}
+      <div className="result-card-must rounded-lg border p-5">
+        <div className="flex items-start gap-3">
+          <div className="rounded-full bg-must-rest p-2 mt-0.5">
+            <Shield className="h-4 w-4 text-must-rest-foreground" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-must-rest text-sm uppercase tracking-wide">
+              Du ska vara ledig
+            </h3>
+            <p className="text-2xl font-bold text-foreground mt-1">
+              {formatHours(result.mandatoryRestHours)}
+            </p>
+            {result.mandatoryRestHours > 0 && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Från {workDayStart} (ordinarie arbetsstart)
+              </p>
+            )}
+            {result.mandatoryRestHours === 0 && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Tillräcklig vila finns redan efter störningen
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Får vara ledig */}
+      {result.restrictedDailyRestHours > 0 && (
+        <div className="result-card-may rounded-lg border p-5">
+          <div className="flex items-start gap-3">
+            <div className="rounded-full bg-may-rest p-2 mt-0.5">
+              <Clock className="h-4 w-4 text-may-rest-foreground" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-may-rest text-sm uppercase tracking-wide">
+                Du får vara ledig
+              </h3>
+              <p className="text-2xl font-bold text-foreground mt-1">
+                Ytterligare {formatHours(result.restrictedDailyRestHours)}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                På grund av inskränkt dygnsvila
+              </p>
+              <div className="mt-3 bg-card/60 rounded-md p-3 space-y-1.5">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Beredskapsvila</span>
+                  <span className="font-medium">{formatHoursShort(result.beredskapsvila)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Inskränkt dygnsvila</span>
+                  <span className="font-medium">{formatHoursShort(result.inskanktDygnsvila)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Beredskapsvila info (only when no restricted rest) */}
+      {result.restrictedDailyRestHours === 0 && result.beredskapsvila > 0 && (
+        <div className="result-card-may rounded-lg border p-5">
+          <div className="flex items-start gap-3">
+            <div className="rounded-full bg-may-rest p-2 mt-0.5">
+              <Clock className="h-4 w-4 text-may-rest-foreground" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-may-rest text-sm uppercase tracking-wide">
+                Beredskapsvila
+              </h3>
+              <p className="text-2xl font-bold text-foreground mt-1">
+                {formatHours(result.beredskapsvila)}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Du kan använda {formatHoursShort(result.beredskapsvila)} beredskapsvila
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tidigast åter i arbete */}
+      <div className="result-card-info rounded-lg border p-5">
+        <div className="flex items-start gap-3">
+          <div className="rounded-full bg-info p-2 mt-0.5">
+            <Clock className="h-4 w-4 text-must-rest-foreground" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-info text-sm uppercase tracking-wide">
+              Tidigast åter i arbete
+            </h3>
+            <p className="text-2xl font-bold text-foreground mt-1">
+              {result.earliestReturn}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Kvar att använda denna vecka: {formatHoursShort(result.remainingWeeklyBeredskapsvila)} beredskapsvila
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Chef-avstämning */}
+      {result.requiresManagerConsultation && (
+        <div className="result-card-warning rounded-lg border p-5">
+          <div className="flex items-start gap-3">
+            <div className="rounded-full bg-warning p-2 mt-0.5">
+              <AlertTriangle className="h-4 w-4 text-warning-foreground" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-warning text-sm uppercase tracking-wide">
+                Kräver avstämning med chef
+              </h3>
+              <p className="text-sm text-muted-foreground mt-2">
+                Du avgör ihop med din chef om du behöver ta den inskränkta dygnsvilan
+                i samband med nästa arbetspass eller om den sparas tills beredskapsveckan är slut.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Warnings */}
+      {result.warnings.length > 0 && (
+        <div className="space-y-2">
+          {result.warnings.map((w, i) => (
+            <div key={i} className="flex items-start gap-2 text-sm text-muted-foreground bg-muted/50 rounded-md p-3">
+              <Info className="h-4 w-4 mt-0.5 shrink-0" />
+              <span>{w}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
