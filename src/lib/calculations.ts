@@ -178,10 +178,10 @@ export function calculateRest(input: CalcInput): CalcResult {
 
   // Beräkna vila före störning (föregående arbetsslut → störningens start)
   let restBeforeMinutes: number;
-  if (activeStartMins >= workEndMins) {
-    restBeforeMinutes = activeStartMins - workEndMins;
+  if (activeStartMins >= prevWorkEndMins) {
+    restBeforeMinutes = activeStartMins - prevWorkEndMins;
   } else {
-    restBeforeMinutes = (1440 - workEndMins) + activeStartMins;
+    restBeforeMinutes = (1440 - prevWorkEndMins) + activeStartMins;
   }
   const restBeforeHours = restBeforeMinutes / 60;
 
