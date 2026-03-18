@@ -163,13 +163,11 @@ export function calculateRest(input: CalcInput): CalcResult {
   const mandatoryRestHours = Math.max(0, MIN_REST_AFTER_DISTURBANCE - restAfterHours);
 
   // 2. Inskränkt dygnsvila ("får vara ledig")
-  // Total vila utan förskjutning = restBefore + restAfter
-  // Med obligatorisk förskjutning: total = restBefore + mandatoryRest
-  // Om detta < 11h → deficit = inskränkt dygnsvila
-  const totalRestWithMandatory = restBeforeHours + MIN_REST_AFTER_DISTURBANCE;
+  // Vila före störning + obligatorisk ledighet (faktiskt tillagd tid) ska uppnå 11h
+  // Om restBefore + mandatoryRestHours < 11h → deficit = inskränkt dygnsvila
   const restrictedDailyRestHours = Math.max(
     0,
-    DAILY_REST_REQUIRED - totalRestWithMandatory
+    DAILY_REST_REQUIRED - restBeforeHours - mandatoryRestHours
   );
   // Avrunda till närmaste 0.5
   const restrictedRounded =
