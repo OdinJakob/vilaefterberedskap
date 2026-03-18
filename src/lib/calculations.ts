@@ -282,6 +282,8 @@ export const EXAMPLE_SCENARIOS: ExampleScenario[] = [
     input: {
       activeWorkStart: "00:00",
       activeWorkEnd: "03:00",
+      prevWorkDayStart: "07:00",
+      prevWorkDayEnd: "15:30",
       workDayStart: "07:00",
       workDayEnd: "15:30",
       usedBeredskapsvila: 0,
@@ -294,6 +296,8 @@ export const EXAMPLE_SCENARIOS: ExampleScenario[] = [
     input: {
       activeWorkStart: "20:00",
       activeWorkEnd: "03:00",
+      prevWorkDayStart: "07:00",
+      prevWorkDayEnd: "15:30",
       workDayStart: "07:00",
       workDayEnd: "15:30",
       usedBeredskapsvila: 0,
@@ -306,6 +310,8 @@ export const EXAMPLE_SCENARIOS: ExampleScenario[] = [
     input: {
       activeWorkStart: "01:00",
       activeWorkEnd: "04:00",
+      prevWorkDayStart: "07:00",
+      prevWorkDayEnd: "15:30",
       workDayStart: "07:00",
       workDayEnd: "15:30",
       usedBeredskapsvila: 5,
