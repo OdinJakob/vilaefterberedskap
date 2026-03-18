@@ -1,13 +1,25 @@
 /**
  * Vila vid beredskap – beräkningslogik
  *
- * Regler:
- * - 11 timmars dygnsvila krävs per 24-timmarsperiod
- * - 36 timmars veckovila krävs
- * - Vid störning under beredskap gäller minst 7 timmars sammanhängande vila
- *   efter att störningen upphört innan arbetet återupptas
- * - 8 timmars betald beredskapsvila per beredskapsvecka (lokalt kollektivavtal)
- * - Max 6 timmars beredskapsvila vid ett tillfälle
+ * Regler enligt dokumentet "Vila vid beredskap – Kompensation enligt Veckoberedskapsavtalet":
+ *
+ * 1. OBLIGATORISK VILA (00–06-regeln):
+ *    Kompensera för utebliven vila mellan 00:00–06:00.
+ *    Vila läggs ut timme per timme motsvarande aktivt arbete mellan 00:00–06:00.
+ *    Tiden ska läggas ut samma dag (arbetspasset som börjar efter tjänstgöringsnatten).
+ *
+ * 2. INSKRÄNKT DYGNSVILA:
+ *    11 timmars sammanhängande dygnsvila krävs per 24-timmarsperiod.
+ *    Räkna den längsta sammanhängande dygnsvilan utifrån störningar.
+ *    Inskränkt dygnsvila = 11 - längsta sammanhängande vila.
+ *    Den kompenserande vilan ska aldrig bli längre än störningens varaktighet.
+ *    Samlas normalt i en "pott" och kompenseras vid beredskapsperiodens slut,
+ *    men kan användas tidigare vid arbetsmiljöskäl.
+ *
+ * 3. VECKOBEREDSKAPSAVTALET (lokalt kollektivavtal):
+ *    Max 8 timmars betald beredskapsvila per beredskapsvecka.
+ *    Max 6 timmar per ledighetstillfälle.
+ *    Används i första hand för att täcka vilobehov.
  */
 
 export interface CalcInput {
@@ -28,15 +40,21 @@ export interface CalcInput {
 export interface CalcResult {
   /** Timmar aktivt arbete */
   activeWorkHours: number;
-  /** Obligatorisk ledighet (timmar) – "ska vara ledig" */
+  /** Timmar aktivt arbete mellan 00:00–06:00 */
+  nightWorkHours: number;
+  /** Obligatorisk ledighet (timmar) – 00–06-regeln – "ska vara ledig" */
   mandatoryRestHours: number;
-  /** Inskränkt dygnsvila (timmar) – "får vara ledig" */
-  restrictedDailyRestHours: number;
-  /** Total ledighet */
+  /** Längsta sammanhängande vila under viloperioden */
+  longestContinuousRest: number;
+  /** Total inskränkt dygnsvila (11 - längsta vila, max störningstid) */
+  totalInskranktDygnsvila: number;
+  /** Ytterligare inskränkt dygnsvila utöver obligatorisk – "får vara ledig" */
+  additionalInskranktHours: number;
+  /** Total ledighet (obligatorisk + ytterligare inskränkt) */
   totalRestHours: number;
   /** Beredskapsvila som kan tas ut (timmar) */
   beredskapsvila: number;
-  /** Inskränkt dygnsvila som klassas separat */
+  /** Resterande som klassas som inskränkt dygnsvila */
   inskanktDygnsvila: number;
   /** Tidigast åter i arbete (HH:mm) */
   earliestReturn: string;
@@ -54,7 +72,8 @@ export interface CalcResult {
 
 // Konstanter
 const DAILY_REST_REQUIRED = 11; // timmar
-const MIN_REST_AFTER_DISTURBANCE = 7; // timmar – minsta sammanhängande vila
+const NIGHT_START = 0; // 00:00 i minuter
+const NIGHT_END = 360; // 06:00 i minuter
 const WEEKLY_BEREDSKAPSVILA_MAX = 8; // timmar per vecka
 const SINGLE_BEREDSKAPSVILA_MAX = 6; // max per tillfälle
 
@@ -70,7 +89,7 @@ function timeToMinutes(time: string): number {
  * Formaterar minuter till HH:mm
  */
 function minutesToTime(minutes: number): string {
-  const totalMins = ((minutes % 1440) + 1440) % 1440; // hantera negativa & > 24h
+  const totalMins = ((minutes % 1440) + 1440) % 1440;
   const h = Math.floor(totalMins / 60);
   const m = totalMins % 60;
   return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
@@ -97,6 +116,33 @@ export function formatHoursShort(hours: number): string {
 }
 
 /**
+ * Beräknar hur många minuter av ett arbetspass som ligger mellan 00:00–06:00
+ */
+function nightWorkMinutes(activeStartMins: number, activeEndMins: number, crossesMidnight: boolean): number {
+  if (!crossesMidnight && activeEndMins > activeStartMins) {
+    // Inget midnattspassage, t.ex. 01:00–04:00
+    const overlapStart = Math.max(activeStartMins, NIGHT_START);
+    const overlapEnd = Math.min(activeEndMins, NIGHT_END);
+    return Math.max(0, overlapEnd - overlapStart);
+  } else {
+    // Passerar midnatt, t.ex. 20:00–03:00
+    // Del 1: [activeStart, 24:00] – overlap med [00:00, 06:00]
+    // Bara relevant om activeStart < 06:00 (t.ex. start 02:00)
+    const part1 = activeStartMins < NIGHT_END
+      ? Math.max(0, NIGHT_END - activeStartMins)
+      : 0;
+
+    // Del 2: [00:00, activeEnd] – overlap med [00:00, 06:00]
+    const part2 = Math.min(activeEndMins, NIGHT_END);
+
+    // Undvik dubbelräkning om start < 06:00 och slut < 06:00
+    // I normalfallet (t.ex. 20:00–03:00) är part1 = 0, part2 = 180 (3h)
+    // Om t.ex. 02:00–05:00 (ej midnattspassage) hanteras ovan
+    return part1 + part2;
+  }
+}
+
+/**
  * Huvudberäkning
  *
  * Antar att föregående arbetsdag hade samma schema som nästa arbetsdag.
@@ -107,96 +153,77 @@ export function calculateRest(input: CalcInput): CalcResult {
 
   // Parsa tider
   const activeStartMins = timeToMinutes(input.activeWorkStart);
-  let activeEndMins = timeToMinutes(input.activeWorkEnd);
+  const activeEndMins = timeToMinutes(input.activeWorkEnd);
   const workStartMins = timeToMinutes(input.workDayStart);
   const workEndMins = timeToMinutes(input.workDayEnd);
 
-  // Hantera midnattspassering
-  if (input.crossesMidnight || activeEndMins <= activeStartMins) {
-    // Aktivt arbete börjar före midnatt, slutar efter
-    // Normalisera: activeStart är på dag 0, activeEnd är på dag 1
-  }
-
   // Beräkna varaktighet för aktivt arbete
   let activeWorkMinutes: number;
-  if (activeEndMins <= activeStartMins) {
-    // Passerar midnatt
+  const crossesMidnight = input.crossesMidnight || activeEndMins <= activeStartMins;
+  if (crossesMidnight) {
     activeWorkMinutes = (1440 - activeStartMins) + activeEndMins;
   } else {
     activeWorkMinutes = activeEndMins - activeStartMins;
   }
   const activeWorkHours = activeWorkMinutes / 60;
 
-  // Beräkna vila före störning
-  // Antar föregående arbetsdag slutade vid workEndMins (samma schema)
-  // Vila = tid från föregående arbetsslut till störningens start
+  // 1. OBLIGATORISK VILA (00–06-regeln)
+  // Timmar aktivt arbete mellan 00:00–06:00
+  const nightMins = nightWorkMinutes(activeStartMins, activeEndMins, crossesMidnight);
+  const nightWorkHrs = nightMins / 60;
+  const mandatoryRestHours = nightWorkHrs;
+
+  // Beräkna vila före störning (föregående arbetsslut → störningens start)
   let restBeforeMinutes: number;
   if (activeStartMins >= workEndMins) {
-    // Störningen börjar samma dag som arbetet slutade (t.ex. arbete slutar 15:30, störning 20:00)
     restBeforeMinutes = activeStartMins - workEndMins;
   } else {
-    // Störningen börjar efter midnatt (t.ex. arbete slutar 15:30, störning 00:00 nästa dag)
     restBeforeMinutes = (1440 - workEndMins) + activeStartMins;
   }
   const restBeforeHours = restBeforeMinutes / 60;
 
-  // Vila efter störning till arbetsstart (utan förskjutning)
+  // Vila efter störning (störningens slut → ordinarie arbetsstart)
   let restAfterMinutes: number;
-  if (activeEndMins <= activeStartMins) {
-    // Störningen slutar efter midnatt, dag 1
+  if (crossesMidnight) {
+    // Störningen slutar efter midnatt
     restAfterMinutes = workStartMins - activeEndMins;
   } else {
-    // Störningen slutar samma dag som den börjar
-    // Vila = från störningsslut (dag 0 eller 1) till arbetsstart (dag 1)
     if (activeEndMins <= workStartMins) {
-      // Slutar efter midnatt men före arbetsstart
       restAfterMinutes = workStartMins - activeEndMins;
     } else {
-      // Slutar efter arbetsstart – det borde inte hända normalt
       restAfterMinutes = (1440 - activeEndMins) + workStartMins;
     }
   }
   const restAfterHours = restAfterMinutes / 60;
 
-  // 1. Obligatorisk ledighet ("ska vara ledig")
-  // Minst MIN_REST_AFTER_DISTURBANCE timmars sammanhängande vila efter störning
-  const mandatoryRestHours = Math.max(0, MIN_REST_AFTER_DISTURBANCE - restAfterHours);
+  // 2. INSKRÄNKT DYGNSVILA
+  // Längsta sammanhängande dygnsvila = max(vila före störning, vila efter störning)
+  const longestContinuousRest = Math.max(restBeforeHours, restAfterHours);
 
-  // 2. Inskränkt dygnsvila ("får vara ledig")
-  // Vila före störning + obligatorisk ledighet (faktiskt tillagd tid) ska uppnå 11h
-  // Om restBefore + mandatoryRestHours < 11h → deficit = inskränkt dygnsvila
-  const restrictedDailyRestHours = Math.max(
-    0,
-    DAILY_REST_REQUIRED - restBeforeHours - mandatoryRestHours
-  );
-  // Avrunda till närmaste 0.5
-  const restrictedRounded =
-    Math.round(restrictedDailyRestHours * 2) / 2;
+  // Inskränkt = 11 - längsta vila, men aldrig mer än störningens varaktighet
+  const rawInskrankt = Math.max(0, DAILY_REST_REQUIRED - longestContinuousRest);
+  const totalInskranktDygnsvila = Math.min(rawInskrankt, activeWorkHours);
 
-  const totalRestHours = mandatoryRestHours + restrictedRounded;
+  // 3. Ytterligare inskränkt dygnsvila utöver obligatorisk vila
+  // (det som "får" tas ut utöver det som "ska" tas ut)
+  const additionalInskranktHours = Math.max(0, totalInskranktDygnsvila - mandatoryRestHours);
 
-  // 3. Beredskapsvila (lokalt kollektivavtal)
-  const remainingWeekly = Math.max(
-    0,
-    WEEKLY_BEREDSKAPSVILA_MAX - input.usedBeredskapsvila
-  );
+  // 4. Total ledighet = obligatorisk + ytterligare inskränkt
+  const totalRestHours = mandatoryRestHours + additionalInskranktHours;
 
-  // Beredskapsvila = min(totalRestHours, remainingWeekly, SINGLE_MAX)
-  const beredskapsvila = Math.min(
-    totalRestHours,
-    remainingWeekly,
-    SINGLE_BEREDSKAPSVILA_MAX
-  );
+  // 5. Beredskapsvila (veckoberedskapsavtalet)
+  const remainingWeekly = Math.max(0, WEEKLY_BEREDSKAPSVILA_MAX - input.usedBeredskapsvila);
+  const beredskapsvila = Math.min(totalRestHours, remainingWeekly, SINGLE_BEREDSKAPSVILA_MAX);
   const inskanktDygnsvila = Math.max(0, totalRestHours - beredskapsvila);
 
-  // 4. Tidigast åter i arbete
+  // 6. Tidigast åter i arbete
   const earliestReturnMins = workStartMins + Math.round(totalRestHours * 60);
   const earliestReturn = minutesToTime(earliestReturnMins);
 
-  // 5. Kvarvarande beredskapsvila
+  // 7. Kvarvarande beredskapsvila
   const remainingAfter = Math.max(0, remainingWeekly - beredskapsvila);
 
-  // 6. Varningar
+  // 8. Varningar
   if (beredskapsvila < totalRestHours && beredskapsvila >= SINGLE_BEREDSKAPSVILA_MAX) {
     warnings.push(
       `Max ${SINGLE_BEREDSKAPSVILA_MAX} timmars beredskapsvila kan tas ut vid ett tillfälle. ` +
@@ -211,18 +238,21 @@ export function calculateRest(input: CalcInput): CalcResult {
     );
   }
 
-  const requiresManagerConsultation = restrictedRounded > 0;
+  const requiresManagerConsultation = additionalInskranktHours > 0;
 
   if (requiresManagerConsultation) {
     warnings.push(
-      "Inskränkt dygnsvila kräver avstämning med chef om den ska tas ut direkt eller senare under beredskapsveckan."
+      "Inskränkt dygnsvila kräver avstämning med chef om den ska tas ut direkt eller sparas tills beredskapsveckan är slut."
     );
   }
 
   return {
     activeWorkHours,
+    nightWorkHours: nightWorkHrs,
     mandatoryRestHours,
-    restrictedDailyRestHours: restrictedRounded,
+    longestContinuousRest,
+    totalInskranktDygnsvila,
+    additionalInskranktHours,
     totalRestHours,
     beredskapsvila,
     inskanktDygnsvila,
