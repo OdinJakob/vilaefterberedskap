@@ -158,7 +158,7 @@ export function calculateRest(input: CalcInput): CalcResult {
   const activeStartMins = timeToMinutes(input.activeWorkStart);
   const activeEndMins = timeToMinutes(input.activeWorkEnd);
   const workStartMins = timeToMinutes(input.workDayStart);
-  const workEndMins = timeToMinutes(input.workDayEnd);
+  const prevWorkEndMins = timeToMinutes(input.prevWorkDayEnd);
 
   // Beräkna varaktighet för aktivt arbete
   let activeWorkMinutes: number;
