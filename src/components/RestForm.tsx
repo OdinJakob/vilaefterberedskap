@@ -15,6 +15,8 @@ interface RestFormProps {
 const DEFAULT_INPUT: CalcInput = {
   activeWorkStart: "",
   activeWorkEnd: "",
+  prevWorkDayStart: "07:00",
+  prevWorkDayEnd: "15:30",
   workDayStart: "07:00",
   workDayEnd: "15:30",
   usedBeredskapsvila: 0,
@@ -67,6 +69,35 @@ export default function RestForm({ input, onChange, onReset }: RestFormProps) {
         </Button>
       </div>
 
+      {/* Föregående arbetsdag */}
+      <fieldset className="space-y-3">
+        <legend className="text-sm font-medium text-muted-foreground mb-1">
+          Föregående arbetsdag (dagen före beredskapsnatten)
+        </legend>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="prevWorkStart" className="text-xs">Start</Label>
+            <Input
+              id="prevWorkStart"
+              type="time"
+              value={input.prevWorkDayStart}
+              onChange={(e) => update("prevWorkDayStart", e.target.value)}
+              className="mt-1 text-lg h-12"
+            />
+          </div>
+          <div>
+            <Label htmlFor="prevWorkEnd" className="text-xs">Slut</Label>
+            <Input
+              id="prevWorkEnd"
+              type="time"
+              value={input.prevWorkDayEnd}
+              onChange={(e) => update("prevWorkDayEnd", e.target.value)}
+              className="mt-1 text-lg h-12"
+            />
+          </div>
+        </div>
+      </fieldset>
+
       {/* Aktivt arbete */}
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium text-muted-foreground mb-1">
@@ -106,7 +137,7 @@ export default function RestForm({ input, onChange, onReset }: RestFormProps) {
         </div>
       </fieldset>
 
-      {/* Ordinarie arbetstid */}
+      {/* Ordinarie arbetstid nästa dag */}
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium text-muted-foreground mb-1">
           Ordinarie arbetstid nästa dag
