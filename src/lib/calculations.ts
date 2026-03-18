@@ -27,6 +27,10 @@ export interface CalcInput {
   activeWorkStart: string;
   /** Sluttid för aktivt arbete (HH:mm) */
   activeWorkEnd: string;
+  /** Start ordinarie arbetstid föregående arbetsdag (HH:mm) */
+  prevWorkDayStart: string;
+  /** Slut ordinarie arbetstid föregående arbetsdag (HH:mm) */
+  prevWorkDayEnd: string;
   /** Start ordinarie arbetstid nästa dag (HH:mm) */
   workDayStart: string;
   /** Slut ordinarie arbetstid nästa dag (HH:mm) */
@@ -145,7 +149,6 @@ function nightWorkMinutes(activeStartMins: number, activeEndMins: number, crosse
 /**
  * Huvudberäkning
  *
- * Antar att föregående arbetsdag hade samma schema som nästa arbetsdag.
  * Beräkningsperiod: från föregående dags arbetsslut till nästa dags arbetsstart.
  */
 export function calculateRest(input: CalcInput): CalcResult {
@@ -155,7 +158,7 @@ export function calculateRest(input: CalcInput): CalcResult {
   const activeStartMins = timeToMinutes(input.activeWorkStart);
   const activeEndMins = timeToMinutes(input.activeWorkEnd);
   const workStartMins = timeToMinutes(input.workDayStart);
-  const workEndMins = timeToMinutes(input.workDayEnd);
+  const prevWorkEndMins = timeToMinutes(input.prevWorkDayEnd);
 
   // Beräkna varaktighet för aktivt arbete
   let activeWorkMinutes: number;
@@ -175,10 +178,10 @@ export function calculateRest(input: CalcInput): CalcResult {
 
   // Beräkna vila före störning (föregående arbetsslut → störningens start)
   let restBeforeMinutes: number;
-  if (activeStartMins >= workEndMins) {
-    restBeforeMinutes = activeStartMins - workEndMins;
+  if (activeStartMins >= prevWorkEndMins) {
+    restBeforeMinutes = activeStartMins - prevWorkEndMins;
   } else {
-    restBeforeMinutes = (1440 - workEndMins) + activeStartMins;
+    restBeforeMinutes = (1440 - prevWorkEndMins) + activeStartMins;
   }
   const restBeforeHours = restBeforeMinutes / 60;
 
@@ -279,6 +282,8 @@ export const EXAMPLE_SCENARIOS: ExampleScenario[] = [
     input: {
       activeWorkStart: "00:00",
       activeWorkEnd: "03:00",
+      prevWorkDayStart: "07:00",
+      prevWorkDayEnd: "15:30",
       workDayStart: "07:00",
       workDayEnd: "15:30",
       usedBeredskapsvila: 0,
@@ -291,6 +296,8 @@ export const EXAMPLE_SCENARIOS: ExampleScenario[] = [
     input: {
       activeWorkStart: "20:00",
       activeWorkEnd: "03:00",
+      prevWorkDayStart: "07:00",
+      prevWorkDayEnd: "15:30",
       workDayStart: "07:00",
       workDayEnd: "15:30",
       usedBeredskapsvila: 0,
@@ -303,6 +310,8 @@ export const EXAMPLE_SCENARIOS: ExampleScenario[] = [
     input: {
       activeWorkStart: "01:00",
       activeWorkEnd: "04:00",
+      prevWorkDayStart: "07:00",
+      prevWorkDayEnd: "15:30",
       workDayStart: "07:00",
       workDayEnd: "15:30",
       usedBeredskapsvila: 5,

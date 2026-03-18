@@ -16,6 +16,8 @@ export default function Index() {
   const isComplete =
     input.activeWorkStart !== "" &&
     input.activeWorkEnd !== "" &&
+    input.prevWorkDayStart !== "" &&
+    input.prevWorkDayEnd !== "" &&
     input.workDayStart !== "" &&
     input.workDayEnd !== "";
 
