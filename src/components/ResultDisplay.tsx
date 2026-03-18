@@ -17,7 +17,7 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-must-rest text-sm uppercase tracking-wide">
-              Du ska vara ledig
+              Du måste vara ledig
             </h3>
             <p className="text-2xl font-bold text-foreground mt-1">
               {formatHours(result.mandatoryRestHours)}
