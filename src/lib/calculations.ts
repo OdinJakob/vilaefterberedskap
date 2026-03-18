@@ -27,6 +27,10 @@ export interface CalcInput {
   activeWorkStart: string;
   /** Sluttid för aktivt arbete (HH:mm) */
   activeWorkEnd: string;
+  /** Start ordinarie arbetstid föregående arbetsdag (HH:mm) */
+  prevWorkDayStart: string;
+  /** Slut ordinarie arbetstid föregående arbetsdag (HH:mm) */
+  prevWorkDayEnd: string;
   /** Start ordinarie arbetstid nästa dag (HH:mm) */
   workDayStart: string;
   /** Slut ordinarie arbetstid nästa dag (HH:mm) */
