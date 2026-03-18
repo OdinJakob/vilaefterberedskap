@@ -11,6 +11,13 @@ export default function DetailedBreakdown({ result }: DetailedBreakdownProps) {
       value: formatHoursShort(result.activeWorkHours),
     },
     {
+      label: "Varav arbete mellan 00:00–06:00",
+      value: formatHoursShort(result.nightWorkHours),
+      detail: result.nightWorkHours > 0
+        ? "Vila läggs ut timme per timme enligt tillämpningarna"
+        : "Inget arbete mellan 00:00–06:00",
+    },
+    {
       label: "Vila före störning (föregående arbetsslut → störningens start)",
       value: formatHoursShort(result.restBeforeDisturbance),
     },
@@ -19,28 +26,28 @@ export default function DetailedBreakdown({ result }: DetailedBreakdownProps) {
       value: formatHoursShort(result.restAfterDisturbance),
     },
     {
-      label: "Krävd sammanhängande vila efter störning",
-      value: "7 h",
-      detail: result.restAfterDisturbance >= 7
-        ? "✓ Redan uppfyllt"
-        : `Saknas ${formatHoursShort(7 - result.restAfterDisturbance)} → obligatorisk ledighet`,
+      label: "Längsta sammanhängande vila",
+      value: formatHoursShort(result.longestContinuousRest),
+      detail: `max(${formatHoursShort(result.restBeforeDisturbance)}, ${formatHoursShort(result.restAfterDisturbance)})`,
     },
     {
-      label: "Obligatorisk ledighet (ska vara ledig)",
+      label: "Obligatorisk ledighet (ska vara ledig, 00–06-regeln)",
       value: formatHoursShort(result.mandatoryRestHours),
       highlight: true,
     },
     {
-      label: "Dygnsvila (11 h krav)",
-      value: `Vila före (${formatHoursShort(result.restBeforeDisturbance)}) + obligatorisk vila (${formatHoursShort(result.mandatoryRestHours)}) = ${formatHoursShort(result.restBeforeDisturbance + result.mandatoryRestHours)}`,
-      detail: result.restrictedDailyRestHours > 0
-        ? `Saknas ${formatHoursShort(result.restrictedDailyRestHours)} → inskränkt dygnsvila`
-        : "✓ Dygnsvila uppfylld med befintlig vila + obligatorisk ledighet",
+      label: "Inskränkt dygnsvila (11 h krav)",
+      value: `11 h − ${formatHoursShort(result.longestContinuousRest)} = ${formatHoursShort(result.totalInskranktDygnsvila)}`,
+      detail: result.totalInskranktDygnsvila > result.mandatoryRestHours
+        ? `Ytterligare ${formatHoursShort(result.additionalInskranktHours)} utöver obligatorisk vila`
+        : result.totalInskranktDygnsvila > 0
+        ? "Täcks redan av obligatorisk vila"
+        : "✓ Dygnsvila uppfylld",
     },
     {
-      label: "Inskränkt dygnsvila (får vara ledig)",
-      value: formatHoursShort(result.restrictedDailyRestHours),
-      highlight: result.restrictedDailyRestHours > 0,
+      label: "Ytterligare inskränkt dygnsvila (får vara ledig)",
+      value: formatHoursShort(result.additionalInskranktHours),
+      highlight: result.additionalInskranktHours > 0,
     },
     {
       label: "Total ledighet",

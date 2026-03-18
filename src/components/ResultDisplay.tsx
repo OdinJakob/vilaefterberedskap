@@ -9,7 +9,7 @@ interface ResultDisplayProps {
 export default function ResultDisplay({ result, workDayStart }: ResultDisplayProps) {
   return (
     <div className="space-y-4 animate-fade-in">
-      {/* Ska vara ledig */}
+      {/* Ska vara ledig – 00–06-regeln */}
       <div className="result-card-must rounded-lg border p-5">
         <div className="flex items-start gap-3">
           <div className="rounded-full bg-must-rest p-2 mt-0.5">
@@ -24,20 +24,21 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
             </p>
             {result.mandatoryRestHours > 0 && (
               <p className="text-sm text-muted-foreground mt-1">
-                Från {workDayStart} (ordinarie arbetsstart)
+                Du arbetade {formatHoursShort(result.nightWorkHours)} mellan kl 00:00–06:00.
+                Vila läggs ut timme per timme från {workDayStart} (ordinarie arbetsstart).
               </p>
             )}
             {result.mandatoryRestHours === 0 && (
               <p className="text-sm text-muted-foreground mt-1">
-                Tillräcklig vila finns redan efter störningen
+                Inget aktivt arbete utfördes mellan kl 00:00–06:00
               </p>
             )}
           </div>
         </div>
       </div>
 
-      {/* Får vara ledig */}
-      {result.restrictedDailyRestHours > 0 && (
+      {/* Får vara ledig – inskränkt dygnsvila utöver obligatorisk */}
+      {result.additionalInskranktHours > 0 && (
         <div className="result-card-may rounded-lg border p-5">
           <div className="flex items-start gap-3">
             <div className="rounded-full bg-may-rest p-2 mt-0.5">
@@ -48,10 +49,10 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
                 Du får vara ledig
               </h3>
               <p className="text-2xl font-bold text-foreground mt-1">
-                Ytterligare {formatHours(result.restrictedDailyRestHours)}
+                Ytterligare {formatHours(result.additionalInskranktHours)}
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                På grund av inskränkt dygnsvila
+                På grund av inskränkt dygnsvila (längsta sammanhängande vila var {formatHoursShort(result.longestContinuousRest)} av 11 h)
               </p>
               <div className="mt-3 bg-card/60 rounded-md p-3 space-y-1.5">
                 <div className="flex justify-between text-sm">
@@ -68,8 +69,8 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
         </div>
       )}
 
-      {/* Beredskapsvila info (only when no restricted rest) */}
-      {result.restrictedDailyRestHours === 0 && result.beredskapsvila > 0 && (
+      {/* Beredskapsvila info (only when no additional inskränkt) */}
+      {result.additionalInskranktHours === 0 && result.beredskapsvila > 0 && (
         <div className="result-card-may rounded-lg border p-5">
           <div className="flex items-start gap-3">
             <div className="rounded-full bg-may-rest p-2 mt-0.5">
