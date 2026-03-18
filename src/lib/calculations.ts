@@ -149,7 +149,6 @@ function nightWorkMinutes(activeStartMins: number, activeEndMins: number, crosse
 /**
  * Huvudberäkning
  *
- * Antar att föregående arbetsdag hade samma schema som nästa arbetsdag.
  * Beräkningsperiod: från föregående dags arbetsslut till nästa dags arbetsstart.
  */
 export function calculateRest(input: CalcInput): CalcResult {
