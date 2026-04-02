@@ -168,27 +168,29 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
       </fieldset>
 
       {/* Redan uttagen beredskapsvila */}
-      <div className="space-y-1.5">
-        <Label htmlFor="usedVila" className="text-sm font-medium text-muted-foreground">
-          Redan uttagen beredskapsvila denna vecka
-        </Label>
-        <div className="flex items-center gap-2">
-          <Input
-            id="usedVila"
-            type="number"
-            min={0}
-            max={8}
-            step={0.5}
-            value={input.usedBeredskapsvila}
-            onChange={(e) => update("usedBeredskapsvila", parseFloat(e.target.value) || 0)}
-            className="w-24 text-lg h-12"
-          />
-          <span className="text-sm text-muted-foreground">timmar (av 8)</span>
+      {!hideUsedBeredskapsvila && (
+        <div className="space-y-1.5">
+          <Label htmlFor="usedVila" className="text-sm font-medium text-muted-foreground">
+            Redan uttagen beredskapsvila denna vecka
+          </Label>
+          <div className="flex items-center gap-2">
+            <Input
+              id="usedVila"
+              type="number"
+              min={0}
+              max={8}
+              step={0.5}
+              value={input.usedBeredskapsvila}
+              onChange={(e) => update("usedBeredskapsvila", parseFloat(e.target.value) || 0)}
+              className="w-24 text-lg h-12"
+            />
+            <span className="text-sm text-muted-foreground">timmar (av 8)</span>
+          </div>
+          {errors.usedBeredskapsvila && (
+            <p className="text-sm text-destructive">{errors.usedBeredskapsvila}</p>
+          )}
         </div>
-        {errors.usedBeredskapsvila && (
-          <p className="text-sm text-destructive">{errors.usedBeredskapsvila}</p>
-        )}
-      </div>
+      )}
     </div>
   );
 }
