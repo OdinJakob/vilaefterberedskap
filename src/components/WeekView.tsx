@@ -159,6 +159,11 @@ export default function WeekView() {
             <p className="text-xl font-bold text-primary">
               {formatHoursShort(weeklySummary.remaining)}
             </p>
+            <p className="text-xs text-muted-foreground">
+              {weeklySummary.remaining > 6
+                ? "Ta ut som inskränkt dygnsvila"
+                : "Ta ut som betald beredskapsvila"}
+            </p>
           </div>
         </div>
 
