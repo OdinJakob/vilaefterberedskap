@@ -5,13 +5,16 @@ import ResultDisplay from "@/components/ResultDisplay";
 import DetailedBreakdown from "@/components/DetailedBreakdown";
 import ExampleScenarios from "@/components/ExampleScenarios";
 import InfoBox from "@/components/InfoBox";
+import WeekView from "@/components/WeekView";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Shield } from "lucide-react";
 
 export default function Index() {
   const [input, setInput] = useState<CalcInput>({ ...DEFAULT_INPUT });
   const [showDetailed, setShowDetailed] = useState(false);
+  const [mode, setMode] = useState<"day" | "week">("day");
 
   const isComplete =
     input.activeWorkStart !== "" &&
@@ -33,6 +36,7 @@ export default function Index() {
 
   const handleExampleSelect = (exInput: CalcInput) => {
     setInput({ ...exInput });
+    setMode("day");
   };
 
   return (
@@ -64,33 +68,47 @@ export default function Index() {
           </p>
         </div>
 
-        {/* Form */}
-        <RestForm input={input} onChange={setInput} onReset={handleReset} />
+        {/* Mode tabs */}
+        <Tabs value={mode} onValueChange={(v) => setMode(v as "day" | "week")}>
+          <TabsList className="w-full">
+            <TabsTrigger value="day" className="flex-1">En dag</TabsTrigger>
+            <TabsTrigger value="week" className="flex-1">Hel vecka</TabsTrigger>
+          </TabsList>
 
-        {/* Show detailed toggle */}
-        {isComplete && (
-          <div className="flex items-center gap-2">
-            <Switch
-              id="detailed"
-              checked={showDetailed}
-              onCheckedChange={setShowDetailed}
-            />
-            <Label htmlFor="detailed" className="text-sm text-muted-foreground cursor-pointer">
-              Visa detaljerad uträkning
-            </Label>
-          </div>
-        )}
+          <TabsContent value="day" className="space-y-6 mt-6">
+            {/* Form */}
+            <RestForm input={input} onChange={setInput} onReset={handleReset} />
 
-        {/* Results */}
-        {result && (
-          <>
-            <ResultDisplay result={result} workDayStart={input.workDayStart} />
-            {showDetailed && <DetailedBreakdown result={result} />}
-          </>
-        )}
+            {/* Show detailed toggle */}
+            {isComplete && (
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="detailed"
+                  checked={showDetailed}
+                  onCheckedChange={setShowDetailed}
+                />
+                <Label htmlFor="detailed" className="text-sm text-muted-foreground cursor-pointer">
+                  Visa detaljerad uträkning
+                </Label>
+              </div>
+            )}
 
-        {/* Examples */}
-        <ExampleScenarios onSelect={handleExampleSelect} />
+            {/* Results */}
+            {result && (
+              <>
+                <ResultDisplay result={result} workDayStart={input.workDayStart} />
+                {showDetailed && <DetailedBreakdown result={result} />}
+              </>
+            )}
+
+            {/* Examples */}
+            <ExampleScenarios onSelect={handleExampleSelect} />
+          </TabsContent>
+
+          <TabsContent value="week" className="mt-6">
+            <WeekView />
+          </TabsContent>
+        </Tabs>
 
         {/* Info */}
         <InfoBox />
