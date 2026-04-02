@@ -110,37 +110,42 @@ export default function WeekView() {
       }
     }
 
-    const totalEarned = totalBeredskapsvila;
-    const weeklyMax = 8;
-    const remaining = Math.max(0, weeklyMax - totalEarned - totalVilaUsed);
+    const totalEarned = totalMandatory + totalAdditional;
+    const remaining = Math.max(0, totalEarned - totalVilaUsed);
 
     return {
       totalMandatory,
       totalAdditional,
-      totalBeredskapsvila: totalEarned,
+      totalEarned,
       totalVilaUsed,
       remaining,
       completedDays,
-      weeklyMax,
     };
   }, [dayResults]);
+
+  const [showSummaryBreakdown, setShowSummaryBreakdown] = useState(false);
 
   return (
     <div className="space-y-6">
       {/* Weekly Summary */}
       <div className="bg-card rounded-lg border p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Veckosummering</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-foreground">Veckosummering</h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowSummaryBreakdown(!showSummaryBreakdown)}
+            className="text-muted-foreground hover:text-foreground gap-1.5 text-xs"
+          >
+            <Info className="h-3.5 w-3.5" />
+            {showSummaryBreakdown ? "Dölj uträkning" : "Visa uträkning"}
+          </Button>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Obligatorisk vila</p>
+            <p className="text-xs text-muted-foreground">Upparbetad vila</p>
             <p className="text-xl font-bold text-foreground">
-              {formatHoursShort(weeklySummary.totalMandatory)}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Beredskapsvila intjänad</p>
-            <p className="text-xl font-bold text-foreground">
-              {formatHoursShort(weeklySummary.totalBeredskapsvila)}
+              {formatHoursShort(weeklySummary.totalEarned)}
             </p>
           </div>
           <div className="space-y-1">
@@ -150,12 +155,40 @@ export default function WeekView() {
             </p>
           </div>
           <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Kvar av 8h beredskapsvila</p>
+            <p className="text-xs text-muted-foreground">Kvar att ta ut</p>
             <p className="text-xl font-bold text-primary">
               {formatHoursShort(weeklySummary.remaining)}
             </p>
           </div>
         </div>
+
+        {showSummaryBreakdown && (
+          <div className="mt-4 pt-4 border-t border-border/50 space-y-2 animate-fade-in">
+            <h3 className="text-sm font-medium text-foreground mb-2">Så räknas nyckeltalen ut</h3>
+            <div className="space-y-1.5 text-sm">
+              <div className="flex justify-between py-1.5 border-b border-border/30">
+                <span className="text-muted-foreground">Du måste vara ledig (00–06-regeln)</span>
+                <span className="font-medium text-foreground">{formatHoursShort(weeklySummary.totalMandatory)}</span>
+              </div>
+              <div className="flex justify-between py-1.5 border-b border-border/30">
+                <span className="text-muted-foreground">Du får vara ledig (inskränkt dygnsvila)</span>
+                <span className="font-medium text-foreground">{formatHoursShort(weeklySummary.totalAdditional)}</span>
+              </div>
+              <div className="flex justify-between py-1.5 border-b border-border/30 bg-muted/30 -mx-2 px-2 rounded">
+                <span className="text-foreground font-medium">Upparbetad vila (summa)</span>
+                <span className="font-bold text-primary">{formatHoursShort(weeklySummary.totalEarned)}</span>
+              </div>
+              <div className="flex justify-between py-1.5 border-b border-border/30">
+                <span className="text-muted-foreground">Vila redan uttagen</span>
+                <span className="font-medium text-foreground">− {formatHoursShort(weeklySummary.totalVilaUsed)}</span>
+              </div>
+              <div className="flex justify-between py-1.5 bg-muted/30 -mx-2 px-2 rounded">
+                <span className="text-foreground font-medium">Kvar att ta ut</span>
+                <span className="font-bold text-primary">{formatHoursShort(weeklySummary.remaining)}</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Day entries */}
