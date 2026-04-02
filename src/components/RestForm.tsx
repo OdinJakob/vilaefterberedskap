@@ -10,6 +10,7 @@ interface RestFormProps {
   input: CalcInput;
   onChange: (input: CalcInput) => void;
   onReset: () => void;
+  hideUsedBeredskapsvila?: boolean;
 }
 
 const DEFAULT_INPUT: CalcInput = {
