@@ -220,7 +220,7 @@ export function calculateRest(input: CalcInput): CalcResult {
   const inskanktDygnsvila = Math.max(0, totalRestHours - beredskapsvila);
 
   // 6. Tidigast åter i arbete
-  const earliestReturnMins = workStartMins + Math.round(totalRestHours * 60);
+  const earliestReturnMins = workStartMins + Math.round(mandatoryRestHours * 60);
   const earliestReturn = minutesToTime(earliestReturnMins);
 
   // 7. Kvarvarande beredskapsvila
