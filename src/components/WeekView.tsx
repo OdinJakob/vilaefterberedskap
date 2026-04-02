@@ -222,6 +222,7 @@ export default function WeekView() {
                   input={entry.input}
                   onChange={(newInput) => updateDayInput(entry.id, newInput)}
                   onReset={() => resetDay(entry.id)}
+                  hideUsedBeredskapsvila
                 />
 
                 {/* Vila already taken for this day */}
