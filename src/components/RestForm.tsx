@@ -26,7 +26,7 @@ const DEFAULT_INPUT: CalcInput = {
 
 export { DEFAULT_INPUT };
 
-export default function RestForm({ input, onChange, onReset }: RestFormProps) {
+export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsvila }: RestFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const update = (field: keyof CalcInput, value: string | number | boolean) => {
