@@ -62,7 +62,7 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
     <div className="bg-card rounded-lg border p-5 space-y-5 shadow-sm">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-foreground">
-          Inmatning
+          Fyll i informationen nedan
         </h2>
         <Button variant="ghost" size="sm" onClick={onReset} className="text-muted-foreground">
           <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
