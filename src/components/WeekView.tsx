@@ -125,14 +125,12 @@ export default function WeekView() {
             }
           }
         }
-        if (!prevEnd || !nextStart) continue;
-
         const input: CalcInput = {
           activeWorkStart: dist.start,
           activeWorkEnd: dist.end,
           prevWorkDayStart: prevStart || "07:00",
-          prevWorkDayEnd: prevEnd,
-          workDayStart: nextStart,
+          prevWorkDayEnd: prevEnd || "15:30",
+          workDayStart: nextStart || "07:00",
           workDayEnd: nextEnd || "15:30",
           usedBeredskapsvila: 0,
           crossesMidnight: false,
