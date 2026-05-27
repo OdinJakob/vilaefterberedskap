@@ -1,129 +1,151 @@
-import { useState, useMemo } from "react";
-import { CalcInput, CalcResult, calculateRest, formatHours, formatHoursShort } from "@/lib/calculations";
-import RestForm, { DEFAULT_INPUT } from "@/components/RestForm";
-import ResultDisplay from "@/components/ResultDisplay";
-import DetailedBreakdown from "@/components/DetailedBreakdown";
+import { Fragment, useState, useMemo } from "react";
+import { CalcInput, calculateRest, formatHoursShort } from "@/lib/calculations";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Plus, Trash2, ChevronDown, ChevronUp, Info } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Trash2, Info, RotateCcw } from "lucide-react";
 
-interface DayEntry {
-  id: number;
-  label: string;
-  input: CalcInput;
-  vilaUsed: number; // how much rest was actually taken for this day
+const WEEKDAYS = ["Torsdag", "Fredag", "Lördag", "Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag"];
+const SHORT = ["Tor", "Fre", "Lör", "Sön", "Mån", "Tis", "Ons", "Tor"];
+
+interface Disturbance {
+  start: string;
+  end: string;
 }
 
-const WEEKDAYS = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"];
+interface DayCol {
+  workStart: string;
+  workEnd: string;
+  ledig: boolean;
+  sameAsPrev: boolean;
+  disturbances: Disturbance[];
+}
+
+function newDay(): DayCol {
+  return { workStart: "07:00", workEnd: "15:30", ledig: false, sameAsPrev: false, disturbances: [] };
+}
 
 export default function WeekView() {
-  const [days, setDays] = useState<DayEntry[]>([
-    { id: 1, label: WEEKDAYS[0], input: { ...DEFAULT_INPUT }, vilaUsed: 0 },
-  ]);
-  const [expandedDay, setExpandedDay] = useState<number>(1);
-  const [showDetailed, setShowDetailed] = useState<Record<number, boolean>>({});
-  const [nextId, setNextId] = useState(2);
+  const [days, setDays] = useState<DayCol[]>(() => WEEKDAYS.map(() => newDay()));
+  const [disturbanceCount, setDisturbanceCount] = useState(1);
+  const [vilaUsed, setVilaUsed] = useState(0);
+  const [showSummaryBreakdown, setShowSummaryBreakdown] = useState(false);
 
-  const addDay = () => {
-    const dayIndex = days.length < 7 ? days.length : 0;
-    const newDay: DayEntry = {
-      id: nextId,
-      label: WEEKDAYS[dayIndex],
-      input: { ...DEFAULT_INPUT, usedBeredskapsvila: 0 },
-      vilaUsed: 0,
+  // Ensure each day's disturbance array is at least disturbanceCount long
+  const ensureDisturbances = (d: DayCol): DayCol => {
+    if (d.disturbances.length >= disturbanceCount) return d;
+    return {
+      ...d,
+      disturbances: [
+        ...d.disturbances,
+        ...Array.from({ length: disturbanceCount - d.disturbances.length }, () => ({ start: "", end: "" })),
+      ],
     };
-    setDays([...days, newDay]);
-    setExpandedDay(nextId);
-    setNextId(nextId + 1);
   };
 
-  const removeDay = (id: number) => {
-    setDays(days.filter((d) => d.id !== id));
-    if (expandedDay === id) {
-      setExpandedDay(days[0]?.id ?? -1);
-    }
+  const updateDay = (idx: number, patch: Partial<DayCol>) => {
+    setDays((prev) => prev.map((d, i) => (i === idx ? { ...d, ...patch } : d)));
   };
 
-  const updateDayInput = (id: number, input: CalcInput) => {
-    setDays(days.map((d) => (d.id === id ? { ...d, input } : d)));
+  const updateDisturbance = (dayIdx: number, distIdx: number, patch: Partial<Disturbance>) => {
+    setDays((prev) =>
+      prev.map((d, i) => {
+        if (i !== dayIdx) return d;
+        const ensured = ensureDisturbances(d);
+        const disturbances = ensured.disturbances.map((dist, j) => (j === distIdx ? { ...dist, ...patch } : dist));
+        return { ...ensured, disturbances };
+      }),
+    );
   };
 
-  const updateDayLabel = (id: number, label: string) => {
-    setDays(days.map((d) => (d.id === id ? { ...d, label } : d)));
+  const addDisturbance = () => setDisturbanceCount((n) => n + 1);
+  const removeDisturbance = (idx: number) => {
+    if (disturbanceCount <= 1) return;
+    setDays((prev) => prev.map((d) => ({ ...d, disturbances: d.disturbances.filter((_, j) => j !== idx) })));
+    setDisturbanceCount((n) => n - 1);
   };
 
-  const updateVilaUsed = (id: number, value: number) => {
-    setDays(days.map((d) => (d.id === id ? { ...d, vilaUsed: value } : d)));
+  const resetAll = () => {
+    setDays(WEEKDAYS.map(() => newDay()));
+    setDisturbanceCount(1);
+    setVilaUsed(0);
   };
 
-  const resetDay = (id: number) => {
-    setDays(days.map((d) => (d.id === id ? { ...d, input: { ...DEFAULT_INPUT, usedBeredskapsvila: 0 }, vilaUsed: 0 } : d)));
-  };
-
-  // Calculate results for each day, accumulating used beredskapsvila
-  const dayResults = useMemo(() => {
-    const results: { entry: DayEntry; result: CalcResult | null; cumulativeUsed: number }[] = [];
-    let cumulativeUsed = 0;
-
-    for (const day of days) {
-      const isComplete =
-        day.input.activeWorkStart !== "" &&
-        day.input.activeWorkEnd !== "" &&
-        day.input.prevWorkDayStart !== "" &&
-        day.input.prevWorkDayEnd !== "" &&
-        day.input.workDayStart !== "" &&
-        day.input.workDayEnd !== "";
-
-      if (isComplete) {
-        const inputWithCumulative = {
-          ...day.input,
-          usedBeredskapsvila: cumulativeUsed,
-        };
-        const result = calculateRest(inputWithCumulative);
-        results.push({ entry: day, result, cumulativeUsed });
-        cumulativeUsed += result.beredskapsvila + day.vilaUsed;
-      } else {
-        results.push({ entry: day, result: null, cumulativeUsed });
-        cumulativeUsed += day.vilaUsed;
+  // Resolve effective shift for each day (handle sameAsPrev + ledig)
+  const effectiveShifts = useMemo(() => {
+    return days.map((d, i) => {
+      if (d.ledig) return { start: "", end: "", ledig: true };
+      if (d.sameAsPrev && i > 0) {
+        // walk back to find non-ledig non-sameAsPrev base
+        for (let k = i - 1; k >= 0; k--) {
+          const prev = days[k];
+          if (prev.ledig) continue;
+          return { start: prev.workStart, end: prev.workEnd, ledig: false };
+        }
       }
-    }
-    return results;
+      return { start: d.workStart, end: d.workEnd, ledig: false };
+    });
   }, [days]);
 
-  // Weekly summary
-  const weeklySummary = useMemo(() => {
+  // Compute totals across all disturbances
+  const summary = useMemo(() => {
     let totalMandatory = 0;
     let totalAdditional = 0;
-    let totalBeredskapsvila = 0;
-    let totalVilaUsed = 0;
-    let completedDays = 0;
 
-    for (const { result, entry } of dayResults) {
-      totalVilaUsed += entry.vilaUsed;
-      if (result) {
+    for (let i = 0; i < days.length; i++) {
+      const day = days[i];
+      for (let dIdx = 0; dIdx < disturbanceCount; dIdx++) {
+        const dist = day.disturbances[dIdx];
+        if (!dist || !dist.start || !dist.end) continue;
+
+        // prev workday end: most recent earlier day with shift
+        let prevEnd = "";
+        let prevStart = "";
+        for (let k = i - 1; k >= 0; k--) {
+          const sh = effectiveShifts[k];
+          if (!sh.ledig && sh.end) {
+            prevEnd = sh.end;
+            prevStart = sh.start;
+            break;
+          }
+        }
+        // next workday start: this day's shift if any, else next day with shift
+        let nextStart = effectiveShifts[i].start;
+        let nextEnd = effectiveShifts[i].end;
+        if (!nextStart) {
+          for (let k = i + 1; k < days.length; k++) {
+            const sh = effectiveShifts[k];
+            if (!sh.ledig && sh.start) {
+              nextStart = sh.start;
+              nextEnd = sh.end;
+              break;
+            }
+          }
+        }
+        if (!prevEnd || !nextStart) continue;
+
+        const input: CalcInput = {
+          activeWorkStart: dist.start,
+          activeWorkEnd: dist.end,
+          prevWorkDayStart: prevStart || "07:00",
+          prevWorkDayEnd: prevEnd,
+          workDayStart: nextStart,
+          workDayEnd: nextEnd || "15:30",
+          usedBeredskapsvila: 0,
+          crossesMidnight: false,
+        };
+        const result = calculateRest(input);
         totalMandatory += result.mandatoryRestHours;
         totalAdditional += result.additionalInskranktHours;
-        totalBeredskapsvila += result.beredskapsvila;
-        completedDays++;
       }
     }
 
     const totalEarned = totalMandatory + totalAdditional;
-    const remaining = Math.max(0, totalEarned - totalVilaUsed);
+    const remaining = Math.max(0, totalEarned - vilaUsed);
+    return { totalMandatory, totalAdditional, totalEarned, remaining };
+  }, [days, disturbanceCount, effectiveShifts, vilaUsed]);
 
-    return {
-      totalMandatory,
-      totalAdditional,
-      totalEarned,
-      totalVilaUsed,
-      remaining,
-      completedDays,
-    };
-  }, [dayResults]);
-
-  const [showSummaryBreakdown, setShowSummaryBreakdown] = useState(false);
+  const distIndices = Array.from({ length: disturbanceCount }, (_, i) => i);
 
   return (
     <div className="space-y-6">
@@ -145,22 +167,22 @@ export default function WeekView() {
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Upparbetad vila</p>
             <p className="text-xl font-bold text-foreground">
-              {formatHoursShort(weeklySummary.totalEarned)}
+              {formatHoursShort(summary.totalEarned)}
             </p>
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Vila redan uttagen</p>
             <p className="text-xl font-bold text-foreground">
-              {formatHoursShort(weeklySummary.totalVilaUsed)}
+              {formatHoursShort(vilaUsed)}
             </p>
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Kvar att ta ut</p>
             <p className="text-xl font-bold text-primary">
-              {formatHoursShort(weeklySummary.remaining)}
+              {formatHoursShort(summary.remaining)}
             </p>
             <p className="text-xs text-muted-foreground">
-              {weeklySummary.remaining > 6
+              {summary.remaining > 6
                 ? "Ta ut som inskränkt dygnsvila"
                 : "Ta ut som betald beredskapsvila"}
             </p>
@@ -173,148 +195,185 @@ export default function WeekView() {
             <div className="space-y-1.5 text-sm">
               <div className="flex justify-between py-1.5 border-b border-border/30">
                 <span className="text-muted-foreground">Du måste vara ledig (00–06-regeln)</span>
-                <span className="font-medium text-foreground">{formatHoursShort(weeklySummary.totalMandatory)}</span>
+                <span className="font-medium text-foreground">{formatHoursShort(summary.totalMandatory)}</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-border/30">
                 <span className="text-muted-foreground">Du får vara ledig (inskränkt dygnsvila)</span>
-                <span className="font-medium text-foreground">{formatHoursShort(weeklySummary.totalAdditional)}</span>
+                <span className="font-medium text-foreground">{formatHoursShort(summary.totalAdditional)}</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-border/30 bg-muted/30 -mx-2 px-2 rounded">
                 <span className="text-foreground font-medium">Upparbetad vila (summa)</span>
-                <span className="font-bold text-primary">{formatHoursShort(weeklySummary.totalEarned)}</span>
+                <span className="font-bold text-primary">{formatHoursShort(summary.totalEarned)}</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-border/30">
                 <span className="text-muted-foreground">Vila redan uttagen</span>
-                <span className="font-medium text-foreground">− {formatHoursShort(weeklySummary.totalVilaUsed)}</span>
+                <span className="font-medium text-foreground">− {formatHoursShort(vilaUsed)}</span>
               </div>
               <div className="flex justify-between py-1.5 bg-muted/30 -mx-2 px-2 rounded">
                 <span className="text-foreground font-medium">Kvar att ta ut</span>
-                <span className="font-bold text-primary">{formatHoursShort(weeklySummary.remaining)}</span>
+                <span className="font-bold text-primary">{formatHoursShort(summary.remaining)}</span>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Day entries */}
-      {dayResults.map(({ entry, result, cumulativeUsed }, index) => {
-        const isExpanded = expandedDay === entry.id;
-        const isComplete = result !== null;
+      {/* Schedule table */}
+      <div className="bg-card rounded-lg border shadow-sm">
+        <div className="flex items-center justify-between p-4 border-b">
+          <h2 className="text-lg font-semibold text-foreground">Veckoschema och störningar</h2>
+          <Button variant="ghost" size="sm" onClick={resetAll} className="text-muted-foreground">
+            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+            Nollställ
+          </Button>
+        </div>
 
-        return (
-          <div key={entry.id} className="bg-card rounded-lg border shadow-sm overflow-hidden">
-            {/* Day header */}
-            <button
-              onClick={() => setExpandedDay(isExpanded ? -1 : entry.id)}
-              className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <select
-                  value={entry.label}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => updateDayLabel(entry.id, e.target.value)}
-                  className="text-sm font-semibold bg-transparent border-none text-foreground cursor-pointer focus:outline-none"
-                >
-                  {WEEKDAYS.map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-                <span className="text-xs text-muted-foreground">
-                  Störning {index + 1}
-                </span>
-                {isComplete && (
-                  <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                    Vila: {formatHoursShort(result.totalRestHours)}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                {days.length > 1 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeDay(entry.id);
-                    }}
-                    className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-                {isExpanded ? (
-                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                )}
-              </div>
-            </button>
-
-            {/* Day content */}
-            {isExpanded && (
-              <div className="border-t p-4 space-y-4">
-                <div className="text-xs text-muted-foreground bg-muted/50 rounded p-2">
-                  Redan använd beredskapsvila (ackumulerat): {formatHoursShort(cumulativeUsed)}
-                </div>
-
-                <RestForm
-                  input={entry.input}
-                  onChange={(newInput) => updateDayInput(entry.id, newInput)}
-                  onReset={() => resetDay(entry.id)}
-                  hideUsedBeredskapsvila
-                />
-
-                {/* Vila already taken for this day */}
-                <div className="bg-card rounded-lg border p-4 space-y-2">
-                  <Label className="text-sm font-medium text-muted-foreground">
-                    Vila redan uttagen för denna störning
-                  </Label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min={0}
-                      max={6}
-                      step={0.5}
-                      value={entry.vilaUsed}
-                      onChange={(e) => updateVilaUsed(entry.id, parseFloat(e.target.value) || 0)}
-                      className="w-24 h-12 text-lg rounded-md border border-input bg-background px-3 text-foreground"
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="border-b bg-muted/30">
+                <th className="text-left font-medium text-muted-foreground p-2 sticky left-0 bg-muted/30 z-10 min-w-[140px]">
+                  Dag
+                </th>
+                {SHORT.map((d, i) => (
+                  <th key={i} className="font-medium text-foreground p-2 min-w-[90px]">
+                    {d}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {/* Start */}
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Start</td>
+                {days.map((d, i) => (
+                  <td key={i} className="p-1">
+                    <Input
+                      type="time"
+                      value={effectiveShifts[i].start}
+                      disabled={d.ledig || d.sameAsPrev}
+                      onChange={(e) => updateDay(i, { workStart: e.target.value })}
+                      className="h-9 text-sm px-2"
                     />
-                    <span className="text-sm text-muted-foreground">timmar</span>
-                  </div>
-                </div>
+                  </td>
+                ))}
+              </tr>
+              {/* Slut */}
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Slut</td>
+                {days.map((d, i) => (
+                  <td key={i} className="p-1">
+                    <Input
+                      type="time"
+                      value={effectiveShifts[i].end}
+                      disabled={d.ledig || d.sameAsPrev}
+                      onChange={(e) => updateDay(i, { workEnd: e.target.value })}
+                      className="h-9 text-sm px-2"
+                    />
+                  </td>
+                ))}
+              </tr>
+              {/* Ledig */}
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Ledig</td>
+                {days.map((d, i) => (
+                  <td key={i} className="p-2 text-center">
+                    <Checkbox
+                      checked={d.ledig}
+                      onCheckedChange={(c) => updateDay(i, { ledig: !!c, sameAsPrev: c ? false : d.sameAsPrev })}
+                    />
+                  </td>
+                ))}
+              </tr>
+              {/* Samma som dagen innan */}
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Samma som dagen innan</td>
+                {days.map((d, i) => (
+                  <td key={i} className="p-2 text-center">
+                    <Checkbox
+                      checked={d.sameAsPrev}
+                      disabled={i === 0 || d.ledig}
+                      onCheckedChange={(c) => updateDay(i, { sameAsPrev: !!c })}
+                    />
+                  </td>
+                ))}
+              </tr>
+              {/* Disturbances */}
+              {distIndices.map((dIdx) => (
+                <Fragment key={dIdx}>
+                  <tr className="border-b bg-muted/10">
+                    <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">
+                      <div className="flex items-center justify-between gap-1">
+                        <span>Start störning {disturbanceCount > 1 ? dIdx + 1 : ""}</span>
+                        {disturbanceCount > 1 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeDisturbance(dIdx)}
+                            className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                    {days.map((d, i) => (
+                      <td key={i} className="p-1">
+                        <Input
+                          type="time"
+                          value={d.disturbances[dIdx]?.start ?? ""}
+                          onChange={(e) => updateDisturbance(i, dIdx, { start: e.target.value })}
+                          className="h-9 text-sm px-2"
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="border-b bg-muted/10">
+                    <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">
+                      Slut störning {disturbanceCount > 1 ? dIdx + 1 : ""}
+                    </td>
+                    {days.map((d, i) => (
+                      <td key={i} className="p-1">
+                        <Input
+                          type="time"
+                          value={d.disturbances[dIdx]?.end ?? ""}
+                          onChange={(e) => updateDisturbance(i, dIdx, { end: e.target.value })}
+                          className="h-9 text-sm px-2"
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-                {isComplete && (
-                  <>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        id={`detailed-${entry.id}`}
-                        checked={showDetailed[entry.id] ?? false}
-                        onCheckedChange={(checked) =>
-                          setShowDetailed({ ...showDetailed, [entry.id]: checked })
-                        }
-                      />
-                      <Label htmlFor={`detailed-${entry.id}`} className="text-sm text-muted-foreground cursor-pointer">
-                        Visa detaljerad uträkning
-                      </Label>
-                    </div>
+        <div className="p-3 border-t">
+          <Button variant="outline" size="sm" onClick={addDisturbance} className="w-full">
+            <Plus className="mr-1.5 h-3.5 w-3.5" />
+            Lägg till fler störningar
+          </Button>
+        </div>
+      </div>
 
-                    <ResultDisplay result={result} workDayStart={entry.input.workDayStart} />
-                    {showDetailed[entry.id] && <DetailedBreakdown result={result} />}
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
-
-      {/* Add day button */}
-      {days.length < 7 && (
-        <Button variant="outline" onClick={addDay} className="w-full">
-          <Plus className="mr-2 h-4 w-4" />
-          Lägg till störning
-        </Button>
-      )}
+      {/* Vila redan uttagen */}
+      <div className="bg-card rounded-lg border p-4 shadow-sm space-y-2">
+        <label className="text-sm font-medium text-muted-foreground">
+          Vila redan uttagen denna vecka
+        </label>
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            min={0}
+            step={0.5}
+            value={vilaUsed}
+            onChange={(e) => setVilaUsed(parseFloat(e.target.value) || 0)}
+            className="w-28 h-11 text-lg"
+          />
+          <span className="text-sm text-muted-foreground">timmar</span>
+        </div>
+      </div>
     </div>
   );
 }
