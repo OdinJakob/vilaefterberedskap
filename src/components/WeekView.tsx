@@ -28,7 +28,7 @@ function newDay(): DayCol {
 export default function WeekView() {
   const [days, setDays] = useState<DayCol[]>(() => WEEKDAYS.map(() => newDay()));
   const [disturbanceCount, setDisturbanceCount] = useState(1);
-  const [vilaUsed, setVilaUsed] = useState(0);
+  const [vilaUsed, setVilaUsed] = useState<number | "">("");
   const [showSummaryBreakdown, setShowSummaryBreakdown] = useState(false);
 
   // Ensure each day's disturbance array is at least disturbanceCount long
@@ -68,7 +68,7 @@ export default function WeekView() {
   const resetAll = () => {
     setDays(WEEKDAYS.map(() => newDay()));
     setDisturbanceCount(1);
-    setVilaUsed(0);
+    setVilaUsed("");
   };
 
   // Resolve effective shift for each day (handle sameAsPrev + ledig)
@@ -142,7 +142,8 @@ export default function WeekView() {
     }
 
     const totalEarned = totalMandatory + totalAdditional;
-    const remaining = Math.max(0, totalEarned - vilaUsed);
+    const used = typeof vilaUsed === "number" ? vilaUsed : 0;
+    const remaining = Math.max(0, totalEarned - used);
     return { totalMandatory, totalAdditional, totalEarned, remaining };
   }, [days, disturbanceCount, effectiveShifts, vilaUsed]);
 
@@ -174,7 +175,7 @@ export default function WeekView() {
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Vila redan uttagen</p>
             <p className="text-xl font-bold text-foreground">
-              {formatHoursShort(vilaUsed)}
+              {formatHoursShort(typeof vilaUsed === "number" ? vilaUsed : 0)}
             </p>
           </div>
           <div className="space-y-1">
@@ -208,7 +209,7 @@ export default function WeekView() {
               </div>
               <div className="flex justify-between py-1.5 border-b border-border/30">
                 <span className="text-muted-foreground">Vila redan uttagen</span>
-                <span className="font-medium text-foreground">− {formatHoursShort(vilaUsed)}</span>
+                <span className="font-medium text-foreground">− {formatHoursShort(typeof vilaUsed === "number" ? vilaUsed : 0)}</span>
               </div>
               <div className="flex justify-between py-1.5 bg-muted/30 -mx-2 px-2 rounded">
                 <span className="text-foreground font-medium">Kvar att ta ut</span>
@@ -369,7 +370,10 @@ export default function WeekView() {
             min={0}
             step={0.5}
             value={vilaUsed}
-            onChange={(e) => setVilaUsed(parseFloat(e.target.value) || 0)}
+            onChange={(e) => {
+              const v = e.target.value;
+              setVilaUsed(v === "" ? "" : parseFloat(v) || 0);
+            }}
             className="w-28 h-11 text-lg"
           />
           <span className="text-sm text-muted-foreground">timmar</span>
