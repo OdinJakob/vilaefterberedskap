@@ -1,5 +1,6 @@
 import { Fragment, useState, useMemo } from "react";
-import { CalcInput, calculateRest, formatHoursShort } from "@/lib/calculations";
+import { CalcInput, CalcResult, calculateRest, formatHoursShort } from "@/lib/calculations";
+import DetailedBreakdown from "@/components/DetailedBreakdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -92,6 +93,7 @@ export default function WeekView() {
   const summary = useMemo(() => {
     let totalMandatory = 0;
     let totalAdditional = 0;
+    const breakdowns: { label: string; result: CalcResult }[] = [];
 
     for (let i = 0; i < days.length; i++) {
       const day = days[i];
@@ -138,13 +140,17 @@ export default function WeekView() {
         const result = calculateRest(input);
         totalMandatory += result.mandatoryRestHours;
         totalAdditional += result.additionalInskranktHours;
+        breakdowns.push({
+          label: `${WEEKDAYS[i]}${disturbanceCount > 1 ? ` – störning ${dIdx + 1}` : ""} (${dist.start}–${dist.end})`,
+          result,
+        });
       }
     }
 
     const totalEarned = totalMandatory + totalAdditional;
     const used = typeof vilaUsed === "number" ? vilaUsed : 0;
     const remaining = Math.max(0, totalEarned - used);
-    return { totalMandatory, totalAdditional, totalEarned, remaining };
+    return { totalMandatory, totalAdditional, totalEarned, remaining, breakdowns };
   }, [days, disturbanceCount, effectiveShifts, vilaUsed]);
 
   const distIndices = Array.from({ length: disturbanceCount }, (_, i) => i);
@@ -216,6 +222,20 @@ export default function WeekView() {
                 <span className="font-bold text-primary">{formatHoursShort(summary.remaining)}</span>
               </div>
             </div>
+
+            {summary.breakdowns.length > 0 && (
+              <div className="mt-6 space-y-4">
+                <h3 className="text-sm font-medium text-foreground">Uträkning per störning</h3>
+                {summary.breakdowns.map((b, idx) => (
+                  <div key={idx} className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      {b.label}
+                    </p>
+                    <DetailedBreakdown result={b.result} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
