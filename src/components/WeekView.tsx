@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { Fragment, useState, useMemo } from "react";
 import { CalcInput, calculateRest, formatHoursShort } from "@/lib/calculations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -300,8 +300,8 @@ export default function WeekView() {
               </tr>
               {/* Disturbances */}
               {distIndices.map((dIdx) => (
-                <>
-                  <tr key={`s-${dIdx}`} className="border-b bg-muted/10">
+                <Fragment key={dIdx}>
+                  <tr className="border-b bg-muted/10">
                     <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">
                       <div className="flex items-center justify-between gap-1">
                         <span>Start störning {disturbanceCount > 1 ? dIdx + 1 : ""}</span>
@@ -328,7 +328,7 @@ export default function WeekView() {
                       </td>
                     ))}
                   </tr>
-                  <tr key={`e-${dIdx}`} className="border-b bg-muted/10">
+                  <tr className="border-b bg-muted/10">
                     <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">
                       Slut störning {disturbanceCount > 1 ? dIdx + 1 : ""}
                     </td>
@@ -343,7 +343,7 @@ export default function WeekView() {
                       </td>
                     ))}
                   </tr>
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
