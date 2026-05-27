@@ -76,10 +76,11 @@ export default function WeekView() {
     return days.map((d, i) => {
       if (d.ledig) return { start: "", end: "", ledig: true };
       if (d.sameAsPrev && i > 0) {
-        // walk back to find non-ledig non-sameAsPrev base
+        // walk back to find the most recent manually-filled day (skip ledig and other sameAsPrev)
         for (let k = i - 1; k >= 0; k--) {
           const prev = days[k];
           if (prev.ledig) continue;
+          if (prev.sameAsPrev) continue;
           return { start: prev.workStart, end: prev.workEnd, ledig: false };
         }
       }
