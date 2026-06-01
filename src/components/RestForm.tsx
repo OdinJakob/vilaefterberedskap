@@ -180,8 +180,11 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
               min={0}
               max={8}
               step={0.5}
-              value={input.usedBeredskapsvila}
-              onChange={(e) => update("usedBeredskapsvila", parseFloat(e.target.value) || 0)}
+              value={input.usedBeredskapsvila === 0 ? "" : input.usedBeredskapsvila}
+              onChange={(e) => {
+                const val = e.target.value;
+                update("usedBeredskapsvila", val === "" ? 0 : parseFloat(val));
+              }}
               className="w-24 text-lg h-12"
             />
             <span className="text-sm text-muted-foreground">timmar (av 8)</span>
