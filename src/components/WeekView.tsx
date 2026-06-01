@@ -125,6 +125,40 @@ export default function WeekView() {
             }
           }
         }
+        // Fallback: if no prev/next found, use this day's own shift (or first available)
+        if (!prevEnd || !prevStart) {
+          const own = effectiveShifts[i];
+          if (!own.ledig && own.start && own.end) {
+            prevEnd = prevEnd || own.end;
+            prevStart = prevStart || own.start;
+          } else {
+            // search forward for any defined shift
+            for (let k = 0; k < days.length; k++) {
+              const sh = effectiveShifts[k];
+              if (!sh.ledig && sh.start && sh.end) {
+                prevEnd = prevEnd || sh.end;
+                prevStart = prevStart || sh.start;
+                break;
+              }
+            }
+          }
+        }
+        if (!nextStart || !nextEnd) {
+          const own = effectiveShifts[i];
+          if (!own.ledig && own.start && own.end) {
+            nextStart = nextStart || own.start;
+            nextEnd = nextEnd || own.end;
+          } else {
+            for (let k = 0; k < days.length; k++) {
+              const sh = effectiveShifts[k];
+              if (!sh.ledig && sh.start && sh.end) {
+                nextStart = nextStart || sh.start;
+                nextEnd = nextEnd || sh.end;
+                break;
+              }
+            }
+          }
+        }
         const input: CalcInput = {
           activeWorkStart: dist.start,
           activeWorkEnd: dist.end,
