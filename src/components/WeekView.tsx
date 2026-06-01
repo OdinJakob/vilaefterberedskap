@@ -414,7 +414,7 @@ export default function WeekView() {
       {/* Vila redan uttagen */}
       <div className="bg-card rounded-lg border p-4 shadow-sm space-y-2">
         <label className="text-sm font-medium text-muted-foreground">
-          Vila redan uttagen denna vecka
+          Redan uttagen betald beredskapsvila denna beredskapsvecka
         </label>
         <div className="flex items-center gap-2">
           <Input
