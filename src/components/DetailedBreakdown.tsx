@@ -14,7 +14,7 @@ export default function DetailedBreakdown({ result }: DetailedBreakdownProps) {
       label: "Varav arbete mellan 00:00–06:00",
       value: formatHoursShort(result.nightWorkHours),
       detail: result.nightWorkHours > 0
-        ? "Vila läggs ut timme per timme enligt tillämpningarna"
+        ? "Vila läggs ut timme för timme antingen i början av nästa arbetspass, i slutet av nästa arbetspass eller en kombination av dem"
         : "Inget arbete mellan 00:00–06:00",
     },
     {
