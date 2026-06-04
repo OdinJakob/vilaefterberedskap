@@ -267,24 +267,24 @@ export default function WeekView() {
           </Button>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Upparbetad vila</p>
+          <div className="flex flex-col">
+            <p className="text-xs text-muted-foreground min-h-[2.5rem]">Upparbetad vila</p>
             <p className="text-xl font-bold text-foreground">
               {formatHoursShort(summary.totalEarned)}
             </p>
           </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Redan uttagen betald beredskapsvila och vila pga inskränkt dygnsvila</p>
+          <div className="flex flex-col">
+            <p className="text-xs text-muted-foreground min-h-[2.5rem]">Redan uttagen betald beredskapsvila och vila pga inskränkt dygnsvila</p>
             <p className="text-xl font-bold text-foreground">
               {formatHoursShort(summary.used)}
             </p>
           </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Kvar att ta ut</p>
+          <div className="flex flex-col">
+            <p className="text-xs text-muted-foreground min-h-[2.5rem]">Kvar att ta ut</p>
             <p className="text-xl font-bold text-primary">
               {formatHoursShort(summary.remaining)}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mt-1">
               {(() => {
                 const usedBetald = typeof vilaUsed === "number" ? vilaUsed : 0;
                 const kvarAvAtta = Math.max(0, 8 - usedBetald);
