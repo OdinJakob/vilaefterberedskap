@@ -94,26 +94,6 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
         </div>
       )}
 
-      {/* Chef-avstämning */}
-      {result.requiresManagerConsultation && (
-        <div className="result-card-warning rounded-lg border p-5">
-          <div className="flex items-start gap-3">
-            <div className="rounded-full bg-warning p-2 mt-0.5">
-              <AlertTriangle className="h-4 w-4 text-warning-foreground" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-warning text-sm uppercase tracking-wide">
-                Kräver avstämning med chef
-              </h3>
-              <p className="text-sm text-muted-foreground mt-2">
-                Du avgör ihop med din chef om du behöver ta den inskränkta dygnsvilan
-                i samband med nästa arbetspass eller om den sparas tills beredskapsveckan är slut.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Warnings */}
       {result.warnings.length > 0 && (
         <div className="space-y-2">
