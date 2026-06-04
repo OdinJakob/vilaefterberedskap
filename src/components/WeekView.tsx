@@ -1,5 +1,5 @@
 import { Fragment, useState, useMemo } from "react";
-import { CalcInput, CalcResult, calculateRest, formatHoursShort } from "@/lib/calculations";
+import { CalcResult, formatHoursShort } from "@/lib/calculations";
 import DetailedBreakdown from "@/components/DetailedBreakdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
