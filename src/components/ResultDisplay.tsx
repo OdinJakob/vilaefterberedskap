@@ -25,7 +25,7 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
             {result.mandatoryRestHours > 0 && (
               <p className="text-sm text-muted-foreground mt-1">
                 Du arbetade {formatHoursShort(result.nightWorkHours)} mellan kl 00:00–06:00.
-                Vila läggs ut timme per timme från {workDayStart} (ordinarie arbetsstart).
+                Vila läggs ut timme för timme antingen i början av nästa arbetspass, i slutet av nästa arbetspass eller en kombination av dem.
               </p>
             )}
             {result.mandatoryRestHours === 0 && (
