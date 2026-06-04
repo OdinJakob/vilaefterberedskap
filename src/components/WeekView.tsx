@@ -216,7 +216,7 @@ export default function WeekView() {
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Redan uttagen betald beredskapsvila och vila pga inskränkt dygnsvila</p>
             <p className="text-xl font-bold text-foreground">
-              {formatHoursShort(typeof vilaUsed === "number" ? vilaUsed : 0)}
+              {formatHoursShort(summary.used)}
             </p>
           </div>
           <div className="space-y-1">
@@ -250,7 +250,7 @@ export default function WeekView() {
               </div>
               <div className="flex justify-between py-1.5 border-b border-border/30">
                 <span className="text-muted-foreground">Vila redan uttagen</span>
-                <span className="font-medium text-foreground">− {formatHoursShort(typeof vilaUsed === "number" ? vilaUsed : 0)}</span>
+                <span className="font-medium text-foreground">− {formatHoursShort(summary.used)}</span>
               </div>
               <div className="flex justify-between py-1.5 bg-muted/30 -mx-2 px-2 rounded">
                 <span className="text-foreground font-medium">Kvar att ta ut</span>
