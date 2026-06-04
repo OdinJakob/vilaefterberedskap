@@ -30,6 +30,7 @@ export default function WeekView() {
   const [days, setDays] = useState<DayCol[]>(() => WEEKDAYS.map(() => newDay()));
   const [disturbanceCount, setDisturbanceCount] = useState(1);
   const [vilaUsed, setVilaUsed] = useState<number | "">("");
+  const [inskranktUsed, setInskranktUsed] = useState<number | "">("");
   const [showSummaryBreakdown, setShowSummaryBreakdown] = useState(false);
 
   // Ensure each day's disturbance array is at least disturbanceCount long
