@@ -181,10 +181,12 @@ export default function WeekView() {
     }
 
     const totalEarned = totalMandatory + totalAdditional;
-    const used = typeof vilaUsed === "number" ? vilaUsed : 0;
+    const used =
+      (typeof vilaUsed === "number" ? vilaUsed : 0) +
+      (typeof inskranktUsed === "number" ? inskranktUsed : 0);
     const remaining = Math.max(0, totalEarned - used);
-    return { totalMandatory, totalAdditional, totalEarned, remaining, breakdowns };
-  }, [days, disturbanceCount, effectiveShifts, vilaUsed]);
+    return { totalMandatory, totalAdditional, totalEarned, remaining, used, breakdowns };
+  }, [days, disturbanceCount, effectiveShifts, vilaUsed, inskranktUsed]);
 
   const distIndices = Array.from({ length: disturbanceCount }, (_, i) => i);
 
