@@ -64,11 +64,9 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
                   <span className="font-medium">{formatHoursShort(result.inskanktDygnsvila)}</span>
                 </div>
               </div>
-              {result.inskanktDygnsvila > 0 && (
-              <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+              <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
                   Huvudregeln är att kompensation vid inskränkt dygnsvila ska ske i samband med dygnsvila vid beredskapsperiodens slut. Om behov finnas av att ta ut dygnsvila direkt stäms detta av med beredskapsledare eller chef.
                 </p>
-              )}
             </div>
           </div>
         </div>
