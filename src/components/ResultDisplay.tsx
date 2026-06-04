@@ -91,26 +91,6 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
         </div>
       )}
 
-      {/* Tidigast åter i arbete */}
-      <div className="result-card-info rounded-lg border p-5">
-        <div className="flex items-start gap-3">
-          <div className="rounded-full bg-info p-2 mt-0.5">
-            <Clock className="h-4 w-4 text-must-rest-foreground" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-info text-sm uppercase tracking-wide">
-              Tidigast åter i arbete
-            </h3>
-            <p className="text-2xl font-bold text-foreground mt-1">
-              {result.earliestReturn}
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Kvar att använda denna vecka: {formatHoursShort(result.remainingWeeklyBeredskapsvila)} beredskapsvila
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Chef-avstämning */}
       {result.requiresManagerConsultation && (
         <div className="result-card-warning rounded-lg border p-5">
