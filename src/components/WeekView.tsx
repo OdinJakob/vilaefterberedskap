@@ -283,14 +283,14 @@ export default function WeekView() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm border-collapse">
+          <table className="w-full text-xs sm:text-sm border-collapse">
             <thead>
               <tr className="border-b bg-muted/30">
-                <th className="text-left font-medium text-muted-foreground p-2 sticky left-0 bg-muted/30 z-10 min-w-[140px]">
+                <th className="text-left font-medium text-muted-foreground p-1.5 sticky left-0 bg-muted/30 z-10 min-w-[96px]">
                   Dag
                 </th>
                 {SHORT.map((d, i) => (
-                  <th key={i} className="font-medium text-foreground p-2 min-w-[90px]">
+                  <th key={i} className="font-medium text-foreground p-1.5 min-w-[72px]">
                     {d}
                   </th>
                 ))}
