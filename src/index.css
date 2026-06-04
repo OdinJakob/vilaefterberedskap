@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,51 +6,53 @@
 
 @layer base {
   :root {
-    --background: 210 25% 97%;
-    --foreground: 210 30% 15%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 13%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 30% 15%;
+    --card-foreground: 0 0% 13%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 30% 15%;
+    --popover-foreground: 0 0% 13%;
 
-    --primary: 195 60% 32%;
+    /* Göteborgs Stad blue ~ #0058A3 */
+    --primary: 207 100% 32%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 195 30% 92%;
-    --secondary-foreground: 195 60% 25%;
+    --secondary: 207 70% 94%;
+    --secondary-foreground: 207 100% 25%;
 
-    --muted: 210 20% 94%;
-    --muted-foreground: 210 15% 50%;
+    --muted: 210 15% 95%;
+    --muted-foreground: 210 8% 38%;
 
-    --accent: 38 85% 55%;
-    --accent-foreground: 38 90% 15%;
+    /* Göteborg yellow accent ~ #F8D000 */
+    --accent: 50 100% 49%;
+    --accent-foreground: 0 0% 13%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 20% 88%;
-    --input: 210 20% 88%;
-    --ring: 195 60% 32%;
+    --border: 210 14% 85%;
+    --input: 210 14% 85%;
+    --ring: 207 100% 32%;
 
-    --radius: 0.75rem;
+    --radius: 0.125rem;
 
     /* Custom tokens */
-    --must-rest: 195 60% 32%;
+    --must-rest: 207 100% 32%;
     --must-rest-foreground: 0 0% 100%;
-    --must-rest-bg: 195 40% 95%;
+    --must-rest-bg: 207 70% 95%;
 
-    --may-rest: 152 45% 42%;
+    --may-rest: 152 55% 35%;
     --may-rest-foreground: 0 0% 100%;
-    --may-rest-bg: 152 30% 94%;
+    --may-rest-bg: 152 40% 94%;
 
-    --warning: 38 85% 55%;
-    --warning-foreground: 38 90% 15%;
-    --warning-bg: 38 60% 95%;
+    --warning: 35 95% 50%;
+    --warning-foreground: 0 0% 13%;
+    --warning-bg: 45 100% 94%;
 
-    --info: 210 50% 50%;
-    --info-bg: 210 40% 95%;
+    --info: 207 100% 32%;
+    --info-bg: 207 70% 95%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -70,7 +72,13 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Open Sans', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Open Sans', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 }
 
