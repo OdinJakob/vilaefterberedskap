@@ -65,7 +65,7 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                  Huvudregeln är att kompensation vid inskränkt dygnsvila ska ske i samband med dygnsvila vid beredskapsperiodens slut. Om behov finnas av att ta ut dygnsvila direkt stäms detta av med beredskapsledare eller chef.
+                  Huvudregeln är att kompensation vid inskränkt dygnsvila ska ske i samband med dygnsvila vid beredskapsperiodens slut. Om behov finnas av att ta ut vila för inskränkt dygnsvila direkt stäms detta av med beredskapsledare eller chef.
                 </p>
             </div>
           </div>
