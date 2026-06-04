@@ -211,7 +211,7 @@ export default function WeekView() {
             </p>
           </div>
           <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Vila redan uttagen</p>
+            <p className="text-xs text-muted-foreground">Redan uttagen betald beredskapsvila och vila pga inskränkt dygnsvila</p>
             <p className="text-xl font-bold text-foreground">
               {formatHoursShort(typeof vilaUsed === "number" ? vilaUsed : 0)}
             </p>
