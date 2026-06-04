@@ -30,6 +30,7 @@ export default function WeekView() {
   const [days, setDays] = useState<DayCol[]>(() => WEEKDAYS.map(() => newDay()));
   const [disturbanceCount, setDisturbanceCount] = useState(1);
   const [vilaUsed, setVilaUsed] = useState<number | "">("");
+  const [inskranktUsed, setInskranktUsed] = useState<number | "">("");
   const [showSummaryBreakdown, setShowSummaryBreakdown] = useState(false);
 
   // Ensure each day's disturbance array is at least disturbanceCount long
@@ -180,10 +181,12 @@ export default function WeekView() {
     }
 
     const totalEarned = totalMandatory + totalAdditional;
-    const used = typeof vilaUsed === "number" ? vilaUsed : 0;
+    const used =
+      (typeof vilaUsed === "number" ? vilaUsed : 0) +
+      (typeof inskranktUsed === "number" ? inskranktUsed : 0);
     const remaining = Math.max(0, totalEarned - used);
-    return { totalMandatory, totalAdditional, totalEarned, remaining, breakdowns };
-  }, [days, disturbanceCount, effectiveShifts, vilaUsed]);
+    return { totalMandatory, totalAdditional, totalEarned, remaining, used, breakdowns };
+  }, [days, disturbanceCount, effectiveShifts, vilaUsed, inskranktUsed]);
 
   const distIndices = Array.from({ length: disturbanceCount }, (_, i) => i);
 
@@ -213,7 +216,7 @@ export default function WeekView() {
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Redan uttagen betald beredskapsvila och vila pga inskränkt dygnsvila</p>
             <p className="text-xl font-bold text-foreground">
-              {formatHoursShort(typeof vilaUsed === "number" ? vilaUsed : 0)}
+              {formatHoursShort(summary.used)}
             </p>
           </div>
           <div className="space-y-1">
@@ -247,7 +250,7 @@ export default function WeekView() {
               </div>
               <div className="flex justify-between py-1.5 border-b border-border/30">
                 <span className="text-muted-foreground">Vila redan uttagen</span>
-                <span className="font-medium text-foreground">− {formatHoursShort(typeof vilaUsed === "number" ? vilaUsed : 0)}</span>
+                <span className="font-medium text-foreground">− {formatHoursShort(summary.used)}</span>
               </div>
               <div className="flex justify-between py-1.5 bg-muted/30 -mx-2 px-2 rounded">
                 <span className="text-foreground font-medium">Kvar att ta ut</span>
@@ -412,23 +415,46 @@ export default function WeekView() {
       </div>
 
       {/* Vila redan uttagen */}
-      <div className="bg-card rounded-lg border p-4 shadow-sm space-y-2">
-        <label className="text-sm font-medium text-muted-foreground">
-          Redan uttagen betald beredskapsvila denna beredskapsvecka
-        </label>
-        <div className="flex items-center gap-2">
-          <Input
-            type="number"
-            min={0}
-            step={0.5}
-            value={vilaUsed}
-            onChange={(e) => {
-              const v = e.target.value;
-              setVilaUsed(v === "" ? "" : parseFloat(v) || 0);
-            }}
-            className="w-28 h-11 text-lg"
-          />
-          <span className="text-sm text-muted-foreground">timmar</span>
+      <div className="bg-card rounded-lg border p-4 shadow-sm">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">
+              Redan uttagen betald beredskapsvila denna beredskapsvecka
+            </label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={0}
+                step={0.5}
+                value={vilaUsed}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setVilaUsed(v === "" ? "" : parseFloat(v) || 0);
+                }}
+                className="w-28 h-11 text-lg"
+              />
+              <span className="text-sm text-muted-foreground">timmar</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">
+              Redan uttagen betald vila pga inskränkt dygnsvila denna beredskapsvecka
+            </label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={0}
+                step={0.5}
+                value={inskranktUsed}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setInskranktUsed(v === "" ? "" : parseFloat(v) || 0);
+                }}
+                className="w-28 h-11 text-lg"
+              />
+              <span className="text-sm text-muted-foreground">timmar</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
