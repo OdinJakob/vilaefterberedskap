@@ -243,12 +243,6 @@ export function calculateRest(input: CalcInput): CalcResult {
 
   const requiresManagerConsultation = additionalInskranktHours > 0;
 
-  if (requiresManagerConsultation) {
-    warnings.push(
-      "Inskränkt dygnsvila kräver avstämning med chef om den ska tas ut direkt eller sparas tills beredskapsveckan är slut."
-    );
-  }
-
   return {
     activeWorkHours,
     nightWorkHours: nightWorkHrs,
