@@ -90,94 +90,154 @@ export default function WeekView() {
     });
   }, [days]);
 
-  // Compute totals across all disturbances
+  // Compute totals per day, aggregating disturbances within the same rest window
   const summary = useMemo(() => {
     let totalMandatory = 0;
     let totalAdditional = 0;
     const breakdowns: { label: string; result: CalcResult }[] = [];
 
+    const toMin = (t: string) => {
+      const [h, m] = t.split(":").map(Number);
+      return h * 60 + m;
+    };
+    const forward = (anchor: number, t: number) => (t >= anchor ? t - anchor : t + 1440 - anchor);
+    const nightOverlap = (sM: number, eM: number) => {
+      // minutes of [sM..eM) (handles midnight crossing) intersected with [0,360)
+      const crosses = eM <= sM;
+      if (!crosses) {
+        return Math.max(0, Math.min(eM, 360) - Math.max(sM, 0));
+      }
+      const part1 = sM < 360 ? 360 - sM : 0;
+      const part2 = Math.min(eM, 360);
+      return part1 + part2;
+    };
+
     for (let i = 0; i < days.length; i++) {
       const day = days[i];
-      for (let dIdx = 0; dIdx < disturbanceCount; dIdx++) {
-        const dist = day.disturbances[dIdx];
-        if (!dist || !dist.start || !dist.end) continue;
+      const validDists = (day.disturbances || [])
+        .slice(0, disturbanceCount)
+        .filter((d) => d && d.start && d.end);
+      if (validDists.length === 0) continue;
 
-        // prev workday end: most recent earlier day with shift
-        let prevEnd = "";
-        let prevStart = "";
-        for (let k = i - 1; k >= 0; k--) {
+      // prev workday end
+      let prevEnd = "";
+      let prevStart = "";
+      for (let k = i - 1; k >= 0; k--) {
+        const sh = effectiveShifts[k];
+        if (!sh.ledig && sh.end) {
+          prevEnd = sh.end;
+          prevStart = sh.start;
+          break;
+        }
+      }
+      // next workday start (this day's shift if any, else next day's)
+      let nextStart = effectiveShifts[i].start;
+      let nextEnd = effectiveShifts[i].end;
+      if (!nextStart) {
+        for (let k = i + 1; k < days.length; k++) {
           const sh = effectiveShifts[k];
-          if (!sh.ledig && sh.end) {
-            prevEnd = sh.end;
-            prevStart = sh.start;
+          if (!sh.ledig && sh.start) {
+            nextStart = sh.start;
+            nextEnd = sh.end;
             break;
           }
         }
-        // next workday start: this day's shift if any, else next day with shift
-        let nextStart = effectiveShifts[i].start;
-        let nextEnd = effectiveShifts[i].end;
-        if (!nextStart) {
-          for (let k = i + 1; k < days.length; k++) {
-            const sh = effectiveShifts[k];
-            if (!sh.ledig && sh.start) {
-              nextStart = sh.start;
-              nextEnd = sh.end;
-              break;
-            }
-          }
-        }
-        // Fallback: if no prev/next found, use this day's own shift (or first available)
-        if (!prevEnd || !prevStart) {
-          const own = effectiveShifts[i];
-          if (!own.ledig && own.start && own.end) {
-            prevEnd = prevEnd || own.end;
-            prevStart = prevStart || own.start;
-          } else {
-            // search forward for any defined shift
-            for (let k = 0; k < days.length; k++) {
-              const sh = effectiveShifts[k];
-              if (!sh.ledig && sh.start && sh.end) {
-                prevEnd = prevEnd || sh.end;
-                prevStart = prevStart || sh.start;
-                break;
-              }
-            }
-          }
-        }
-        if (!nextStart || !nextEnd) {
-          const own = effectiveShifts[i];
-          if (!own.ledig && own.start && own.end) {
-            nextStart = nextStart || own.start;
-            nextEnd = nextEnd || own.end;
-          } else {
-            for (let k = 0; k < days.length; k++) {
-              const sh = effectiveShifts[k];
-              if (!sh.ledig && sh.start && sh.end) {
-                nextStart = nextStart || sh.start;
-                nextEnd = nextEnd || sh.end;
-                break;
-              }
-            }
-          }
-        }
-        const input: CalcInput = {
-          activeWorkStart: dist.start,
-          activeWorkEnd: dist.end,
-          prevWorkDayStart: prevStart || "07:00",
-          prevWorkDayEnd: prevEnd || "15:30",
-          workDayStart: nextStart || "07:00",
-          workDayEnd: nextEnd || "15:30",
-          usedBeredskapsvila: 0,
-          crossesMidnight: false,
-        };
-        const result = calculateRest(input);
-        totalMandatory += result.mandatoryRestHours;
-        totalAdditional += result.additionalInskranktHours;
-        breakdowns.push({
-          label: `${WEEKDAYS[i]}${disturbanceCount > 1 ? ` – störning ${dIdx + 1}` : ""} (${dist.start}–${dist.end})`,
-          result,
-        });
       }
+      // Fallback
+      if (!prevEnd || !prevStart) {
+        for (let k = 0; k < days.length; k++) {
+          const sh = effectiveShifts[k];
+          if (!sh.ledig && sh.start && sh.end) {
+            prevEnd = prevEnd || sh.end;
+            prevStart = prevStart || sh.start;
+            break;
+          }
+        }
+      }
+      if (!nextStart || !nextEnd) {
+        for (let k = 0; k < days.length; k++) {
+          const sh = effectiveShifts[k];
+          if (!sh.ledig && sh.start && sh.end) {
+            nextStart = nextStart || sh.start;
+            nextEnd = nextEnd || sh.end;
+            break;
+          }
+        }
+      }
+      prevEnd = prevEnd || "15:30";
+      prevStart = prevStart || "07:00";
+      nextStart = nextStart || "07:00";
+      nextEnd = nextEnd || "15:30";
+
+      const anchor = toMin(prevEnd);
+      const restEnd = forward(anchor, toMin(nextStart));
+
+      // Build absolute timeline (minutes since prev workday end)
+      const items = validDists
+        .map((d) => {
+          const sM = toMin(d.start);
+          const eM = toMin(d.end);
+          const absS = forward(anchor, sM);
+          const dur = eM > sM ? eM - sM : 1440 - sM + eM;
+          return {
+            start: d.start,
+            end: d.end,
+            absS,
+            absE: absS + dur,
+            dur,
+            night: nightOverlap(sM, eM),
+          };
+        })
+        .sort((a, b) => a.absS - b.absS);
+
+      // Longest continuous rest = max gap before/between/after disturbances inside rest window
+      let longestMin = 0;
+      let cursor = 0;
+      let restBeforeMin = 0;
+      let restAfterMin = 0;
+      for (let j = 0; j < items.length; j++) {
+        const gap = Math.max(0, items[j].absS - cursor);
+        if (j === 0) restBeforeMin = gap;
+        longestMin = Math.max(longestMin, gap);
+        cursor = Math.max(cursor, items[j].absE);
+      }
+      restAfterMin = Math.max(0, restEnd - cursor);
+      longestMin = Math.max(longestMin, restAfterMin);
+
+      const longestContinuousRest = longestMin / 60;
+      const activeWorkHours = items.reduce((s, it) => s + it.dur, 0) / 60;
+      const nightWorkHours = items.reduce((s, it) => s + it.night, 0) / 60;
+      const mandatoryRestHours = nightWorkHours;
+      const rawInskrankt = Math.max(0, 11 - longestContinuousRest);
+      const totalInskranktDygnsvila = Math.min(rawInskrankt, activeWorkHours);
+      const additionalInskranktHours = Math.max(0, totalInskranktDygnsvila - mandatoryRestHours);
+      const totalRestHours = mandatoryRestHours + additionalInskranktHours;
+
+      totalMandatory += mandatoryRestHours;
+      totalAdditional += additionalInskranktHours;
+
+      const distLabel = items.map((it) => `${it.start}–${it.end}`).join(", ");
+      const result: CalcResult = {
+        activeWorkHours,
+        nightWorkHours,
+        mandatoryRestHours,
+        longestContinuousRest,
+        totalInskranktDygnsvila,
+        additionalInskranktHours,
+        totalRestHours,
+        beredskapsvila: Math.min(totalRestHours, 6),
+        inskanktDygnsvila: Math.max(0, totalRestHours - Math.min(totalRestHours, 6)),
+        earliestReturn: "",
+        remainingWeeklyBeredskapsvila: 0,
+        restBeforeDisturbance: restBeforeMin / 60,
+        restAfterDisturbance: restAfterMin / 60,
+        requiresManagerConsultation: additionalInskranktHours > 0,
+        warnings: [],
+      };
+      breakdowns.push({
+        label: `${WEEKDAYS[i]} (${distLabel})`,
+        result,
+      });
     }
 
     const totalEarned = totalMandatory + totalAdditional;
