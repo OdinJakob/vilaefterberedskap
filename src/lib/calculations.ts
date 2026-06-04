@@ -203,9 +203,8 @@ export function calculateRest(input: CalcInput): CalcResult {
   // Längsta sammanhängande dygnsvila = max(vila före störning, vila efter störning)
   const longestContinuousRest = Math.max(restBeforeHours, restAfterHours);
 
-  // Inskränkt = 11 - längsta vila, men aldrig mer än störningens varaktighet
-  const rawInskrankt = Math.max(0, DAILY_REST_REQUIRED - longestContinuousRest);
-  const totalInskranktDygnsvila = Math.min(rawInskrankt, activeWorkHours);
+  // Inskränkt = 11 - längsta sammanhängande vila
+  const totalInskranktDygnsvila = Math.max(0, DAILY_REST_REQUIRED - longestContinuousRest);
 
   // 3. Ytterligare inskränkt dygnsvila utöver obligatorisk vila
   // (det som "får" tas ut utöver det som "ska" tas ut)
