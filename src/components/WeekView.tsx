@@ -285,9 +285,12 @@ export default function WeekView() {
               {formatHoursShort(summary.remaining)}
             </p>
             <p className="text-xs text-muted-foreground">
-              {summary.remaining > 6
-                ? "Ta ut som inskränkt dygnsvila"
-                : "Ta ut som betald beredskapsvila"}
+              {(() => {
+                const usedBetald = typeof vilaUsed === "number" ? vilaUsed : 0;
+                const kvarAvAtta = Math.max(0, 8 - usedBetald);
+                const x = Math.min(summary.remaining, kvarAvAtta);
+                return `Varav ${formatHoursShort(x)} kan tas ut som betald beredskapsvila`;
+              })()}
             </p>
           </div>
         </div>
