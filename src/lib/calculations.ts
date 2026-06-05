@@ -163,6 +163,7 @@ export function calculateRest(input: CalcInput): CalcResult {
   const activeEndMins = timeToMinutes(input.activeWorkEnd);
   const workStartMins = input.nextDayOff ? 0 : timeToMinutes(input.workDayStart);
   const prevWorkEndMins = input.prevDayOff ? 0 : timeToMinutes(input.prevWorkDayEnd);
+  const prevWorkStartMins = input.prevDayOff ? 0 : timeToMinutes(input.prevWorkDayStart);
 
   // Beräkna varaktighet för aktivt arbete
   let activeWorkMinutes: number;
@@ -184,8 +185,11 @@ export function calculateRest(input: CalcInput): CalcResult {
   // Beräkna vila före störning (föregående arbetsslut → störningens start)
   let restBeforeHours: number;
   if (input.prevDayOff) {
-    // Ledig dagen före → räknas som tillräcklig sammanhängande vila
-    restBeforeHours = DAILY_REST_REQUIRED;
+    // Ledig dagen före → mät från senaste dygnsbryt (= ordinarie arbetsstart
+    // nästa dag, tillämpad dagen före) fram till störningens start.
+    let diff = ((activeStartMins - workStartMins) % 1440 + 1440) % 1440;
+    if (diff === 0) diff = 1440;
+    restBeforeHours = diff / 60;
   } else {
     let restBeforeMinutes: number;
     if (activeStartMins >= prevWorkEndMins) {
@@ -199,7 +203,11 @@ export function calculateRest(input: CalcInput): CalcResult {
   // Vila efter störning (störningens slut → ordinarie arbetsstart)
   let restAfterHours: number;
   if (input.nextDayOff) {
-    restAfterHours = DAILY_REST_REQUIRED;
+    // Ledig dagen efter → mät från störningens slut fram till nästa dygnsbryt
+    // (= ordinarie arbetsstart föregående dag, tillämpad dagen efter störning).
+    let diff = ((prevWorkStartMins - activeEndMins) % 1440 + 1440) % 1440;
+    if (diff === 0) diff = 1440;
+    restAfterHours = diff / 60;
   } else {
     let restAfterMinutes: number;
     if (crossesMidnight) {
