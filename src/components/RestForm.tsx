@@ -22,6 +22,8 @@ const DEFAULT_INPUT: CalcInput = {
   workDayEnd: "15:30",
   usedBeredskapsvila: 0,
   crossesMidnight: false,
+  prevDayOff: false,
+  nextDayOff: false,
 };
 
 export { DEFAULT_INPUT };
