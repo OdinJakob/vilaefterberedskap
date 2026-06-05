@@ -119,10 +119,13 @@ export default function WeekView() {
         .filter((d) => d && d.start && d.end);
       if (validDists.length === 0) continue;
 
-      // Neighbour day off-flags (dygnsbryt-logik)
-      const prevLedig = i > 0 && days[i - 1].ledig;
+      // Dygnsbryt-logik:
+      // - "ledig dagen innan störning" = störningsdagen själv är ledig
+      //   (ingen ordinarie arbetsdag slutar före störningen samma dag)
+      // - "ledig dagen efter störning" = nästa kalenderdag är ledig
+      const prevLedig = day.ledig;
       const nextLedig = i < days.length - 1 && days[i + 1].ledig;
-      // Båda grannarna lediga → ingen vila beräknas för den här dagen
+      // Båda förhållandena → ingen vila beräknas för den här dagen
       if (prevLedig && nextLedig) continue;
 
       // prev workday end
