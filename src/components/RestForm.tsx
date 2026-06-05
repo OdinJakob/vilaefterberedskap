@@ -210,8 +210,11 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
               type="time"
               value={input.workDayStart}
               onChange={(e) => {
-                update("workDayStart", e.target.value);
-                update("prevWorkDayStart", e.target.value);
+                onChange({
+                  ...input,
+                  workDayStart: e.target.value,
+                  prevWorkDayStart: e.target.value,
+                });
               }}
               className="mt-1 text-lg h-12"
             />
