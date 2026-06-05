@@ -125,8 +125,6 @@ export default function WeekView() {
       // - "ledig dagen efter störning" = nästa kalenderdag är ledig
       const prevLedig = day.ledig;
       const nextLedig = i < days.length - 1 && days[i + 1].ledig;
-      // Båda förhållandena → ingen vila beräknas för den här dagen
-      if (prevLedig && nextLedig) continue;
 
       // prev workday end
       let prevEnd = "";
