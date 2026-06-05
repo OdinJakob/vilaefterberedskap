@@ -161,9 +161,11 @@ export function calculateRest(input: CalcInput): CalcResult {
   // Parsa tider
   const activeStartMins = timeToMinutes(input.activeWorkStart);
   const activeEndMins = timeToMinutes(input.activeWorkEnd);
-  const workStartMins = input.nextDayOff ? 0 : timeToMinutes(input.workDayStart);
+  // Ordinarie arbetsdagstider används alltid som dygnsbryt-ankare,
+  // även när man är ledig dagen före/efter störningen.
+  const workStartMins = timeToMinutes(input.workDayStart || "07:00");
   const prevWorkEndMins = input.prevDayOff ? 0 : timeToMinutes(input.prevWorkDayEnd);
-  const prevWorkStartMins = input.prevDayOff ? 0 : timeToMinutes(input.prevWorkDayStart);
+  const prevWorkStartMins = timeToMinutes(input.prevWorkDayStart || input.workDayStart || "07:00");
 
   // Beräkna varaktighet för aktivt arbete
   let activeWorkMinutes: number;
