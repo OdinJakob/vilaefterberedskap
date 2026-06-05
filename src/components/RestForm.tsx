@@ -193,34 +193,6 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
         )}
       </fieldset>
 
-      {/* Dygnsbryt-ankare när båda dagar är lediga */}
-      {input.prevDayOff && input.nextDayOff && (
-        <fieldset className="space-y-3">
-          <legend className="text-sm font-medium text-muted-foreground mb-1">
-            Ordinarie arbetstid (dygnsbryt)
-          </legend>
-          <p className="text-xs text-muted-foreground">
-            Eftersom du är ledig både dagen före och efter störningen används
-            din ordinarie arbetsdags starttid som dygnsbryt.
-          </p>
-          <div>
-            <Label htmlFor="anchorStart" className="text-xs">Ordinarie starttid</Label>
-            <Input
-              id="anchorStart"
-              type="time"
-              value={input.workDayStart}
-              onChange={(e) => {
-                onChange({
-                  ...input,
-                  workDayStart: e.target.value,
-                  prevWorkDayStart: e.target.value,
-                });
-              }}
-              className="mt-1 text-lg h-12"
-            />
-          </div>
-        </fieldset>
-      )}
 
       {/* Redan uttagen beredskapsvila */}
       {!hideUsedBeredskapsvila && (
