@@ -119,6 +119,12 @@ export default function WeekView() {
         .filter((d) => d && d.start && d.end);
       if (validDists.length === 0) continue;
 
+      // Neighbour day off-flags (dygnsbryt-logik)
+      const prevLedig = i > 0 && days[i - 1].ledig;
+      const nextLedig = i < days.length - 1 && days[i + 1].ledig;
+      // Båda grannarna lediga → ingen vila beräknas för den här dagen
+      if (prevLedig && nextLedig) continue;
+
       // prev workday end
       let prevEnd = "";
       let prevStart = "";
@@ -169,8 +175,15 @@ export default function WeekView() {
       nextStart = nextStart || "07:00";
       nextEnd = nextEnd || "15:30";
 
-      const anchor = toMin(prevEnd);
-      const restEnd = forward(anchor, toMin(nextStart));
+      // Vilofönstrets start (klocktid) = föregående arbetsslut, eller dygnsbryt
+      // (= ordinarie arbetsstart nästa dag) om dagen före är ledig.
+      const windowStartClock = prevLedig ? toMin(nextStart) : toMin(prevEnd);
+      // Vilofönstrets slut (klocktid) = nästa arbetsstart, eller dygnsbryt
+      // (= ordinarie arbetsstart föregående dag) om dagen efter är ledig.
+      const windowEndClock = nextLedig ? toMin(prevStart) : toMin(nextStart);
+      const anchor = windowStartClock;
+      let restEnd = forward(anchor, windowEndClock);
+      if (restEnd === 0) restEnd = 1440;
 
       // Build absolute timeline (minutes since prev workday end)
       const items = validDists
@@ -200,6 +213,11 @@ export default function WeekView() {
         if (j === 0) restBeforeMin = gap;
         longestMin = Math.max(longestMin, gap);
         cursor = Math.max(cursor, items[j].absE);
+      }
+      restAfterMin = Math.max(0, restEnd - cursor);
+      // Säkerställ att vilofönstret sträcker sig förbi sista störningen
+      while (restEnd < cursor) {
+        restEnd += 1440;
       }
       restAfterMin = Math.max(0, restEnd - cursor);
       longestMin = Math.max(longestMin, restAfterMin);

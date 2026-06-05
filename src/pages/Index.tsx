@@ -16,7 +16,9 @@ export default function Index() {
   const [showDetailed, setShowDetailed] = useState(false);
   const [mode, setMode] = useState<"day" | "week">("day");
 
+  const bothDaysOff = !!input.prevDayOff && !!input.nextDayOff;
   const isComplete =
+    !bothDaysOff &&
     input.activeWorkStart !== "" &&
     input.activeWorkEnd !== "" &&
     (input.prevDayOff || (input.prevWorkDayStart !== "" && input.prevWorkDayEnd !== "")) &&
@@ -91,6 +93,15 @@ export default function Index() {
                 <Label htmlFor="detailed" className="text-sm text-muted-foreground cursor-pointer">
                   Visa detaljerad uträkning
                 </Label>
+              </div>
+            )}
+
+            {bothDaysOff && (
+              <div className="bg-muted/50 rounded-lg p-4 border border-border/50">
+                <p className="text-sm text-foreground">
+                  Ingen vila beräknas när du är ledig både dagen före och dagen
+                  efter störningen.
+                </p>
               </div>
             )}
 
