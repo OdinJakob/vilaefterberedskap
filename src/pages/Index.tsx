@@ -19,10 +19,8 @@ export default function Index() {
   const isComplete =
     input.activeWorkStart !== "" &&
     input.activeWorkEnd !== "" &&
-    input.prevWorkDayStart !== "" &&
-    input.prevWorkDayEnd !== "" &&
-    input.workDayStart !== "" &&
-    input.workDayEnd !== "";
+    (input.prevDayOff || (input.prevWorkDayStart !== "" && input.prevWorkDayEnd !== "")) &&
+    (input.nextDayOff || (input.workDayStart !== "" && input.workDayEnd !== ""));
 
   const result = useMemo(() => {
     if (!isComplete) return null;

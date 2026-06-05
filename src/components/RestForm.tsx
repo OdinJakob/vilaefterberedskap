@@ -22,6 +22,8 @@ const DEFAULT_INPUT: CalcInput = {
   workDayEnd: "15:30",
   usedBeredskapsvila: 0,
   crossesMidnight: false,
+  prevDayOff: false,
+  nextDayOff: false,
 };
 
 export { DEFAULT_INPUT };
@@ -75,6 +77,17 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
         <legend className="text-sm font-medium text-muted-foreground mb-1">
           Föregående arbetsdag (dagen före beredskapsnatten)
         </legend>
+        <div className="flex items-center gap-2">
+          <Switch
+            id="prevDayOff"
+            checked={!!input.prevDayOff}
+            onCheckedChange={(checked) => update("prevDayOff", checked)}
+          />
+          <Label htmlFor="prevDayOff" className="text-sm text-muted-foreground cursor-pointer">
+            Jag var ledig föregående dag
+          </Label>
+        </div>
+        {!input.prevDayOff && (
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label htmlFor="prevWorkStart" className="text-xs">Start</Label>
@@ -97,6 +110,7 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
             />
           </div>
         </div>
+        )}
       </fieldset>
 
       {/* Aktivt arbete */}
@@ -143,6 +157,17 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
         <legend className="text-sm font-medium text-muted-foreground mb-1">
           Ordinarie arbetstid nästa dag
         </legend>
+        <div className="flex items-center gap-2">
+          <Switch
+            id="nextDayOff"
+            checked={!!input.nextDayOff}
+            onCheckedChange={(checked) => update("nextDayOff", checked)}
+          />
+          <Label htmlFor="nextDayOff" className="text-sm text-muted-foreground cursor-pointer">
+            Jag är ledig nästkommande dag
+          </Label>
+        </div>
+        {!input.nextDayOff && (
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label htmlFor="workStart" className="text-xs">Start</Label>
@@ -165,6 +190,7 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
             />
           </div>
         </div>
+        )}
       </fieldset>
 
       {/* Redan uttagen beredskapsvila */}
