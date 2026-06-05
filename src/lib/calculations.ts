@@ -39,6 +39,10 @@ export interface CalcInput {
   usedBeredskapsvila: number;
   /** Om arbetspasset passerar midnatt */
   crossesMidnight: boolean;
+  /** Ledig föregående arbetsdag (ingen ordinarie arbetstid dagen före) */
+  prevDayOff?: boolean;
+  /** Ledig nästkommande dag (ingen ordinarie arbetstid dagen efter) */
+  nextDayOff?: boolean;
 }
 
 export interface CalcResult {
