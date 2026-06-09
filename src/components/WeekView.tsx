@@ -501,7 +501,7 @@ export default function WeekView() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">
-              Redan uttagen betald beredskapsvila denna beredskapsvecka
+              Redan uttagen veckoberedskap med lön denna beredskapsvecka
             </label>
             <div className="flex items-center gap-2">
               <Input
