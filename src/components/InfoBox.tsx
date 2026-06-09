@@ -13,7 +13,7 @@ export default function InfoBox() {
         <Info className="h-4 w-4 text-info mt-0.5 shrink-0" />
         <div className="flex-1">
           <p className="text-sm text-foreground font-medium">
-            Vad är skillnaden mellan beredskapsvila och inskränkt dygnsvila?
+            Vad är skillnaden mellan veckoberedskap med lön och inskränkt dygnsvila?
           </p>
         </div>
         {expanded ? (
