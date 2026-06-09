@@ -26,11 +26,12 @@ export default function InfoBox() {
       {expanded && (
         <div className="mt-4 space-y-3 text-sm text-muted-foreground animate-fade-in">
           <div>
-            <h4 className="font-medium text-foreground">Beredskapsvila</h4>
+            <h4 className="font-medium text-foreground">Veckoberedskapsvila med lön</h4>
             <p className="mt-1">
               Enligt lokalt kollektivavtal har du rätt till 8 timmars betald beredskapsvila
               per beredskapsvecka. Max 6 timmar kan tas ut vid ett enskilt tillfälle.
               Beredskapsvila är en kompensation för att du blivit störd under din beredskap.
+              Beredskapsvila registreras som veckoberedskap med lön i Personnec.
             </p>
           </div>
           <div>
