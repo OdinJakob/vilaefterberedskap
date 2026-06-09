@@ -65,9 +65,9 @@ export default function Index() {
         {/* Disclaimer */}
         <div className="bg-muted/50 rounded-lg p-4 border border-border/50">
           <p className="text-sm text-muted-foreground">
-            Det här verktyget är ett stöd för att räkna ut ledighet efter störning under
-            beredskap. Slutlig bedömning görs tillsammans med chef enligt gällande regler
-            och lokala rutiner.
+            Det här verktyget är ett stöd för att räkna ut ledighet och vila efter störning under
+            beredskap. Slutlig bedömning görs tillsammans med chef eller beredskapsledare enligt gällande regler
+            och lokala rutiner. Observera att du får ha beredskap en vecka i taget och inte arbeta mer än 12 dagar i rad enligt gällande regler och lokala rutiner.
           </p>
         </div>
 
