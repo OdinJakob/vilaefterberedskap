@@ -293,7 +293,7 @@ export default function WeekView() {
             </p>
           </div>
           <div className="flex flex-col">
-            <p className="text-xs text-muted-foreground min-h-[2.5rem]">Redan uttagen betald beredskapsvila och vila pga inskränkt dygnsvila</p>
+            <p className="text-xs text-muted-foreground min-h-[2.5rem]">Redan uttagen veckoberedskap med lön och vila pga inskränkt dygnsvila</p>
             <p className="text-xl font-bold text-foreground">
               {formatHoursShort(summary.used)}
             </p>
@@ -308,7 +308,7 @@ export default function WeekView() {
                 const usedBetald = typeof vilaUsed === "number" ? vilaUsed : 0;
                 const kvarAvAtta = Math.max(0, 8 - usedBetald);
                 const x = Math.min(summary.remaining, kvarAvAtta);
-                return `Varav ${formatHoursShort(x)} kan tas ut som betald beredskapsvila`;
+                return `Varav ${formatHoursShort(x)} kan tas ut som veckoberedskap med lön`;
               })()}
             </p>
           </div>
@@ -501,7 +501,7 @@ export default function WeekView() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">
-              Redan uttagen betald beredskapsvila denna beredskapsvecka
+              Redan uttagen veckoberedskap med lön denna beredskapsvecka
             </label>
             <div className="flex items-center gap-2">
               <Input
