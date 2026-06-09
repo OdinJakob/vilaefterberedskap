@@ -198,7 +198,7 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
       {!hideUsedBeredskapsvila && (
         <div className="space-y-1.5">
           <Label htmlFor="usedVila" className="text-sm font-medium text-muted-foreground">
-            Redan uttagen betald beredskapsvila denna beredskapsvecka
+            Redan uttagen veckoberedskap med lön denna beredskapsvecka
           </Label>
           <div className="flex items-center gap-2">
             <Input
