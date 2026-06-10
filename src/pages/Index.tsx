@@ -125,6 +125,7 @@ export default function Index() {
         </Tabs>
 
         {/* Info */}
+        <RestInfoBox />
         <InfoBox />
       </main>
     </div>
