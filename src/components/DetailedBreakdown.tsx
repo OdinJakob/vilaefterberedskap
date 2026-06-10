@@ -59,10 +59,6 @@ export default function DetailedBreakdown({ result }: DetailedBreakdownProps) {
       value: formatHoursShort(result.beredskapsvila),
     },
     {
-      label: "Klassas som inskränkt dygnsvila",
-      value: formatHoursShort(result.inskanktDygnsvila),
-    },
-    {
       label: "Kvarvarande beredskapsvila denna vecka",
       value: formatHoursShort(result.remainingWeeklyBeredskapsvila),
     },
