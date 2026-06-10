@@ -37,7 +37,7 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
         </div>
       </div>
 
-      {/* Får vara ledig – inskränkt dygnsvila utöver obligatorisk */}
+      {/* Inskränkt dygnsvila */}
       {result.additionalInskranktHours > 0 && (
         <div className="result-card-may rounded-lg border p-5">
           <div className="flex items-start gap-3">
@@ -46,27 +46,17 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-may-rest text-sm uppercase tracking-wide">
-                Du får vara ledig
+                Inskränkt dygnsvila
               </h3>
               <p className="text-2xl font-bold text-foreground mt-1">
-                Ytterligare {formatHours(result.additionalInskranktHours)}
+                {formatHours(result.additionalInskranktHours)}
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                På grund av inskränkt dygnsvila (längsta sammanhängande vila var {formatHoursShort(result.longestContinuousRest)} av 11 h)
+                Dygnsvilan inskränktes med {formatHoursShort(result.additionalInskranktHours)} (längsta sammanhängande vila var {formatHoursShort(result.longestContinuousRest)} av 11 h)
               </p>
-              <div className="mt-3 bg-card/60 rounded-md p-3 space-y-1.5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Veckoberedskap med lön</span>
-                  <span className="font-medium">{formatHoursShort(result.beredskapsvila)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Inskränkt dygnsvila</span>
-                  <span className="font-medium">{formatHoursShort(result.inskanktDygnsvila)}</span>
-                </div>
-              </div>
               <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                  Huvudregeln är att kompensation vid inskränkt dygnsvila ska ske i samband med dygnsvila vid beredskapsperiodens slut. Om behov finnas av att ta ut vila för inskränkt dygnsvila direkt stäms detta av med beredskapsledare eller chef.
-                </p>
+                Huvudregeln är att kompensation vid inskränkt dygnsvila ska ske i samband med dygnsvila vid beredskapsperiodens slut. Om behov finnas av att ta ut vila för inskränkt dygnsvila direkt stäms detta av med beredskapsledare eller chef.
+              </p>
             </div>
           </div>
         </div>
