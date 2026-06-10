@@ -302,7 +302,7 @@ export default function WeekView() {
             </p>
           </div>
           <div className="flex flex-col">
-            <p className="text-xs text-muted-foreground min-h-[2.5rem]">Kvar att ta ut</p>
+            <p className="text-xs text-muted-foreground min-h-[2.5rem]">Vila pga inskränkt dygnsvila som kan tas ut i samband med dygnsvila vid beredskapsperiodens slut</p>
             <p className="text-xl font-bold text-primary">
               {formatHoursShort(summary.remaining)}
             </p>
