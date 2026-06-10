@@ -56,7 +56,7 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
               </p>
               <div className="mt-3 bg-card/60 rounded-md p-3 space-y-1.5">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Beredskapsvila</span>
+                  <span className="text-muted-foreground">Veckoberedskap med lön</span>
                   <span className="font-medium">{formatHoursShort(result.beredskapsvila)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
