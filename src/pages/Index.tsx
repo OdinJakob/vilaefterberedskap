@@ -36,7 +36,7 @@ export default function Index() {
   };
 
   const handleExampleSelect = (exInput: CalcInput) => {
-    setInput({ ...exInput });
+    setInput({ ...DEFAULT_INPUT, ...exInput });
     setMode("day");
   };
 
