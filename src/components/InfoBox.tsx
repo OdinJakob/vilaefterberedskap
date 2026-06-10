@@ -44,6 +44,14 @@ export default function InfoBox() {
               kollektivavtal.
             </p>
           </div>
+          <div>
+            <p className="mt-1">
+              Om du behöver hjälp med vilken vila du ska ta ut eller hur det ska registreras kontakta Personec Internservice | Stadsmiljöförvaltningen{" "}
+              <a href="mailto:personec.internservice@stadsmiljo.goteborg.se" className="text-info underline">
+                personec.internservice@stadsmiljo.goteborg.se
+              </a>
+            </p>
+          </div>
           <div className="bg-card/60 rounded-md p-3 border border-border/50">
             <p className="text-xs">
               <strong>Viktigt:</strong> Slutlig bedömning görs alltid tillsammans med chef
