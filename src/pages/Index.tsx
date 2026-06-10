@@ -5,6 +5,7 @@ import ResultDisplay from "@/components/ResultDisplay";
 import DetailedBreakdown from "@/components/DetailedBreakdown";
 import ExampleScenarios from "@/components/ExampleScenarios";
 import InfoBox from "@/components/InfoBox";
+import RestInfoBox from "@/components/RestInfoBox";
 import WeekView from "@/components/WeekView";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -124,6 +125,7 @@ export default function Index() {
         </Tabs>
 
         {/* Info */}
+        <RestInfoBox />
         <InfoBox />
       </main>
     </div>
