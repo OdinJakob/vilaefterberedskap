@@ -55,7 +55,7 @@ export default function DetailedBreakdown({ result }: DetailedBreakdownProps) {
       highlight: true,
     },
     {
-      label: "Beredskapsvila (max 6 h/tillfälle, 8 h/vecka)",
+      label: "Beredskapsvila med lön (max 6 h/tillfälle, 8 h/vecka)",
       value: formatHoursShort(result.beredskapsvila),
     },
     {
