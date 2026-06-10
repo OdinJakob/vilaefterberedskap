@@ -38,29 +38,27 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
       </div>
 
       {/* Inskränkt dygnsvila */}
-      {result.additionalInskranktHours > 0 && (
-        <div className="result-card-may rounded-lg border p-5">
-          <div className="flex items-start gap-3">
-            <div className="rounded-full bg-may-rest p-2 mt-0.5">
-              <Clock className="h-4 w-4 text-may-rest-foreground" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-may-rest text-sm uppercase tracking-wide">
-                Inskränkt dygnsvila
-              </h3>
-              <p className="text-2xl font-bold text-foreground mt-1">
-                {formatHours(result.additionalInskranktHours)}
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Dygnsvilan inskränktes med {formatHoursShort(result.additionalInskranktHours)} (längsta sammanhängande vila var {formatHoursShort(result.longestContinuousRest)} av 11 h)
-              </p>
-              <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                Huvudregeln är att kompensation vid inskränkt dygnsvila ska ske i samband med dygnsvila vid beredskapsperiodens slut. Om behov finnas av att ta ut vila för inskränkt dygnsvila direkt stäms detta av med beredskapsledare eller chef.
-              </p>
-            </div>
+      <div className="result-card-may rounded-lg border p-5">
+        <div className="flex items-start gap-3">
+          <div className="rounded-full bg-may-rest p-2 mt-0.5">
+            <Clock className="h-4 w-4 text-may-rest-foreground" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-may-rest text-sm uppercase tracking-wide">
+              Inskränkt dygnsvila
+            </h3>
+            <p className="text-2xl font-bold text-foreground mt-1">
+              {formatHours(result.additionalInskranktHours)}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Dygnsvilan inskränktes med {formatHoursShort(result.additionalInskranktHours)} (längsta sammanhängande vila var {formatHoursShort(result.longestContinuousRest)} av 11 h)
+            </p>
+            <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+              Huvudregeln är att kompensation vid inskränkt dygnsvila ska ske i samband med dygnsvila vid beredskapsperiodens slut. Om behov finnas av att ta ut vila för inskränkt dygnsvila direkt stäms detta av med beredskapsledare eller chef.
+            </p>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Beredskapsvila info (only when no additional inskränkt) */}
       {result.additionalInskranktHours === 0 && result.beredskapsvila > 0 && (
