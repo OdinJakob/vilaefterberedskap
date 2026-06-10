@@ -280,7 +280,7 @@ export default function WeekView() {
       restThuFri = diff / 60;
     }
     const availableAtEnd = restThuFri !== null
-      ? Math.max(0, totalEarned + 11 - restThuFri)
+      ? Math.max(0, totalEarned - (typeof inskranktUsed === "number" ? inskranktUsed : 0) + 11 - restThuFri)
       : 0;
     return { totalMandatory, totalAdditional, totalEarned, remaining, used, breakdowns, restThuFri, availableAtEnd };
   }, [days, disturbanceCount, effectiveShifts, vilaUsed, inskranktUsed]);
@@ -379,6 +379,10 @@ export default function WeekView() {
                 <div className="flex justify-between py-1.5 border-b border-border/30">
                   <span className="text-muted-foreground">Upparbetad vila pga inskränkt dygnsvila</span>
                   <span className="font-medium text-foreground">{formatHoursShort(summary.totalEarned)}</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-border/30">
+                  <span className="text-muted-foreground">Redan uttagen betald vila pga inskränkt dygnsvila denna beredskapsvecka</span>
+                  <span className="font-medium text-foreground">− {formatHoursShort(typeof inskranktUsed === "number" ? inskranktUsed : 0)}</span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-border/30">
                   <span className="text-muted-foreground">Lagstadgad dygnsvila</span>
