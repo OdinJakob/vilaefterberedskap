@@ -264,7 +264,25 @@ export default function WeekView() {
       (typeof vilaUsed === "number" ? vilaUsed : 0) +
       (typeof inskranktUsed === "number" ? inskranktUsed : 0);
     const remaining = Math.max(0, totalEarned - used);
-    return { totalMandatory, totalAdditional, totalEarned, remaining, used, breakdowns };
+
+    // Vila mellan torsdagens (idx 7) och fredagens (idx 8) arbetspass
+    const thuEnd = effectiveShifts[7]?.end;
+    const friStart = effectiveShifts[8]?.start;
+    let restThuFri: number | null = null;
+    if (thuEnd && friStart && !effectiveShifts[7]?.ledig && !effectiveShifts[8]?.ledig) {
+      const toMinLocal = (t: string) => {
+        const [h, m] = t.split(":").map(Number);
+        return h * 60 + m;
+      };
+      const e = toMinLocal(thuEnd);
+      const s = toMinLocal(friStart);
+      const diff = s >= e ? s - e : 1440 - e + s;
+      restThuFri = diff / 60;
+    }
+    const availableAtEnd = restThuFri !== null
+      ? Math.max(0, totalEarned + 11 - restThuFri)
+      : 0;
+    return { totalMandatory, totalAdditional, totalEarned, remaining, used, breakdowns, restThuFri, availableAtEnd };
   }, [days, disturbanceCount, effectiveShifts, vilaUsed, inskranktUsed]);
 
   const distIndices = Array.from({ length: disturbanceCount }, (_, i) => i);
@@ -304,7 +322,7 @@ export default function WeekView() {
           <div className="flex flex-col">
             <p className="text-xs text-muted-foreground min-h-[2.5rem]">Vila pga inskränkt dygnsvila som kan tas ut i samband med dygnsvila vid beredskapsperiodens slut</p>
             <p className="text-xl font-bold text-primary">
-              {formatHoursShort(summary.remaining)}
+              {formatHoursShort(summary.availableAtEnd)}
             </p>
           </div>
         </div>
