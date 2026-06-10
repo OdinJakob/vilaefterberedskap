@@ -306,14 +306,6 @@ export default function WeekView() {
             <p className="text-xl font-bold text-primary">
               {formatHoursShort(summary.remaining)}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {(() => {
-                const usedBetald = typeof vilaUsed === "number" ? vilaUsed : 0;
-                const kvarAvAtta = Math.max(0, 8 - usedBetald);
-                const x = Math.min(summary.remaining, kvarAvAtta);
-                return `Varav ${formatHoursShort(x)} kan tas ut som veckoberedskap med lön`;
-              })()}
-            </p>
           </div>
         </div>
 
