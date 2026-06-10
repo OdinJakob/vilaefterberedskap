@@ -31,7 +31,7 @@ export default function InfoBox() {
               Enligt lokalt kollektivavtal har du rätt till 8 timmars betald beredskapsvila
               per beredskapsvecka. Max 6 timmar kan tas ut vid ett enskilt tillfälle.
               Beredskapsvila är en kompensation för att du blivit störd under din beredskap.
-              Beredskapsvila registreras som veckoberedskap med lön i Personnec.
+              Beredskapsvila registreras som veckoberedskap med lön i Personec.
             </p>
           </div>
           <div>
