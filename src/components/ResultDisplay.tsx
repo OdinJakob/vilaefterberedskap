@@ -87,7 +87,7 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
                 {formatHours(result.beredskapsvila)}
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                Du kan använda {formatHoursShort(result.beredskapsvila)} beredskapsvila
+                Du kan använda {formatHoursShort(result.beredskapsvila)} veckoberedskap med lön
               </p>
             </div>
           </div>
