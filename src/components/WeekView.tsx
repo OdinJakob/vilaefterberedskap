@@ -329,27 +329,73 @@ export default function WeekView() {
 
         {showSummaryBreakdown && (
           <div className="mt-4 pt-4 border-t border-border/50 space-y-2 animate-fade-in">
-            <h3 className="text-sm font-medium text-foreground mb-2">Så räknas nyckeltalen ut</h3>
-            <div className="space-y-1.5 text-sm">
-              <div className="flex justify-between py-1.5 border-b border-border/30">
-                <span className="text-muted-foreground">Du måste vara ledig (00–06-regeln)</span>
-                <span className="font-medium text-foreground">{formatHoursShort(summary.totalMandatory)}</span>
+            <h3 className="text-sm font-medium text-foreground mb-2">Så räknas summeringskorten ut</h3>
+            <div className="space-y-4 text-sm">
+              {/* Card 1 */}
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Återstående veckoberedskap med lön
+                </p>
+                <div className="flex justify-between py-1.5 border-b border-border/30">
+                  <span className="text-muted-foreground">Maxuttag per vecka</span>
+                  <span className="font-medium text-foreground">8 h</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-border/30">
+                  <span className="text-muted-foreground">Redan uttagen veckoberedskap med lön</span>
+                  <span className="font-medium text-foreground">− {formatHoursShort(typeof vilaUsed === "number" ? vilaUsed : 0)}</span>
+                </div>
+                <div className="flex justify-between py-1.5 bg-muted/30 -mx-2 px-2 rounded">
+                  <span className="text-foreground font-medium">Återstående</span>
+                  <span className="font-bold text-primary">
+                    {formatHoursShort(Math.max(0, 8 - (typeof vilaUsed === "number" ? vilaUsed : 0)))}
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-border/30">
-                <span className="text-muted-foreground">Du får vara ledig (inskränkt dygnsvila)</span>
-                <span className="font-medium text-foreground">{formatHoursShort(summary.totalAdditional)}</span>
+
+              {/* Card 2 */}
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Upparbetad vila pga inskränkt dygnsvila
+                </p>
+                <div className="flex justify-between py-1.5 border-b border-border/30">
+                  <span className="text-muted-foreground">Du måste vara ledig (00–06-regeln)</span>
+                  <span className="font-medium text-foreground">{formatHoursShort(summary.totalMandatory)}</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-border/30">
+                  <span className="text-muted-foreground">Du får vara ledig (inskränkt dygnsvila)</span>
+                  <span className="font-medium text-foreground">+ {formatHoursShort(summary.totalAdditional)}</span>
+                </div>
+                <div className="flex justify-between py-1.5 bg-muted/30 -mx-2 px-2 rounded">
+                  <span className="text-foreground font-medium">Summa upparbetad vila</span>
+                  <span className="font-bold text-primary">{formatHoursShort(summary.totalEarned)}</span>
+                </div>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-border/30 bg-muted/30 -mx-2 px-2 rounded">
-                <span className="text-foreground font-medium">Upparbetad vila (summa)</span>
-                <span className="font-bold text-primary">{formatHoursShort(summary.totalEarned)}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-border/30">
-                <span className="text-muted-foreground">Vila redan uttagen</span>
-                <span className="font-medium text-foreground">− {formatHoursShort(summary.used)}</span>
-              </div>
-              <div className="flex justify-between py-1.5 bg-muted/30 -mx-2 px-2 rounded">
-                <span className="text-foreground font-medium">Kvar att ta ut</span>
-                <span className="font-bold text-primary">{formatHoursShort(summary.remaining)}</span>
+
+              {/* Card 3 */}
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Vila som kan tas ut i samband med dygnsvila vid beredskapsperiodens slut
+                </p>
+                <div className="flex justify-between py-1.5 border-b border-border/30">
+                  <span className="text-muted-foreground">Upparbetad vila pga inskränkt dygnsvila</span>
+                  <span className="font-medium text-foreground">{formatHoursShort(summary.totalEarned)}</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-border/30">
+                  <span className="text-muted-foreground">Lagstadgad dygnsvila</span>
+                  <span className="font-medium text-foreground">+ 11 h</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-border/30">
+                  <span className="text-muted-foreground">
+                    Vila mellan torsdagens och fredagens arbetspass
+                  </span>
+                  <span className="font-medium text-foreground">
+                    − {summary.restThuFri !== null ? formatHoursShort(summary.restThuFri) : "–"}
+                  </span>
+                </div>
+                <div className="flex justify-between py-1.5 bg-muted/30 -mx-2 px-2 rounded">
+                  <span className="text-foreground font-medium">Vila att ta ut vid periodens slut</span>
+                  <span className="font-bold text-primary">{formatHoursShort(summary.availableAtEnd)}</span>
+                </div>
               </div>
             </div>
 
