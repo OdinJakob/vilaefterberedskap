@@ -111,8 +111,6 @@ export default function Index() {
               </>
             )}
 
-            {/* Examples */}
-            <ExampleScenarios onSelect={handleExampleSelect} />
           </TabsContent>
 
           <TabsContent value="week" className="mt-6">
