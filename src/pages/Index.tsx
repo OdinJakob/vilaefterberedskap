@@ -3,7 +3,7 @@ import { CalcInput, calculateRest } from "@/lib/calculations";
 import RestForm, { DEFAULT_INPUT } from "@/components/RestForm";
 import ResultDisplay from "@/components/ResultDisplay";
 import DetailedBreakdown from "@/components/DetailedBreakdown";
-import ExampleScenarios from "@/components/ExampleScenarios";
+
 import InfoBox from "@/components/InfoBox";
 import RestInfoBox from "@/components/RestInfoBox";
 import WeekView from "@/components/WeekView";
@@ -35,10 +35,6 @@ export default function Index() {
     setShowDetailed(false);
   };
 
-  const handleExampleSelect = (exInput: CalcInput) => {
-    setInput({ ...DEFAULT_INPUT, ...exInput });
-    setMode("day");
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -115,8 +111,6 @@ export default function Index() {
               </>
             )}
 
-            {/* Examples */}
-            <ExampleScenarios onSelect={handleExampleSelect} />
           </TabsContent>
 
           <TabsContent value="week" className="mt-6">
