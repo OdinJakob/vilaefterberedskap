@@ -3,7 +3,7 @@ import { CalcInput, calculateRest } from "@/lib/calculations";
 import RestForm, { DEFAULT_INPUT } from "@/components/RestForm";
 import ResultDisplay from "@/components/ResultDisplay";
 import DetailedBreakdown from "@/components/DetailedBreakdown";
-import ExampleScenarios from "@/components/ExampleScenarios";
+
 import InfoBox from "@/components/InfoBox";
 import RestInfoBox from "@/components/RestInfoBox";
 import WeekView from "@/components/WeekView";
