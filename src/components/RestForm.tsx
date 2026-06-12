@@ -116,7 +116,7 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
       {/* Aktivt arbete */}
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium text-muted-foreground mb-1">
-          Aktivt arbete under beredskap
+          Aktivt arbete under beredskap (störning)
         </legend>
         <div className="grid grid-cols-2 gap-3">
           <div>
