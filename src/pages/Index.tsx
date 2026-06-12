@@ -35,10 +35,6 @@ export default function Index() {
     setShowDetailed(false);
   };
 
-  const handleExampleSelect = (exInput: CalcInput) => {
-    setInput({ ...DEFAULT_INPUT, ...exInput });
-    setMode("day");
-  };
 
   return (
     <div className="min-h-screen bg-background">
