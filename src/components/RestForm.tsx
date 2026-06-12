@@ -155,7 +155,7 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
       {/* Ordinarie arbetstid nästa dag */}
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium text-muted-foreground mb-1">
-          Ordinarie arbetstid nästa dag
+          Ordinarie schema dagen efter störning
         </legend>
         <div className="flex items-center gap-2">
           <Switch
