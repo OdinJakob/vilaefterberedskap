@@ -75,7 +75,7 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
       {/* Föregående arbetsdag */}
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium text-muted-foreground mb-1">
-          Föregående arbetsdag (dagen före beredskapsnatten)
+          Ordinarie schema dagen innan störningen inträffade
         </legend>
         <div className="flex items-center gap-2">
           <Switch
