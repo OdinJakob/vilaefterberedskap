@@ -157,16 +157,6 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
         <legend className="text-sm font-medium text-muted-foreground mb-1">
           Ordinarie schema dagen efter störning
         </legend>
-        <div className="flex items-center gap-2">
-          <Switch
-            id="nextDayOff"
-            checked={!!input.nextDayOff}
-            onCheckedChange={(checked) => update("nextDayOff", checked)}
-          />
-          <Label htmlFor="nextDayOff" className="text-sm text-muted-foreground cursor-pointer">
-            Jag är ledig nästkommande dag
-          </Label>
-        </div>
         {!input.nextDayOff && (
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -191,6 +181,16 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
           </div>
         </div>
         )}
+        <div className="flex items-center gap-2">
+          <Switch
+            id="nextDayOff"
+            checked={!!input.nextDayOff}
+            onCheckedChange={(checked) => update("nextDayOff", checked)}
+          />
+          <Label htmlFor="nextDayOff" className="text-sm text-muted-foreground cursor-pointer">
+            Jag är ledig enligt ordinarie schema (exempelvis helgdag)
+          </Label>
+        </div>
       </fieldset>
 
 
