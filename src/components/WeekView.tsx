@@ -447,7 +447,7 @@ export default function WeekView() {
             <tbody>
               {/* Start */}
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Start</td>
+                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Start ordinarie schema</td>
                 {days.map((d, i) => (
                   <td key={i} className="p-1">
                     <Input
@@ -462,7 +462,7 @@ export default function WeekView() {
               </tr>
               {/* Slut */}
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Slut</td>
+                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Slut ordinarie schema</td>
                 {days.map((d, i) => (
                   <td key={i} className="p-1">
                     <Input
