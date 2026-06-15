@@ -74,7 +74,7 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
 
       {/* Föregående arbetsdag */}
       <fieldset className="space-y-3">
-        <legend className="text-sm font-medium text-muted-foreground mb-1">
+        <legend className="text-sm font-bold text-muted-foreground mb-1">
           Ordinarie schema dagen innan störningen inträffade
         </legend>
         {!input.prevDayOff && (
@@ -154,7 +154,7 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
 
       {/* Ordinarie arbetstid nästa dag */}
       <fieldset className="space-y-3">
-        <legend className="text-sm font-medium text-muted-foreground mb-1">
+        <legend className="text-sm font-bold text-muted-foreground mb-1">
           Ordinarie schema dagen efter störning
         </legend>
         {!input.nextDayOff && (
