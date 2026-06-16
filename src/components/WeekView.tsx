@@ -460,6 +460,21 @@ export default function WeekView() {
               </tr>
             </thead>
             <tbody>
+              {/* Samma schema som dagen innan */}
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Samma schema som dagen innan</td>
+                {days.map((d, i) => (
+                  <td key={i} className="p-2 text-center">
+                    {i === 0 ? null : (
+                      <Checkbox
+                        checked={d.sameAsPrev}
+                        disabled={d.ledig}
+                        onCheckedChange={(c) => updateDay(i, { sameAsPrev: !!c })}
+                      />
+                    )}
+                  </td>
+                ))}
+              </tr>
               {/* Start */}
               <tr className="border-b">
                 <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Start ordinarie schema</td>
