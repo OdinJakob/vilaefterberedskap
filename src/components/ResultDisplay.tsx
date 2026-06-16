@@ -64,9 +64,6 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
             <p className="text-sm text-muted-foreground mt-1">
               Dygnsvilan inskränktes med {formatHoursShort(result.totalInskranktDygnsvila)} (längsta sammanhängande vila var {formatHoursShort(result.longestContinuousRest)} av 11 h)
             </p>
-            <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-              Huvudregeln är att kompensation vid inskränkt dygnsvila ska ske i samband med dygnsvila vid beredskapsperiodens slut. Om behov finns av att ta ut vila i samband med nästa arbetspass stäms detta av med beredskapsledare eller chef.
-            </p>
           </div>
         </div>
       </div>
