@@ -312,9 +312,9 @@ export default function WeekView() {
             {showSummaryBreakdown ? "Dölj uträkning" : "Visa uträkning"}
           </Button>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-stretch">
           <div className="flex flex-col">
-            <p className="text-xs text-muted-foreground min-h-[2.5rem]">Återstående veckoberedskap med lön</p>
+            <p className="text-xs text-muted-foreground h-[4.5rem]">Återstående veckoberedskap med lön</p>
             <p className="text-xl font-bold text-primary">
               {formatHoursShort(Math.max(0, 8 - (typeof vilaUsed === "number" ? vilaUsed : 0)))}
             </p>
@@ -323,19 +323,19 @@ export default function WeekView() {
             </p>
           </div>
           <div className="flex flex-col">
-            <p className="text-xs text-muted-foreground min-h-[2.5rem]">Upparbetad vila pga inskränkt dygnsvila</p>
+            <p className="text-xs text-muted-foreground h-[4.5rem]">Upparbetad vila pga inskränkt dygnsvila</p>
             <p className="text-xl font-bold text-foreground">
               {formatHoursShort(summary.totalEarned)}
             </p>
           </div>
           <div className="flex flex-col">
-            <p className="text-xs text-muted-foreground min-h-[2.5rem]">Redan uttagen betald vila pga inskränkt dygnsvila</p>
+            <p className="text-xs text-muted-foreground h-[4.5rem]">Redan uttagen betald vila pga inskränkt dygnsvila</p>
             <p className="text-xl font-bold text-foreground">
               {formatHoursShort(typeof inskranktUsed === "number" ? inskranktUsed : 0)}
             </p>
           </div>
           <div className="flex flex-col">
-            <p className="text-xs text-muted-foreground min-h-[2.5rem]">Vila pga inskränkt dygnsvila som kan tas ut i samband med dygnsvila vid beredskapsperiodens slut</p>
+            <p className="text-xs text-muted-foreground h-[4.5rem]">Vila pga inskränkt dygnsvila som kan tas ut i samband med dygnsvila vid beredskapsperiodens slut</p>
             <p className="text-xl font-bold text-primary">
               {formatHoursShort(summary.availableAtEnd)}
             </p>
