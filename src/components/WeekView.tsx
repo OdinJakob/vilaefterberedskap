@@ -192,16 +192,25 @@ export default function WeekView() {
           const sM = toMin(d.start);
           const eM = toMin(d.end);
           const absS = forward(anchor, sM);
-          const dur = eM > sM ? eM - sM : 1440 - sM + eM;
+          const rawDur = eM > sM ? eM - sM : 1440 - sM + eM;
+          const absE = absS + rawDur;
+          // Klipp störningen mot vilofönstret så att eventuell överlapp
+          // med ordinarie schema inte räknas med.
+          const clipS = Math.max(0, Math.min(restEnd, absS));
+          const clipE = Math.max(clipS, Math.min(restEnd, absE));
+          const dur = clipE - clipS;
+          const clipStartClock = (((anchor + clipS) % 1440) + 1440) % 1440;
+          const clipEndClock = (((anchor + clipE) % 1440) + 1440) % 1440;
           return {
             start: d.start,
             end: d.end,
-            absS,
-            absE: absS + dur,
+            absS: clipS,
+            absE: clipE,
             dur,
-            night: nightOverlap(sM, eM),
+            night: dur > 0 ? nightOverlap(clipStartClock, clipEndClock) : 0,
           };
         })
+        .filter((it) => it.dur > 0)
         .sort((a, b) => a.absS - b.absS);
 
       // Longest continuous rest = max gap before/between/after disturbances inside rest window
