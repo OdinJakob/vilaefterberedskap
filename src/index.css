@@ -99,4 +99,7 @@
   .result-card-info {
     @apply bg-[hsl(var(--info-bg))] border-[hsl(var(--info))]/30;
   }
+  .result-card-paid {
+    @apply bg-[hsl(var(--paid-rest-bg))] border-[hsl(var(--paid-rest))]/30;
+  }
 }
