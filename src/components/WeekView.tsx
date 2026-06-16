@@ -490,6 +490,19 @@ export default function WeekView() {
                   </td>
                 ))}
               </tr>
+              {/* Samma schema som dagen innan */}
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Samma schema som dagen innan</td>
+                {days.map((d, i) => (
+                  <td key={i} className="p-2 text-center">
+                    <Checkbox
+                      checked={d.sameAsPrev}
+                      disabled={i === 0 || d.ledig}
+                      onCheckedChange={(c) => updateDay(i, { sameAsPrev: !!c })}
+                    />
+                  </td>
+                ))}
+              </tr>
               {/* Ledig enligt ordinarie schema */}
               <tr className="border-b">
                 <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Ledig enligt ordinarie schema</td>
@@ -498,19 +511,6 @@ export default function WeekView() {
                     <Checkbox
                       checked={d.ledig}
                       onCheckedChange={(c) => updateDay(i, { ledig: !!c, sameAsPrev: c ? false : d.sameAsPrev })}
-                    />
-                  </td>
-                ))}
-              </tr>
-              {/* Samma som dagen innan */}
-              <tr className="border-b">
-                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Samma som dagen innan</td>
-                {days.map((d, i) => (
-                  <td key={i} className="p-2 text-center">
-                    <Checkbox
-                      checked={d.sameAsPrev}
-                      disabled={i === 0 || d.ledig}
-                      onCheckedChange={(c) => updateDay(i, { sameAsPrev: !!c })}
                     />
                   </td>
                 ))}
