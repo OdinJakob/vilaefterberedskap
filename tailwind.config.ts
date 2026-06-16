@@ -60,6 +60,11 @@ export default {
           foreground: "hsl(var(--may-rest-foreground))",
           bg: "hsl(var(--may-rest-bg))",
         },
+        "paid-rest": {
+          DEFAULT: "hsl(var(--paid-rest))",
+          foreground: "hsl(var(--paid-rest-foreground))",
+          bg: "hsl(var(--paid-rest-bg))",
+        },
         warning: {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
