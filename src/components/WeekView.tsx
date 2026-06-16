@@ -312,7 +312,7 @@ export default function WeekView() {
             {showSummaryBreakdown ? "Dölj uträkning" : "Visa uträkning"}
           </Button>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="flex flex-col">
             <p className="text-xs text-muted-foreground min-h-[2.5rem]">Återstående veckoberedskap med lön</p>
             <p className="text-xl font-bold text-primary">
@@ -326,6 +326,12 @@ export default function WeekView() {
             <p className="text-xs text-muted-foreground min-h-[2.5rem]">Upparbetad vila pga inskränkt dygnsvila</p>
             <p className="text-xl font-bold text-foreground">
               {formatHoursShort(summary.totalEarned)}
+            </p>
+          </div>
+          <div className="flex flex-col">
+            <p className="text-xs text-muted-foreground min-h-[2.5rem]">Redan uttagen betald vila pga inskränkt dygnsvila</p>
+            <p className="text-xl font-bold text-foreground">
+              {formatHoursShort(typeof inskranktUsed === "number" ? inskranktUsed : 0)}
             </p>
           </div>
           <div className="flex flex-col">
