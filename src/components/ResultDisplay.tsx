@@ -13,6 +13,11 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
     result.remainingWeeklyBeredskapsvila + result.beredskapsvila + result.totalInskranktDygnsvila
   );
 
+  const remainingWeeklyBefore = result.remainingWeeklyBeredskapsvila + result.beredskapsvila;
+  const xRaw = Math.max(6, remainingWeeklyBefore);
+  const x = Math.min(xRaw, paidLeaveHours);
+  const y = paidLeaveHours - x;
+
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Ska vara ledig – 00–06-regeln */}
@@ -78,6 +83,9 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
             </h3>
             <p className="text-2xl font-bold text-foreground mt-1">
               {formatHours(paidLeaveHours)}
+            </p>
+            <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+              {formatHours(x)} kan registreras som Veckoberedskap med lön och {formatHours(y)} som inskränkt dygnsvila
             </p>
             <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
               Om du har behov av längre vila för att återhämta dig kan ytterligare vila tas ut som veckoberedskap utan lön eller som kompensationstid från din komp bank.

@@ -251,12 +251,6 @@ export function calculateRest(input: CalcInput): CalcResult {
   const remainingAfter = Math.max(0, remainingWeekly - beredskapsvila);
 
   // 8. Varningar
-  if (beredskapsvila < totalRestHours && beredskapsvila >= SINGLE_BEREDSKAPSVILA_MAX) {
-    warnings.push(
-      `Max ${SINGLE_BEREDSKAPSVILA_MAX} timmars beredskapsvila kan tas ut vid ett tillfälle. ` +
-      `Resterande ${formatHoursShort(inskanktDygnsvila)} klassas som inskränkt dygnsvila.`
-    );
-  }
 
   if (remainingWeekly < totalRestHours) {
     warnings.push(
