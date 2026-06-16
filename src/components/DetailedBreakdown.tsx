@@ -52,11 +52,6 @@ export default function DetailedBreakdown({ result }: DetailedBreakdownProps) {
       highlight: Math.min(result.activeWorkHours, result.totalInskranktDygnsvila) > 0,
     },
     {
-      label: "Total ledighet",
-      value: formatHoursShort(result.totalRestHours),
-      highlight: true,
-    },
-    {
       label: "Beredskapsvila med lön (max 6 h/tillfälle, 8 h/vecka)",
       value: formatHoursShort(result.beredskapsvila),
     },
