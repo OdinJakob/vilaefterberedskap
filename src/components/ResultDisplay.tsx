@@ -1,5 +1,5 @@
 import { CalcResult, formatHours, formatHoursShort } from "@/lib/calculations";
-import { Clock, Shield, AlertTriangle, Info } from "lucide-react";
+import { Clock, Shield, AlertTriangle, Info, Banknote } from "lucide-react";
 
 interface ResultDisplayProps {
   result: CalcResult;
@@ -7,6 +7,12 @@ interface ResultDisplayProps {
 }
 
 export default function ResultDisplay({ result, workDayStart }: ResultDisplayProps) {
+  const paidLeaveHours = Math.max(
+    result.activeWorkHours,
+    6 + result.totalInskranktDygnsvila,
+    result.remainingWeeklyBeredskapsvila + result.beredskapsvila + result.totalInskranktDygnsvila
+  );
+
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Ska vara ledig – 00–06-regeln */}
@@ -55,6 +61,26 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
             </p>
             <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
               Huvudregeln är att kompensation vid inskränkt dygnsvila ska ske i samband med dygnsvila vid beredskapsperiodens slut. Om behov finns av att ta ut vila i samband med nästa arbetspass stäms detta av med beredskapsledare eller chef.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Du får vara ledig med lön */}
+      <div className="result-card-paid rounded-lg border p-5">
+        <div className="flex items-start gap-3">
+          <div className="rounded-full bg-paid-rest p-2 mt-0.5">
+            <Banknote className="h-4 w-4 text-paid-rest-foreground" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-paid-rest text-sm uppercase tracking-wide">
+              Du får vara ledig med lön
+            </h3>
+            <p className="text-2xl font-bold text-foreground mt-1">
+              {formatHours(paidLeaveHours)}
+            </p>
+            <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+              Om du har behov av längre vila för att återhämta dig kan ytterligare vila tas ut som veckoberedskap utan lön eller som kompensationstid från din komp bank.
             </p>
           </div>
         </div>

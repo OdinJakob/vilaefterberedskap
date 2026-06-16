@@ -47,6 +47,10 @@
     --may-rest-foreground: 0 0% 100%;
     --may-rest-bg: 152 40% 94%;
 
+    --paid-rest: 43 96% 35%;
+    --paid-rest-foreground: 0 0% 100%;
+    --paid-rest-bg: 43 80% 95%;
+
     --warning: 35 95% 50%;
     --warning-foreground: 0 0% 13%;
     --warning-bg: 45 100% 94%;
@@ -94,5 +98,8 @@
   }
   .result-card-info {
     @apply bg-[hsl(var(--info-bg))] border-[hsl(var(--info))]/30;
+  }
+  .result-card-paid {
+    @apply bg-[hsl(var(--paid-rest-bg))] border-[hsl(var(--paid-rest))]/30;
   }
 }
