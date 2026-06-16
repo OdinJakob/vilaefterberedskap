@@ -52,13 +52,6 @@ export default function InfoBox() {
               </a>
             </p>
           </div>
-          <div className="bg-card/60 rounded-md p-3 border border-border/50">
-            <p className="text-xs">
-              <strong>Viktigt:</strong> Slutlig bedömning görs alltid tillsammans med chef
-              enligt gällande regler och lokala rutiner. Detta verktyg ger ett beslutstöd,
-              inte juridisk rådgivning.
-            </p>
-          </div>
         </div>
       )}
     </div>
