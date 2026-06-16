@@ -13,6 +13,11 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
     result.remainingWeeklyBeredskapsvila + result.beredskapsvila + result.totalInskranktDygnsvila
   );
 
+  const remainingWeeklyBefore = result.remainingWeeklyBeredskapsvila + result.beredskapsvila;
+  const xRaw = Math.max(6, remainingWeeklyBefore);
+  const x = Math.min(xRaw, paidLeaveHours);
+  const y = paidLeaveHours - x;
+
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Ska vara ledig – 00–06-regeln */}
