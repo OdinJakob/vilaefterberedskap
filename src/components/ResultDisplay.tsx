@@ -14,7 +14,7 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
   );
 
   const remainingWeeklyBefore = result.remainingWeeklyBeredskapsvila + result.beredskapsvila;
-  const xRaw = Math.max(6, remainingWeeklyBefore);
+  const xRaw = Math.min(6, remainingWeeklyBefore);
   const x = Math.min(xRaw, paidLeaveHours);
   const y = paidLeaveHours - x;
 
