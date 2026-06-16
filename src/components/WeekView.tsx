@@ -475,9 +475,9 @@ export default function WeekView() {
                   </td>
                 ))}
               </tr>
-              {/* Ledig */}
+              {/* Ledig enligt ordinarie schema */}
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Ledig</td>
+                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Ledig enligt ordinarie schema</td>
                 {days.map((d, i) => (
                   <td key={i} className="p-2 text-center">
                     <Checkbox
