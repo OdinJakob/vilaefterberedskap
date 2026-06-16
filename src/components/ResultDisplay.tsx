@@ -1,5 +1,5 @@
 import { CalcResult, formatHours, formatHoursShort } from "@/lib/calculations";
-import { Clock, Shield, AlertTriangle, Info } from "lucide-react";
+import { Clock, Shield, AlertTriangle, Info, Banknote } from "lucide-react";
 
 interface ResultDisplayProps {
   result: CalcResult;
