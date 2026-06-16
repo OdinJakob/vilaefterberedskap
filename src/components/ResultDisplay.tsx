@@ -7,6 +7,12 @@ interface ResultDisplayProps {
 }
 
 export default function ResultDisplay({ result, workDayStart }: ResultDisplayProps) {
+  const paidLeaveHours = Math.max(
+    result.activeWorkHours,
+    6 + result.totalInskranktDygnsvila,
+    result.remainingWeeklyBeredskapsvila + result.beredskapsvila + result.totalInskranktDygnsvila
+  );
+
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Ska vara ledig – 00–06-regeln */}
