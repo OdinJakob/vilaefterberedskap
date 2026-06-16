@@ -7,7 +7,7 @@ interface ResultDisplayProps {
 }
 
 export default function ResultDisplay({ result, workDayStart }: ResultDisplayProps) {
-  const paidLeaveHours = Math.max(
+  const paidLeaveHours = Math.min(
     result.activeWorkHours,
     6 + result.totalInskranktDygnsvila,
     result.remainingWeeklyBeredskapsvila + result.beredskapsvila + result.totalInskranktDygnsvila
