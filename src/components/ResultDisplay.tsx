@@ -85,6 +85,9 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
               {formatHours(paidLeaveHours)}
             </p>
             <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+              {formatHours(x)} kan registreras som Veckoberedskap med lön och {formatHours(y)} som inskränkt dygnsvila
+            </p>
+            <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
               Om du har behov av längre vila för att återhämta dig kan ytterligare vila tas ut som veckoberedskap utan lön eller som kompensationstid från din komp bank.
             </p>
           </div>
