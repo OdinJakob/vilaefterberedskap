@@ -28,10 +28,7 @@ export default function InfoBox() {
           <div>
             <h4 className="font-medium text-foreground">Veckoberedskap med lön</h4>
             <p className="mt-1">
-              Enligt lokalt kollektivavtal har du rätt till 8 timmars betald beredskapsvila
-              per beredskapsvecka. Max 6 timmar kan tas ut vid ett enskilt tillfälle.
-              Beredskapsvila är en kompensation för att du blivit störd under din beredskap.
-              Beredskapsvila registreras som veckoberedskap med lön i Personec.
+              Enligt lokalt kollektivavtal har du rätt till 8 timmars betald beredskapsvila per beredskapsvecka, när du har beredskap under en hel vecka. Max 6 timmar kan tas ut vid ett enskilt tillfälle. Beredskapsvila är en kompensation för att du blivit störd under din beredskap. Beredskapsvila registreras som veckoberedskap med lön i Personec.
             </p>
           </div>
           <div>
