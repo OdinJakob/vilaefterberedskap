@@ -225,7 +225,7 @@ export function calculateRest(input: CalcInput): CalcResult {
 
   // 5. Beredskapsvila (veckoberedskapsavtalet)
   const remainingWeekly = Math.max(0, WEEKLY_BEREDSKAPSVILA_MAX - input.usedBeredskapsvila);
-  const beredskapsvila = Math.min(totalRestHours, remainingWeekly, SINGLE_BEREDSKAPSVILA_MAX);
+  const beredskapsvila = Math.min(totalRestHours, remainingWeekly, SINGLE_BEREDSKAPSVILA_MAX, activeWorkHours);
   const inskanktDygnsvila = Math.max(0, totalRestHours - beredskapsvila);
 
   // 6. Tidigast åter i arbete
