@@ -45,9 +45,11 @@ export default function DetailedBreakdown({ result }: DetailedBreakdownProps) {
         : "✓ Dygnsvila uppfylld",
     },
     {
-      label: "Ytterligare inskränkt dygnsvila (får vara ledig)",
-      value: formatHoursShort(result.additionalInskranktHours),
-      highlight: result.additionalInskranktHours > 0,
+      label: "Vila med lön pga. Inskränkt dygnsvila (resultatet kan aldrig överstiga störningens längd)",
+      value: formatHoursShort(
+        Math.min(result.activeWorkHours, result.totalInskranktDygnsvila)
+      ),
+      highlight: Math.min(result.activeWorkHours, result.totalInskranktDygnsvila) > 0,
     },
     {
       label: "Total ledighet",
