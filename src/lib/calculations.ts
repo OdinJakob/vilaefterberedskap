@@ -175,54 +175,39 @@ export function calculateRest(input: CalcInput): CalcResult {
   } else {
     activeWorkMinutes = activeEndMins - activeStartMins;
   }
-  const activeWorkHours = activeWorkMinutes / 60;
 
-  // 1. OBLIGATORISK VILA (00–06-regeln)
-  // Timmar aktivt arbete mellan 00:00–06:00
-  const nightMins = nightWorkMinutes(activeStartMins, activeEndMins, crossesMidnight);
+  // Bygg vilofönstret (från föregående arbetsslut till nästa arbetsstart),
+  // och klipp störningen så att eventuell överlapp med ordinarie schema
+  // inte räknas med.
+  const windowStartClock = input.prevDayOff ? workStartMins : prevWorkEndMins;
+  const windowEndClock = input.nextDayOff ? prevWorkStartMins : workStartMins;
+  const anchor = windowStartClock;
+  const fwd = (t: number) => (((t - anchor) % 1440) + 1440) % 1440;
+  let restEndAbs = fwd(windowEndClock);
+  if (restEndAbs === 0) restEndAbs = 1440;
+
+  const disturbStartAbs = fwd(activeStartMins);
+  const disturbEndAbs = disturbStartAbs + activeWorkMinutes;
+
+  const clippedStartAbs = Math.max(0, Math.min(restEndAbs, disturbStartAbs));
+  const clippedEndAbs = Math.max(clippedStartAbs, Math.min(restEndAbs, disturbEndAbs));
+  const clippedDuration = clippedEndAbs - clippedStartAbs;
+
+  const clippedStartClock = (((anchor + clippedStartAbs) % 1440) + 1440) % 1440;
+  const clippedEndClock = (((anchor + clippedEndAbs) % 1440) + 1440) % 1440;
+  const clippedCrosses = clippedDuration > 0 && clippedEndClock <= clippedStartClock;
+
+  const activeWorkHours = clippedDuration / 60;
+
+  // 1. OBLIGATORISK VILA (00–06-regeln) – baserat på den klippta störningen
+  const nightMins = clippedDuration > 0
+    ? nightWorkMinutes(clippedStartClock, clippedEndClock, clippedCrosses)
+    : 0;
   const nightWorkHrs = nightMins / 60;
-  // Om man redan är ledig nästa dag behövs ingen kompenserande ledighet
   const mandatoryRestHours = input.nextDayOff ? 0 : nightWorkHrs;
 
-  // Beräkna vila före störning (föregående arbetsslut → störningens start)
-  let restBeforeHours: number;
-  if (input.prevDayOff) {
-    // Ledig dagen före → mät från senaste dygnsbryt (= ordinarie arbetsstart
-    // nästa dag, tillämpad dagen före) fram till störningens start.
-    let diff = ((activeStartMins - workStartMins) % 1440 + 1440) % 1440;
-    if (diff === 0) diff = 1440;
-    restBeforeHours = diff / 60;
-  } else {
-    let restBeforeMinutes: number;
-    if (activeStartMins >= prevWorkEndMins) {
-      restBeforeMinutes = activeStartMins - prevWorkEndMins;
-    } else {
-      restBeforeMinutes = (1440 - prevWorkEndMins) + activeStartMins;
-    }
-    restBeforeHours = restBeforeMinutes / 60;
-  }
-
-  // Vila efter störning (störningens slut → ordinarie arbetsstart)
-  let restAfterHours: number;
-  if (input.nextDayOff) {
-    // Ledig dagen efter → mät från störningens slut fram till nästa dygnsbryt
-    // (= ordinarie arbetsstart föregående dag, tillämpad dagen efter störning).
-    let diff = ((prevWorkStartMins - activeEndMins) % 1440 + 1440) % 1440;
-    if (diff === 0) diff = 1440;
-    restAfterHours = diff / 60;
-  } else {
-    let restAfterMinutes: number;
-    if (crossesMidnight) {
-      restAfterMinutes = workStartMins - activeEndMins;
-    } else {
-      if (activeEndMins <= workStartMins) {
-        restAfterMinutes = workStartMins - activeEndMins;
-      } else {
-        restAfterMinutes = (1440 - activeEndMins) + workStartMins;
-      }
-    }
-    restAfterHours = restAfterMinutes / 60;
-  }
+  const restBeforeHours = clippedStartAbs / 60;
+  const restAfterHours = (restEndAbs - clippedEndAbs) / 60;
 
   // 2. INSKRÄNKT DYGNSVILA
   // Längsta sammanhängande dygnsvila = max(vila före störning, vila efter störning)
