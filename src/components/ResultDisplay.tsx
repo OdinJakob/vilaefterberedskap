@@ -66,6 +66,26 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
         </div>
       </div>
 
+      {/* Du får vara ledig med lön */}
+      <div className="result-card-paid rounded-lg border p-5">
+        <div className="flex items-start gap-3">
+          <div className="rounded-full bg-paid-rest p-2 mt-0.5">
+            <Banknote className="h-4 w-4 text-paid-rest-foreground" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-paid-rest text-sm uppercase tracking-wide">
+              Du får vara ledig med lön
+            </h3>
+            <p className="text-2xl font-bold text-foreground mt-1">
+              {formatHours(paidLeaveHours)}
+            </p>
+            <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+              Om du har behov av längre vila för att återhämta dig kan ytterligare vila tas ut som veckoberedskap utan lön eller som kompensationstid från din komp bank.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Beredskapsvila info (only when no additional inskränkt) */}
       {result.totalInskranktDygnsvila === 0 && result.beredskapsvila > 0 && (
         <div className="result-card-may rounded-lg border p-5">
