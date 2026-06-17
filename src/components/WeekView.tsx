@@ -191,7 +191,11 @@ export default function WeekView() {
         .map((d) => {
           const sM = toMin(d.start);
           const eM = toMin(d.end);
-          const absS = forward(anchor, sM);
+          const rawAbsS = forward(anchor, sM);
+          // Om störningen "egentligen" börjar strax före vilofönstret
+          // (t.ex. ordinarie 07–16 med störning 15–21), tolkar vi
+          // fwd-värdet som negativt istället för nästan ett helt dygn framåt.
+          const absS = rawAbsS > 720 ? rawAbsS - 1440 : rawAbsS;
           const rawDur = eM > sM ? eM - sM : 1440 - sM + eM;
           const absE = absS + rawDur;
           // Klipp störningen mot vilofönstret så att eventuell överlapp
