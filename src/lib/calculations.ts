@@ -187,9 +187,15 @@ export function calculateRest(input: CalcInput): CalcResult {
   if (restEndAbs === 0) restEndAbs = 1440;
 
   const disturbStartAbs = fwd(activeStartMins);
-  const disturbEndAbs = disturbStartAbs + activeWorkMinutes;
+  // Om störningen "egentligen" startar före vilofönstret (t.ex. under
+  // föregående ordinarie arbetsdag), tolkar vi fwd-värdet som negativt
+  // istället för nästan ett helt dygn framåt. Annars hamnar störningen
+  // efter fönstrets slut och klipps felaktigt till noll.
+  const normalizedDisturbStartAbs =
+    disturbStartAbs > 720 ? disturbStartAbs - 1440 : disturbStartAbs;
+  const disturbEndAbs = normalizedDisturbStartAbs + activeWorkMinutes;
 
-  const clippedStartAbs = Math.max(0, Math.min(restEndAbs, disturbStartAbs));
+  const clippedStartAbs = Math.max(0, Math.min(restEndAbs, normalizedDisturbStartAbs));
   const clippedEndAbs = Math.max(clippedStartAbs, Math.min(restEndAbs, disturbEndAbs));
   const clippedDuration = clippedEndAbs - clippedStartAbs;
 
