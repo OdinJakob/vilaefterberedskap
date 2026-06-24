@@ -121,126 +121,91 @@ export default function WeekView() {
         .filter((d) => d && d.start && d.end);
       if (validDists.length === 0) continue;
 
-      // Dygnsbryt-logik:
-      // - "ledig dagen innan störning" = störningsdagen själv är ledig
-      //   (ingen ordinarie arbetsdag slutar före störningen samma dag)
-      // - "ledig dagen efter störning" = nästa kalenderdag är ledig
-      const prevLedig = day.ledig;
-      const nextLedig = i < days.length - 1 && days[i + 1].ledig;
+      // Vilofönster: 24 h med dygnsbryt som ankare.
+      // Inom fönstret placeras dagens ordinarie schema (om ej ledig)
+      // och alla störningar. Längsta sammanhängande vila = största
+      // lucka mellan dessa event inom fönstret.
+      const anchor = toMin(dygnsbryt || "06:00");
+      const fwd = (t: number) => {
+        const a = ((t - anchor) % 1440 + 1440) % 1440;
+        return a > 720 ? a - 1440 : a;
+      };
 
-      // prev workday end
-      let prevEnd = "";
-      let prevStart = "";
-      for (let k = i - 1; k >= 0; k--) {
-        const sh = effectiveShifts[k];
-        if (!sh.ledig && sh.end) {
-          prevEnd = sh.end;
-          prevStart = sh.start;
-          break;
-        }
+      type Iv = { s: number; e: number; kind: "shift" | "dist"; start: string; end: string };
+      const rawEvents: Iv[] = [];
+      const ownShift = effectiveShifts[i];
+      if (!ownShift.ledig && ownShift.start && ownShift.end) {
+        const sM = toMin(ownShift.start);
+        const eM = toMin(ownShift.end);
+        const dur = eM >= sM ? eM - sM : 1440 - sM + eM;
+        const absS = fwd(sM);
+        rawEvents.push({ s: absS, e: absS + dur, kind: "shift", start: ownShift.start, end: ownShift.end });
       }
-      // next workday start (this day's shift if any, else next day's)
-      let nextStart = effectiveShifts[i].start;
-      let nextEnd = effectiveShifts[i].end;
-      if (!nextStart) {
-        for (let k = i + 1; k < days.length; k++) {
-          const sh = effectiveShifts[k];
-          if (!sh.ledig && sh.start) {
-            nextStart = sh.start;
-            nextEnd = sh.end;
-            break;
-          }
-        }
+      for (const d of validDists) {
+        const sM = toMin(d.start);
+        const eM = toMin(d.end);
+        const dur = eM > sM ? eM - sM : 1440 - sM + eM;
+        const absS = fwd(sM);
+        rawEvents.push({ s: absS, e: absS + dur, kind: "dist", start: d.start, end: d.end });
       }
-      // Fallback
-      if (!prevEnd || !prevStart) {
-        for (let k = 0; k < days.length; k++) {
-          const sh = effectiveShifts[k];
-          if (!sh.ledig && sh.start && sh.end) {
-            prevEnd = prevEnd || sh.end;
-            prevStart = prevStart || sh.start;
-            break;
-          }
-        }
-      }
-      if (!nextStart || !nextEnd) {
-        for (let k = 0; k < days.length; k++) {
-          const sh = effectiveShifts[k];
-          if (!sh.ledig && sh.start && sh.end) {
-            nextStart = nextStart || sh.start;
-            nextEnd = nextEnd || sh.end;
-            break;
-          }
-        }
-      }
-      prevEnd = prevEnd || "15:30";
-      prevStart = prevStart || "07:00";
-      nextStart = nextStart || "07:00";
-      nextEnd = nextEnd || "15:30";
-
-      // Vilofönstrets start (klocktid) = föregående arbetsslut, eller dygnsbryt
-      // (= ordinarie arbetsstart nästa dag) om dagen före är ledig.
-      const windowStartClock = prevLedig ? toMin(nextStart) : toMin(prevEnd);
-      // Vilofönstrets slut (klocktid) = nästa arbetsstart, eller dygnsbryt
-      // (= ordinarie arbetsstart föregående dag) om dagen efter är ledig.
-      const windowEndClock = nextLedig ? toMin(prevStart) : toMin(nextStart);
-      const anchor = windowStartClock;
-      let restEnd = forward(anchor, windowEndClock);
-      if (restEnd === 0) restEnd = 1440;
-
-      // Build absolute timeline (minutes since prev workday end)
-      const items = validDists
-        .map((d) => {
-          const sM = toMin(d.start);
-          const eM = toMin(d.end);
-          const rawAbsS = forward(anchor, sM);
-          // Om störningen "egentligen" börjar strax före vilofönstret
-          // (t.ex. ordinarie 07–16 med störning 15–21), tolkar vi
-          // fwd-värdet som negativt istället för nästan ett helt dygn framåt.
-          const absS = rawAbsS > 720 ? rawAbsS - 1440 : rawAbsS;
-          const rawDur = eM > sM ? eM - sM : 1440 - sM + eM;
-          const absE = absS + rawDur;
-          // Klipp störningen mot vilofönstret så att eventuell överlapp
-          // med ordinarie schema inte räknas med.
-          const clipS = Math.max(0, Math.min(restEnd, absS));
-          const clipE = Math.max(clipS, Math.min(restEnd, absE));
-          const dur = clipE - clipS;
-          const clipStartClock = (((anchor + clipS) % 1440) + 1440) % 1440;
-          const clipEndClock = (((anchor + clipE) % 1440) + 1440) % 1440;
+      // Klipp mot fönstret [0, 1440]
+      const items = rawEvents
+        .map((iv) => {
+          const cs = Math.max(0, iv.s);
+          const ce = Math.min(1440, iv.e);
+          const dur = Math.max(0, ce - cs);
+          const sClock = (((anchor + cs) % 1440) + 1440) % 1440;
+          const eClock = (((anchor + ce) % 1440) + 1440) % 1440;
           return {
-            start: d.start,
-            end: d.end,
-            absS: clipS,
-            absE: clipE,
+            ...iv,
+            absS: cs,
+            absE: ce,
             dur,
-            night: dur > 0 ? nightOverlap(clipStartClock, clipEndClock) : 0,
+            night: iv.kind === "dist" && dur > 0
+              ? nightOverlap(sClock, eClock <= sClock ? sClock + dur : eClock)
+              : 0,
           };
         })
         .filter((it) => it.dur > 0)
         .sort((a, b) => a.absS - b.absS);
 
-      // Longest continuous rest = max gap before/between/after disturbances inside rest window
+      // Slå ihop ev. överlapp (störning vinner)
+      const merged: typeof items = [];
+      for (const it of items) {
+        const last = merged[merged.length - 1];
+        if (last && it.absS <= last.absE) {
+          last.absE = Math.max(last.absE, it.absE);
+          if (it.kind === "dist") last.kind = "dist";
+        } else {
+          merged.push({ ...it });
+        }
+      }
+
+      // Längsta vila + vila före/efter första störning (för label)
       let longestMin = 0;
-      let cursor = 0;
       let restBeforeMin = 0;
       let restAfterMin = 0;
-      for (let j = 0; j < items.length; j++) {
-        const gap = Math.max(0, items[j].absS - cursor);
-        if (j === 0) restBeforeMin = gap;
+      let prevEnd = 0;
+      let firstDistFound = false;
+      for (let j = 0; j < merged.length; j++) {
+        const gap = merged[j].absS - prevEnd;
         longestMin = Math.max(longestMin, gap);
-        cursor = Math.max(cursor, items[j].absE);
+        if (merged[j].kind === "dist" && !firstDistFound) {
+          restBeforeMin = gap;
+          firstDistFound = true;
+        }
+        if (merged[j].kind === "dist") {
+          const ns = j + 1 < merged.length ? merged[j + 1].absS : 1440;
+          restAfterMin = ns - merged[j].absE;
+        }
+        prevEnd = Math.max(prevEnd, merged[j].absE);
       }
-      restAfterMin = Math.max(0, restEnd - cursor);
-      // Säkerställ att vilofönstret sträcker sig förbi sista störningen
-      while (restEnd < cursor) {
-        restEnd += 1440;
-      }
-      restAfterMin = Math.max(0, restEnd - cursor);
-      longestMin = Math.max(longestMin, restAfterMin);
+      longestMin = Math.max(longestMin, 1440 - prevEnd);
 
       const longestContinuousRest = longestMin / 60;
-      const activeWorkHours = items.reduce((s, it) => s + it.dur, 0) / 60;
-      const nightWorkHours = items.reduce((s, it) => s + it.night, 0) / 60;
+      const distItems = items.filter((it) => it.kind === "dist");
+      const activeWorkHours = distItems.reduce((s, it) => s + it.dur, 0) / 60;
+      const nightWorkHours = distItems.reduce((s, it) => s + it.night, 0) / 60;
       const mandatoryRestHours = nightWorkHours;
       const rawInskrankt = Math.max(0, 11 - longestContinuousRest);
       const totalInskranktDygnsvila = Math.min(rawInskrankt, activeWorkHours);
@@ -250,7 +215,7 @@ export default function WeekView() {
       totalMandatory += mandatoryRestHours;
       totalAdditional += additionalInskranktHours;
 
-      const distLabel = items.map((it) => `${it.start}–${it.end}`).join(", ");
+      const distLabel = distItems.map((it) => `${it.start}–${it.end}`).join(", ");
       const result: CalcResult = {
         activeWorkHours,
         nightWorkHours,
