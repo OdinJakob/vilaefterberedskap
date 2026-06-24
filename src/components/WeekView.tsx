@@ -211,9 +211,16 @@ export default function WeekView() {
       }
 
       const longestContinuousRest = longestMin / 60;
-      const distItems = items.filter((it) => it.kind === "dist");
-      const activeWorkHours = distItems.reduce((s, it) => s + it.dur, 0) / 60;
-      const nightWorkHours = distItems.reduce((s, it) => s + it.night, 0) / 60;
+      // Störningens längd och nattarbete beräknas på de råa klocktiderna,
+      // oberoende av dygnsbrytet.
+      const rawDistItems = validDists.map((d) => {
+        const sM = toMin(d.start);
+        const eM = toMin(d.end);
+        const dur = eM > sM ? eM - sM : 1440 - sM + eM;
+        return { start: d.start, end: d.end, dur, night: nightOverlap(sM, eM) };
+      });
+      const activeWorkHours = rawDistItems.reduce((s, it) => s + it.dur, 0) / 60;
+      const nightWorkHours = rawDistItems.reduce((s, it) => s + it.night, 0) / 60;
       const mandatoryRestHours = nightWorkHours;
       const rawInskrankt = Math.max(0, 11 - longestContinuousRest);
       const totalInskranktDygnsvila = Math.min(rawInskrankt, activeWorkHours);
@@ -223,7 +230,7 @@ export default function WeekView() {
       totalMandatory += mandatoryRestHours;
       totalAdditional += additionalInskranktHours;
 
-      const distLabel = distItems.map((it) => `${it.start}–${it.end}`).join(", ");
+      const distLabel = rawDistItems.map((it) => `${it.start}–${it.end}`).join(", ");
       const result: CalcResult = {
         activeWorkHours,
         nightWorkHours,

@@ -260,36 +260,51 @@ export function calculateRest(input: CalcInput): CalcResult {
     }
   }
 
-  // Aktivt arbete: störningens varaktighet inom fönstret, exkl. överlapp med ordinarie schema.
+  // Aktivt arbete: störningens varaktighet exkl. överlapp med ordinarie schema.
+  // Beräknas på störningens absoluta klocktider, oberoende av dygnsbrytet.
   // Om störningen börjar under ett ordinarie pass räknas den först från passets slut,
   // och om den slutar under ett ordinarie pass räknas den bara fram till passets start.
-  const workIntervals = intervals.filter((i) => i.kind !== "dist");
-  const rawDist = intervals.filter((i) => i.kind === "dist");
-  const distPieces: { s: number; e: number }[] = [];
-  for (const d of rawDist) {
-    let pieces: { s: number; e: number }[] = [{ s: d.s, e: d.e }];
-    for (const w of workIntervals) {
-      const next: { s: number; e: number }[] = [];
-      for (const p of pieces) {
-        const os = Math.max(p.s, w.s);
-        const oe = Math.min(p.e, w.e);
-        if (oe <= os) { next.push(p); continue; }
-        if (p.s < os) next.push({ s: p.s, e: os });
-        if (oe < p.e) next.push({ s: oe, e: p.e });
-      }
-      pieces = next;
+  const workAbs: { s: number; e: number }[] = [];
+  if (!input.prevDayOff) {
+    const prevDur = prevWorkEndMins >= prevWorkStartMins
+      ? prevWorkEndMins - prevWorkStartMins
+      : 1440 - prevWorkStartMins + prevWorkEndMins;
+    // Föregående pass placeras så att det slutar före (eller vid) störningens start.
+    const gap = ((activeStartMins - prevWorkEndMins) % 1440 + 1440) % 1440;
+    const e = -gap;
+    workAbs.push({ s: e - prevDur, e });
+  }
+  if (!input.nextDayOff) {
+    const nextDur = workEndMins >= workStartMins
+      ? workEndMins - workStartMins
+      : 1440 - workStartMins + workEndMins;
+    // Nästa pass placeras så att det startar efter (eller vid) störningens slut.
+    const gap = ((workStartMins - activeEndMins) % 1440 + 1440) % 1440;
+    const s = activeWorkMinutes + gap;
+    workAbs.push({ s, e: s + nextDur });
+  }
+  let distPieces: { s: number; e: number }[] = [{ s: 0, e: activeWorkMinutes }];
+  for (const w of workAbs) {
+    const next: { s: number; e: number }[] = [];
+    for (const p of distPieces) {
+      const os = Math.max(p.s, w.s);
+      const oe = Math.min(p.e, w.e);
+      if (oe <= os) { next.push(p); continue; }
+      if (p.s < os) next.push({ s: p.s, e: os });
+      if (oe < p.e) next.push({ s: oe, e: p.e });
     }
-    distPieces.push(...pieces);
+    distPieces = next;
   }
   const activeWorkHours =
     distPieces.reduce((s, i) => s + (i.e - i.s), 0) / 60;
-  const distIntervals = distPieces.map((p) => ({ ...p, kind: "dist" as const }));
+  const distIntervals = intervals.filter((i) => i.kind === "dist");
 
-  // Natt-overlap för störningen
-  const nightMins = distIntervals.reduce((sum, iv) => {
-    const sClock = (((anchor + iv.s) % 1440) + 1440) % 1440;
-    const eClock = (((anchor + iv.e) % 1440) + 1440) % 1440;
-    const crosses = eClock <= sClock;
+  // Natt-overlap för störningen – baseras på absoluta klocktider.
+  const nightMins = distPieces.reduce((sum, p) => {
+    const sClock = ((activeStartMins + p.s) % 1440 + 1440) % 1440;
+    const eClock = ((activeStartMins + p.e) % 1440 + 1440) % 1440;
+    const dur = p.e - p.s;
+    const crosses = dur > 0 && eClock <= sClock;
     return sum + nightWorkMinutes(sClock, eClock, crosses);
   }, 0);
   const nightWorkHrs = nightMins / 60;
