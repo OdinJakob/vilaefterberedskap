@@ -414,6 +414,24 @@ export default function WeekView() {
           </Button>
         </div>
 
+        <div className="flex items-center gap-3 p-4 border-b">
+          <div className="flex-1">
+            <label htmlFor="weekDygnsbryt" className="text-sm font-bold text-muted-foreground">
+              Dygnsbryt
+            </label>
+            <p className="text-xs text-muted-foreground">
+              Tidpunkten som markerar starten på ett nytt dygn vid beräkning av dygnsvila.
+            </p>
+          </div>
+          <Input
+            id="weekDygnsbryt"
+            type="time"
+            value={dygnsbryt}
+            onChange={(e) => setDygnsbryt(e.target.value || "06:00")}
+            className="w-32 h-11 text-base"
+          />
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-xs sm:text-sm border-collapse">
             <thead>
