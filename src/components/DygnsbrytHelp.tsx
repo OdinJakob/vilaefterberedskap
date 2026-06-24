@@ -18,16 +18,17 @@ export default function DygnsbrytHelp() {
           <HelpCircle className="h-4 w-4 text-muted-foreground" />
         </button>
       </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-xs p-3 space-y-2">
+      <TooltipContent side="top" className="max-w-md p-3 space-y-2">
         <p className="text-sm text-popover-foreground">
           Information om ditt dygnsbryt hittar du i Personec.
         </p>
         <img
           src={dygnsbrytAsset.url}
           alt="Skärmbild som visar var dygnsbrytet visas i Personec Kalender"
-          className="w-full rounded border"
+          className="w-full rounded border transition-transform duration-200 hover:scale-110 origin-top-left"
         />
       </TooltipContent>
     </Tooltip>
   );
 }
+
