@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
+import DygnsbrytHelp from "@/components/DygnsbrytHelp";
+
 
 interface RestFormProps {
   input: CalcInput;
@@ -71,9 +73,12 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
 
       {/* Dygnsbryt */}
       <div className="space-y-1.5">
-        <Label htmlFor="dygnsbryt" className="text-sm font-bold text-muted-foreground">
-          Dygnsbryt
-        </Label>
+        <div className="flex items-center gap-2">
+          <Label htmlFor="dygnsbryt" className="text-sm font-bold text-muted-foreground">
+            Dygnsbryt
+          </Label>
+          <DygnsbrytHelp />
+        </div>
         <p className="text-xs text-muted-foreground">
           Tidpunkten som markerar starten på ett nytt dygn vid beräkning av dygnsvila.
         </p>
