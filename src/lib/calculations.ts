@@ -163,11 +163,11 @@ export function calculateRest(input: CalcInput): CalcResult {
   // Parsa tider
   const activeStartMins = timeToMinutes(input.activeWorkStart);
   const activeEndMins = timeToMinutes(input.activeWorkEnd);
-  // Ordinarie arbetsdagstider används alltid som dygnsbryt-ankare,
-  // även när man är ledig dagen före/efter störningen.
   const workStartMins = timeToMinutes(input.workDayStart || "07:00");
-  const prevWorkEndMins = input.prevDayOff ? 0 : timeToMinutes(input.prevWorkDayEnd);
+  const workEndMins = timeToMinutes(input.workDayEnd || "15:30");
   const prevWorkStartMins = timeToMinutes(input.prevWorkDayStart || input.workDayStart || "07:00");
+  const prevWorkEndMins = timeToMinutes(input.prevWorkDayEnd || input.workDayEnd || "15:30");
+  const dygnsbrytMins = timeToMinutes(input.dygnsbryt || "06:00");
 
   // Beräkna varaktighet för aktivt arbete
   let activeWorkMinutes: number;
@@ -178,48 +178,93 @@ export function calculateRest(input: CalcInput): CalcResult {
     activeWorkMinutes = activeEndMins - activeStartMins;
   }
 
-  // Bygg vilofönstret (från föregående arbetsslut till nästa arbetsstart),
-  // och klipp störningen så att eventuell överlapp med ordinarie schema
-  // inte räknas med.
-  const windowStartClock = input.prevDayOff ? workStartMins : prevWorkEndMins;
-  const windowEndClock = input.nextDayOff ? prevWorkStartMins : workStartMins;
-  const anchor = windowStartClock;
+  // Vilofönstret är 24 timmar med dygnsbryt som ankare.
+  // Inom fönstret placeras föregående och nästa ordinarie schema samt störningen.
+  // Längsta sammanhängande vila = största lucka mellan dessa event inom fönstret.
+  const anchor = dygnsbrytMins;
   const fwd = (t: number) => (((t - anchor) % 1440) + 1440) % 1440;
-  let restEndAbs = fwd(windowEndClock);
-  if (restEndAbs === 0) restEndAbs = 1440;
 
-  const disturbStartAbs = fwd(activeStartMins);
-  // Om störningen "egentligen" startar före vilofönstret (t.ex. under
-  // föregående ordinarie arbetsdag), tolkar vi fwd-värdet som negativt
-  // istället för nästan ett helt dygn framåt. Annars hamnar störningen
-  // efter fönstrets slut och klipps felaktigt till noll.
-  const normalizedDisturbStartAbs =
-    disturbStartAbs > 720 ? disturbStartAbs - 1440 : disturbStartAbs;
-  const disturbEndAbs = normalizedDisturbStartAbs + activeWorkMinutes;
+  type Interval = { s: number; e: number; kind: "prev" | "next" | "dist" };
+  const intervals: Interval[] = [];
 
-  const clippedStartAbs = Math.max(0, Math.min(restEndAbs, normalizedDisturbStartAbs));
-  const clippedEndAbs = Math.max(clippedStartAbs, Math.min(restEndAbs, disturbEndAbs));
-  const clippedDuration = clippedEndAbs - clippedStartAbs;
+  const addInterval = (
+    sClock: number,
+    eClock: number,
+    durMins: number,
+    kind: Interval["kind"],
+  ) => {
+    if (durMins <= 0) return;
+    let absS = fwd(sClock);
+    if (absS > 720) absS -= 1440;
+    const absE = absS + durMins;
+    const cs = Math.max(0, absS);
+    const ce = Math.min(1440, absE);
+    if (ce > cs) intervals.push({ s: cs, e: ce, kind });
+  };
 
-  const clippedStartClock = (((anchor + clippedStartAbs) % 1440) + 1440) % 1440;
-  const clippedEndClock = (((anchor + clippedEndAbs) % 1440) + 1440) % 1440;
-  const clippedCrosses = clippedDuration > 0 && clippedEndClock <= clippedStartClock;
+  if (!input.prevDayOff) {
+    const dur = prevWorkEndMins >= prevWorkStartMins
+      ? prevWorkEndMins - prevWorkStartMins
+      : 1440 - prevWorkStartMins + prevWorkEndMins;
+    addInterval(prevWorkStartMins, prevWorkEndMins, dur, "prev");
+  }
+  if (!input.nextDayOff) {
+    const dur = workEndMins >= workStartMins
+      ? workEndMins - workStartMins
+      : 1440 - workStartMins + workEndMins;
+    addInterval(workStartMins, workEndMins, dur, "next");
+  }
+  addInterval(activeStartMins, activeEndMins, activeWorkMinutes, "dist");
 
-  const activeWorkHours = clippedDuration / 60;
+  // Sortera och slå ihop ev. överlapp (störning vinner som kind)
+  intervals.sort((a, b) => a.s - b.s);
+  const merged: Interval[] = [];
+  for (const iv of intervals) {
+    const last = merged[merged.length - 1];
+    if (last && iv.s <= last.e) {
+      last.e = Math.max(last.e, iv.e);
+      if (iv.kind === "dist") last.kind = "dist";
+    } else {
+      merged.push({ ...iv });
+    }
+  }
 
-  // 1. OBLIGATORISK VILA (00–06-regeln) – baserat på den klippta störningen
-  const nightMins = clippedDuration > 0
-    ? nightWorkMinutes(clippedStartClock, clippedEndClock, clippedCrosses)
-    : 0;
+  // Aktivt arbete (klippt mot fönstret)
+  const distIntervals = merged.filter((i) => i.kind === "dist");
+  const activeWorkHours =
+    distIntervals.reduce((s, i) => s + (i.e - i.s), 0) / 60;
+
+  // Natt-overlap för störningen
+  const nightMins = distIntervals.reduce((sum, iv) => {
+    const sClock = (((anchor + iv.s) % 1440) + 1440) % 1440;
+    const eClock = (((anchor + iv.e) % 1440) + 1440) % 1440;
+    const crosses = eClock <= sClock;
+    return sum + nightWorkMinutes(sClock, eClock, crosses);
+  }, 0);
   const nightWorkHrs = nightMins / 60;
   const mandatoryRestHours = input.nextDayOff ? 0 : nightWorkHrs;
 
-  const restBeforeHours = clippedStartAbs / 60;
-  const restAfterHours = (restEndAbs - clippedEndAbs) / 60;
+  // Längsta vila + vila före/efter störning
+  let longestMin = 0;
+  let restBeforeMin = 0;
+  let restAfterMin = 0;
+  let prevEnd = 0;
+  for (let i = 0; i < merged.length; i++) {
+    const gap = merged[i].s - prevEnd;
+    longestMin = Math.max(longestMin, gap);
+    if (merged[i].kind === "dist") {
+      restBeforeMin = gap;
+      const nextStart = i + 1 < merged.length ? merged[i + 1].s : 1440;
+      restAfterMin = nextStart - merged[i].e;
+    }
+    prevEnd = Math.max(prevEnd, merged[i].e);
+  }
+  const tailGap = 1440 - prevEnd;
+  longestMin = Math.max(longestMin, tailGap);
 
-  // 2. INSKRÄNKT DYGNSVILA
-  // Längsta sammanhängande dygnsvila = max(vila före störning, vila efter störning)
-  const longestContinuousRest = Math.max(restBeforeHours, restAfterHours);
+  const restBeforeHours = restBeforeMin / 60;
+  const restAfterHours = restAfterMin / 60;
+  const longestContinuousRest = longestMin / 60;
 
   // Inskränkt = 11 - längsta sammanhängande vila
   const totalInskranktDygnsvila = Math.max(0, DAILY_REST_REQUIRED - longestContinuousRest);
