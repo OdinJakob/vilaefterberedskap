@@ -161,9 +161,7 @@ export default function WeekView() {
             absS: cs,
             absE: ce,
             dur,
-            night: iv.kind === "dist" && dur > 0
-              ? nightOverlap(sClock, eClock <= sClock ? sClock + dur : eClock)
-              : 0,
+            night: iv.kind === "dist" && dur > 0 ? nightOverlap(sClock, eClock) : 0,
           };
         })
         .filter((it) => it.dur > 0)
