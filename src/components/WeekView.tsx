@@ -1,5 +1,5 @@
 import { Fragment, useState, useMemo } from "react";
-import { CalcResult, formatHoursShort } from "@/lib/calculations";
+import { CalcResult, formatHoursShort, minutesUntilWorkStartOrDygnsbryt } from "@/lib/calculations";
 import DetailedBreakdown from "@/components/DetailedBreakdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -126,8 +126,7 @@ export default function WeekView() {
       // lucka mellan dessa event inom fönstret.
       const anchor = toMin(dygnsbryt || "06:00");
       const fwd = (t: number) => {
-        const a = ((t - anchor) % 1440 + 1440) % 1440;
-        return a > 720 ? a - 1440 : a;
+        return ((t - anchor) % 1440 + 1440) % 1440;
       };
 
       type Iv = { s: number; e: number; kind: "shift" | "dist"; start: string; end: string };
@@ -191,13 +190,25 @@ export default function WeekView() {
           restBeforeMin = gap;
           firstDistFound = true;
         }
-        if (merged[j].kind === "dist") {
-          const ns = j + 1 < merged.length ? merged[j + 1].absS : 1440;
-          restAfterMin = ns - merged[j].absE;
-        }
         prevEnd = Math.max(prevEnd, merged[j].absE);
       }
       longestMin = Math.max(longestMin, 1440 - prevEnd);
+
+      const lastDistEnd = items
+        .filter((it) => it.kind === "dist")
+        .reduce<{ absS: number; absE: number } | null>(
+          (latest, it) => latest === null || it.absE > latest.absE ? it : latest,
+          null,
+        );
+      if (lastDistEnd !== null) {
+        restAfterMin = minutesUntilWorkStartOrDygnsbryt(
+          lastDistEnd.absE,
+          ownShift.ledig || !ownShift.start ? null : toMin(ownShift.start),
+          anchor,
+          lastDistEnd.absS,
+        );
+        longestMin = Math.max(longestMin, restAfterMin);
+      }
 
       const longestContinuousRest = longestMin / 60;
       const distItems = items.filter((it) => it.kind === "dist");
