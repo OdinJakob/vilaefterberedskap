@@ -102,7 +102,6 @@ export default function WeekView() {
       const [h, m] = t.split(":").map(Number);
       return h * 60 + m;
     };
-    const forward = (anchor: number, t: number) => (t >= anchor ? t - anchor : t + 1440 - anchor);
     const nightOverlap = (sM: number, eM: number) => {
       // minutes of [sM..eM) (handles midnight crossing) intersected with [0,360)
       const crosses = eM <= sM;
