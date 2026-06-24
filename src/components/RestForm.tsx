@@ -24,6 +24,7 @@ const DEFAULT_INPUT: CalcInput = {
   crossesMidnight: false,
   prevDayOff: false,
   nextDayOff: false,
+  dygnsbryt: "06:00",
 };
 
 export { DEFAULT_INPUT };
@@ -70,6 +71,23 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
           <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
           Nollställ
         </Button>
+      </div>
+
+      {/* Dygnsbryt */}
+      <div className="space-y-1.5">
+        <Label htmlFor="dygnsbryt" className="text-sm font-bold text-muted-foreground">
+          Dygnsbryt
+        </Label>
+        <p className="text-xs text-muted-foreground">
+          Tidpunkten som markerar starten på ett nytt dygn vid beräkning av dygnsvila.
+        </p>
+        <Input
+          id="dygnsbryt"
+          type="time"
+          value={input.dygnsbryt || "06:00"}
+          onChange={(e) => update("dygnsbryt", e.target.value)}
+          className="w-32 text-lg h-12"
+        />
       </div>
 
       {/* Föregående arbetsdag */}
