@@ -229,10 +229,30 @@ export function calculateRest(input: CalcInput): CalcResult {
     }
   }
 
-  // Aktivt arbete (klippt mot fönstret)
-  const distIntervals = merged.filter((i) => i.kind === "dist");
+  // Aktivt arbete: störningens varaktighet inom fönstret, exkl. överlapp med ordinarie schema.
+  // Om störningen börjar under ett ordinarie pass räknas den först från passets slut,
+  // och om den slutar under ett ordinarie pass räknas den bara fram till passets start.
+  const workIntervals = intervals.filter((i) => i.kind !== "dist");
+  const rawDist = intervals.filter((i) => i.kind === "dist");
+  const distPieces: { s: number; e: number }[] = [];
+  for (const d of rawDist) {
+    let pieces: { s: number; e: number }[] = [{ s: d.s, e: d.e }];
+    for (const w of workIntervals) {
+      const next: { s: number; e: number }[] = [];
+      for (const p of pieces) {
+        const os = Math.max(p.s, w.s);
+        const oe = Math.min(p.e, w.e);
+        if (oe <= os) { next.push(p); continue; }
+        if (p.s < os) next.push({ s: p.s, e: os });
+        if (oe < p.e) next.push({ s: oe, e: p.e });
+      }
+      pieces = next;
+    }
+    distPieces.push(...pieces);
+  }
   const activeWorkHours =
-    distIntervals.reduce((s, i) => s + (i.e - i.s), 0) / 60;
+    distPieces.reduce((s, i) => s + (i.e - i.s), 0) / 60;
+  const distIntervals = distPieces.map((p) => ({ ...p, kind: "dist" as const }));
 
   // Natt-overlap för störningen
   const nightMins = distIntervals.reduce((sum, iv) => {
