@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
+import DygnsbrytHelp from "@/components/DygnsbrytHelp";
+
 
 interface RestFormProps {
   input: CalcInput;
