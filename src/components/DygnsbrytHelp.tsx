@@ -18,7 +18,7 @@ export default function DygnsbrytHelp() {
           <HelpCircle className="h-4 w-4 text-muted-foreground" />
         </button>
       </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-md p-3 space-y-2">
+      <TooltipContent side="top" className="max-w-2xl p-3 space-y-2">
         <p className="text-sm text-popover-foreground">
           Information om ditt dygnsbryt hittar du i Personec.
         </p>
