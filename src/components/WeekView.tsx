@@ -261,7 +261,7 @@ export default function WeekView() {
       ? Math.max(0, totalEarned - (typeof inskranktUsed === "number" ? inskranktUsed : 0) + 11 - restThuFri)
       : 0;
     return { totalMandatory, totalAdditional, totalEarned, remaining, used, breakdowns, restThuFri, availableAtEnd };
-  }, [days, disturbanceCount, effectiveShifts, vilaUsed, inskranktUsed]);
+  }, [days, disturbanceCount, effectiveShifts, vilaUsed, inskranktUsed, dygnsbryt]);
 
   const distIndices = Array.from({ length: disturbanceCount }, (_, i) => i);
 
