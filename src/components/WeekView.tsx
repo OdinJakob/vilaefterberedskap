@@ -434,9 +434,12 @@ export default function WeekView() {
 
         <div className="flex items-center gap-3 p-4 border-b">
           <div className="flex-1">
-            <label htmlFor="weekDygnsbryt" className="text-sm font-bold text-muted-foreground">
-              Dygnsbryt
-            </label>
+            <div className="flex items-center gap-2">
+              <label htmlFor="weekDygnsbryt" className="text-sm font-bold text-muted-foreground">
+                Dygnsbryt
+              </label>
+              <DygnsbrytHelp />
+            </div>
             <p className="text-xs text-muted-foreground">
               Tidpunkten som markerar starten på ett nytt dygn vid beräkning av dygnsvila.
             </p>
