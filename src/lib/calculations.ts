@@ -95,6 +95,27 @@ function timeToMinutes(time: string): number {
   return h * 60 + m;
 }
 
+function windowOffset(clockMins: number, dygnsbrytMins: number): number {
+  return (((clockMins - dygnsbrytMins) % 1440) + 1440) % 1440;
+}
+
+export function minutesUntilWorkStartOrDygnsbryt(
+  disturbanceEndOffset: number,
+  workStartClockMins: number | null,
+  dygnsbrytMins: number,
+): number {
+  const nextDygnsbryt = 1440;
+  if (workStartClockMins === null) {
+    return Math.max(0, nextDygnsbryt - disturbanceEndOffset);
+  }
+
+  const workStartOffset = windowOffset(workStartClockMins, dygnsbrytMins);
+  const nextWorkStart = workStartOffset <= disturbanceEndOffset
+    ? workStartOffset + 1440
+    : workStartOffset;
+  return Math.max(0, Math.min(nextWorkStart, nextDygnsbryt) - disturbanceEndOffset);
+}
+
 /**
  * Formaterar minuter till HH:mm
  */
@@ -182,7 +203,7 @@ export function calculateRest(input: CalcInput): CalcResult {
   // Inom fönstret placeras föregående och nästa ordinarie schema samt störningen.
   // Längsta sammanhängande vila = största lucka mellan dessa event inom fönstret.
   const anchor = dygnsbrytMins;
-  const fwd = (t: number) => (((t - anchor) % 1440) + 1440) % 1440;
+  const fwd = (t: number) => windowOffset(t, anchor);
 
   type Interval = { s: number; e: number; kind: "prev" | "next" | "dist" };
   const intervals: Interval[] = [];
@@ -194,8 +215,7 @@ export function calculateRest(input: CalcInput): CalcResult {
     kind: Interval["kind"],
   ) => {
     if (durMins <= 0) return;
-    let absS = fwd(sClock);
-    if (absS > 720) absS -= 1440;
+    const absS = fwd(sClock);
     const absE = absS + durMins;
     const cs = Math.max(0, absS);
     const ce = Math.min(1440, absE);
@@ -274,13 +294,24 @@ export function calculateRest(input: CalcInput): CalcResult {
     longestMin = Math.max(longestMin, gap);
     if (merged[i].kind === "dist") {
       restBeforeMin = gap;
-      const nextStart = i + 1 < merged.length ? merged[i + 1].s : 1440;
-      restAfterMin = nextStart - merged[i].e;
     }
     prevEnd = Math.max(prevEnd, merged[i].e);
   }
   const tailGap = 1440 - prevEnd;
   longestMin = Math.max(longestMin, tailGap);
+
+  const lastDistEnd = distIntervals.reduce<number | null>(
+    (latest, iv) => latest === null ? iv.e : Math.max(latest, iv.e),
+    null,
+  );
+  if (lastDistEnd !== null) {
+    restAfterMin = minutesUntilWorkStartOrDygnsbryt(
+      lastDistEnd,
+      input.nextDayOff ? null : workStartMins,
+      dygnsbrytMins,
+    );
+    longestMin = Math.max(longestMin, restAfterMin);
+  }
 
   const restBeforeHours = restBeforeMin / 60;
   const restAfterHours = restAfterMin / 60;
