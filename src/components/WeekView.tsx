@@ -126,8 +126,7 @@ export default function WeekView() {
       // lucka mellan dessa event inom fönstret.
       const anchor = toMin(dygnsbryt || "06:00");
       const fwd = (t: number) => {
-        const a = ((t - anchor) % 1440 + 1440) % 1440;
-        return a > 720 ? a - 1440 : a;
+        return ((t - anchor) % 1440 + 1440) % 1440;
       };
 
       type Iv = { s: number; e: number; kind: "shift" | "dist"; start: string; end: string };
@@ -197,12 +196,16 @@ export default function WeekView() {
 
       const lastDistEnd = items
         .filter((it) => it.kind === "dist")
-        .reduce<number | null>((latest, it) => latest === null ? it.absE : Math.max(latest, it.absE), null);
+        .reduce<{ absS: number; absE: number } | null>(
+          (latest, it) => latest === null || it.absE > latest.absE ? it : latest,
+          null,
+        );
       if (lastDistEnd !== null) {
         restAfterMin = minutesUntilWorkStartOrDygnsbryt(
-          lastDistEnd,
+          lastDistEnd.absE,
           ownShift.ledig || !ownShift.start ? null : toMin(ownShift.start),
           anchor,
+          lastDistEnd.absS,
         );
         longestMin = Math.max(longestMin, restAfterMin);
       }
