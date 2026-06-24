@@ -43,6 +43,8 @@ export interface CalcInput {
   prevDayOff?: boolean;
   /** Ledig nästkommande dag (ingen ordinarie arbetstid dagen efter) */
   nextDayOff?: boolean;
+  /** Dygnsbryt (HH:mm) – ankare för 24-timmarsperioden */
+  dygnsbryt?: string;
 }
 
 export interface CalcResult {
