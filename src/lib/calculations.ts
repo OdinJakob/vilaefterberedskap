@@ -243,7 +243,7 @@ export function calculateRest(input: CalcInput): CalcResult {
       ? workEndMins - workStartMins
       : 1440 - workStartMins + workEndMins;
     const nextStartOffset = fwd(workStartMins);
-    addIntervalAt(nextStartOffset <= disturbanceEndOffset ? nextStartOffset + 1440 : nextStartOffset, dur, "next");
+    addIntervalAt(nextStartOffset <= disturbanceStartOffset ? nextStartOffset + 1440 : nextStartOffset, dur, "next");
   }
   addIntervalAt(disturbanceStartOffset, activeWorkMinutes, "dist");
 
@@ -311,20 +311,16 @@ export function calculateRest(input: CalcInput): CalcResult {
   const tailGap = 1440 - prevEnd;
   longestMin = Math.max(longestMin, tailGap);
 
-  const lastDistEnd = distIntervals.reduce<number | null>(
-    (latest, iv) => latest === null ? iv.e : Math.max(latest, iv.e),
+  const lastDist = distIntervals.reduce<{ s: number; e: number } | null>(
+    (latest, iv) => latest === null || iv.e > latest.e ? iv : latest,
     null,
   );
-  const lastDistStart = distIntervals.reduce<number | null>(
-    (latest, iv) => latest === null || iv.e > (distIntervals.find((d) => d.s === latest)?.e ?? -1) ? iv.s : latest,
-    null,
-  );
-  if (lastDistEnd !== null) {
+  if (lastDist !== null) {
     restAfterMin = minutesUntilWorkStartOrDygnsbryt(
-      lastDistEnd,
+      lastDist.e,
       input.nextDayOff ? null : workStartMins,
       dygnsbrytMins,
-      lastDistStart ?? undefined,
+      lastDist.s,
     );
     longestMin = Math.max(longestMin, restAfterMin);
   }
