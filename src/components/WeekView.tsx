@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2, Info, RotateCcw } from "lucide-react";
+import DygnsbrytHelp from "@/components/DygnsbrytHelp";
 
 const WEEKDAYS = ["Torsdag", "Fredag", "Lördag", "Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag"];
 const SHORT = ["Tor", "Fre", "Lör", "Sön", "Mån", "Tis", "Ons", "Tor", "Fre"];
