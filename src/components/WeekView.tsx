@@ -32,6 +32,7 @@ export default function WeekView() {
   const [vilaUsed, setVilaUsed] = useState<number | "">("");
   const [inskranktUsed, setInskranktUsed] = useState<number | "">("");
   const [showSummaryBreakdown, setShowSummaryBreakdown] = useState(false);
+  const [dygnsbryt, setDygnsbryt] = useState<string>("06:00");
 
   // Ensure each day's disturbance array is at least disturbanceCount long
   const ensureDisturbances = (d: DayCol): DayCol => {
@@ -71,6 +72,7 @@ export default function WeekView() {
     setDays(WEEKDAYS.map(() => newDay()));
     setDisturbanceCount(1);
     setVilaUsed("");
+    setDygnsbryt("06:00");
   };
 
   // Resolve effective shift for each day (handle sameAsPrev + ledig)
