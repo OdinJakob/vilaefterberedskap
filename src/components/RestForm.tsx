@@ -40,11 +40,7 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
       const start = field === "activeWorkStart" ? (value as string) : input.activeWorkStart;
       const end = field === "activeWorkEnd" ? (value as string) : input.activeWorkEnd;
       if (start && end) {
-        const [sh] = start.split(":").map(Number);
-        const [eh] = end.split(":").map(Number);
-        if (sh > eh || (sh === eh && start > end)) {
-          newInput.crossesMidnight = true;
-        }
+        newInput.crossesMidnight = end <= start;
       }
     }
 

@@ -171,7 +171,7 @@ export function calculateRest(input: CalcInput): CalcResult {
 
   // Beräkna varaktighet för aktivt arbete
   let activeWorkMinutes: number;
-  const crossesMidnight = input.crossesMidnight || activeEndMins <= activeStartMins;
+  const crossesMidnight = activeEndMins <= activeStartMins;
   if (crossesMidnight) {
     activeWorkMinutes = (1440 - activeStartMins) + activeEndMins;
   } else {
