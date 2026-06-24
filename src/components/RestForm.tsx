@@ -73,23 +73,25 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
         </Button>
       </div>
 
+      {/* Dygnsbryt */}
+      <div className="space-y-1.5">
+        <Label htmlFor="dygnsbryt" className="text-sm font-bold text-muted-foreground">
+          Dygnsbryt
+        </Label>
+        <p className="text-xs text-muted-foreground">
+          Tidpunkten som markerar starten på ett nytt dygn vid beräkning av dygnsvila.
+        </p>
+        <Input
+          id="dygnsbryt"
+          type="time"
+          value={input.dygnsbryt || "06:00"}
+          onChange={(e) => update("dygnsbryt", e.target.value)}
+          className="w-32 text-lg h-12"
+        />
+      </div>
+
       {/* Föregående arbetsdag */}
       <fieldset className="space-y-3">
-        <div>
-          <Label htmlFor="dygnsbryt" className="text-sm font-bold text-muted-foreground">
-            Dygnsbryt
-          </Label>
-          <p className="text-xs text-muted-foreground mt-0.5 mb-2">
-            Tidpunkten som markerar starten på ett nytt dygn vid beräkning av dygnsvila.
-          </p>
-          <Input
-            id="dygnsbryt"
-            type="time"
-            value={input.dygnsbryt || "06:00"}
-            onChange={(e) => update("dygnsbryt", e.target.value)}
-            className="w-32 text-lg h-12"
-          />
-        </div>
         <legend className="text-sm font-bold text-muted-foreground mb-1">
           Ordinarie schema dagen innan störningen inträffade
         </legend>
