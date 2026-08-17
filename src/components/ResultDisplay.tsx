@@ -4,9 +4,10 @@ import { Clock, Shield, AlertTriangle, Info, Banknote } from "lucide-react";
 interface ResultDisplayProps {
   result: CalcResult;
   workDayStart: string;
+  nextDayOff?: boolean;
 }
 
-export default function ResultDisplay({ result, workDayStart }: ResultDisplayProps) {
+export default function ResultDisplay({ result, workDayStart, nextDayOff }: ResultDisplayProps) {
   const paidLeaveHours = Math.min(
     result.activeWorkHours,
     6 + result.totalInskranktDygnsvila,
@@ -64,6 +65,11 @@ export default function ResultDisplay({ result, workDayStart }: ResultDisplayPro
             <p className="text-sm text-muted-foreground mt-1">
               Dygnsvilan inskränktes med {formatHoursShort(result.totalInskranktDygnsvila)} (längsta sammanhängande vila var {formatHoursShort(result.longestContinuousRest)} av 11 h)
             </p>
+            {nextDayOff && (
+              <p className="text-sm text-muted-foreground mt-2">
+                Du har ej rätt till extra vila eftersom du redan är ledig enligt ordinarie schema.
+              </p>
+            )}
           </div>
         </div>
       </div>

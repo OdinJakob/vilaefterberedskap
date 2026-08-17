@@ -222,9 +222,13 @@ export default function WeekView() {
       });
       const activeWorkHours = rawDistItems.reduce((s, it) => s + it.dur, 0) / 60;
       const nightWorkHours = rawDistItems.reduce((s, it) => s + it.night, 0) / 60;
-      const mandatoryRestHours = nightWorkHours;
+      const mandatoryRestHours = ownShift.ledig ? 0 : nightWorkHours;
       const rawInskrankt = Math.max(0, 11 - longestContinuousRest);
-      const totalInskranktDygnsvila = Math.min(rawInskrankt, activeWorkHours);
+      // Är man ledig enligt ordinarie schema dagen efter störningen finns ingen
+      // rätt till vila pga inskränkt dygnsvila.
+      const totalInskranktDygnsvila = ownShift.ledig
+        ? 0
+        : Math.min(rawInskrankt, activeWorkHours);
       const additionalInskranktHours = Math.max(0, totalInskranktDygnsvila - mandatoryRestHours);
       const totalRestHours = mandatoryRestHours + additionalInskranktHours;
 
