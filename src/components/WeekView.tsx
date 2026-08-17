@@ -222,6 +222,7 @@ export default function WeekView() {
       });
       const activeWorkHours = rawDistItems.reduce((s, it) => s + it.dur, 0) / 60;
       const nightWorkHours = rawDistItems.reduce((s, it) => s + it.night, 0) / 60;
+      const nextDayOff = effectiveShifts[i + 1]?.ledig ?? false;
       const mandatoryRestHours = nextDayOff ? 0 : nightWorkHours;
       const rawInskrankt = Math.max(0, 11 - longestContinuousRest);
       // Är man ledig enligt ordinarie schema dagen efter störningen finns ingen
