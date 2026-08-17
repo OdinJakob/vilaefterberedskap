@@ -32,15 +32,20 @@ export default function ResultDisplay({ result, workDayStart, nextDayOff }: Resu
               Du måste vara ledig
             </h3>
             <p className="text-2xl font-bold text-foreground mt-1">
-              {formatHours(result.mandatoryRestHours)}
+              {nextDayOff ? formatHours(0) : formatHours(result.mandatoryRestHours)}
             </p>
-            {result.mandatoryRestHours > 0 && (
+            {nextDayOff && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Du har ej rätt till extra vila eftersom du redan är ledig enligt ordinarie schema.
+              </p>
+            )}
+            {!nextDayOff && result.mandatoryRestHours > 0 && (
               <p className="text-sm text-muted-foreground mt-1">
                 Du arbetade {formatHoursShort(result.nightWorkHours)} mellan kl 00:00–06:00.
                 Vila läggs ut timme för timme antingen i början av nästa arbetspass, i slutet av nästa arbetspass eller en kombination av dem.
               </p>
             )}
-            {result.mandatoryRestHours === 0 && (
+            {!nextDayOff && result.mandatoryRestHours === 0 && (
               <p className="text-sm text-muted-foreground mt-1">
                 Inget aktivt arbete utfördes mellan kl 00:00–06:00
               </p>
