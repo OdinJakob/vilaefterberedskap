@@ -90,14 +90,22 @@ export default function ResultDisplay({ result, workDayStart, nextDayOff }: Resu
               Du får vara ledig med lön
             </h3>
             <p className="text-2xl font-bold text-foreground mt-1">
-              {formatHours(paidLeaveHours)}
+              {nextDayOff ? formatHours(0) : formatHours(paidLeaveHours)}
             </p>
-            <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-              {formatHours(x)} kan registreras som Veckoberedskap med lön och {formatHours(y)} som inskränkt dygnsvila
-            </p>
-            <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-              Om du har behov av längre vila för att återhämta dig kan ytterligare vila tas ut som veckoberedskap utan lön eller som kompensationstid från din komp bank.
-            </p>
+            {nextDayOff ? (
+              <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                Du har ej rätt till extra vila eftersom du redan är ledig enligt ordinarie schema.
+              </p>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                  {formatHours(x)} kan registreras som Veckoberedskap med lön och {formatHours(y)} som inskränkt dygnsvila
+                </p>
+                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                  Om du har behov av längre vila för att återhämta dig kan ytterligare vila tas ut som veckoberedskap utan lön eller som kompensationstid från din komp bank.
+                </p>
+              </>
+            )}
           </div>
         </div>
       </div>
