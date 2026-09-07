@@ -94,7 +94,7 @@ export default function ResultDisplay({ result, workDayStart, nextDayOff }: Resu
             </p>
             {nextDayOff ? (
               <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                Du har ej rätt till extra vila eftersom du redan är ledig enligt ordinarie schema.
+                Du har ej rätt till extra vila eftersom du redan är ledig enligt ordinarie schema. Vilan tas ut i samråd med chef, beredskapsledare eller samordnare.
               </p>
             ) : (
               <>
@@ -103,6 +103,9 @@ export default function ResultDisplay({ result, workDayStart, nextDayOff }: Resu
                 </p>
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
                   Om du har behov av längre vila för att återhämta dig kan ytterligare vila tas ut som veckoberedskap utan lön eller som kompensationstid från din komp bank.
+                </p>
+                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                  Vilan tas ut i samråd med chef, beredskapsledare eller samordnare.
                 </p>
               </>
             )}
