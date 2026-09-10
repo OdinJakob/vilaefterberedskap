@@ -58,6 +58,8 @@ export interface CalcResult {
   longestContinuousRest: number;
   /** Total inskränkt dygnsvila (11 - längsta vila, max störningstid) */
   totalInskranktDygnsvila: number;
+  /** Inskränkt dygnsvila oavsett rätt till betald vila (informativt) */
+  rawInskranktDygnsvila: number;
   /** Ytterligare inskränkt dygnsvila utöver obligatorisk – "får vara ledig" */
   additionalInskranktHours: number;
   /** Total ledighet (obligatorisk + ytterligare inskränkt) */
@@ -347,7 +349,8 @@ export function calculateRest(input: CalcInput): CalcResult {
   // Inskränkt = 11 - längsta sammanhängande vila, men aldrig längre än störningens varaktighet.
   // Om man är ledig dagen efter störningen finns ingen rätt till betald vila pga inskränkt dygnsvila.
   const rawInskrankt = Math.max(0, DAILY_REST_REQUIRED - longestContinuousRest);
-  const totalInskranktDygnsvila = input.nextDayOff ? 0 : Math.min(rawInskrankt, activeWorkHours);
+  const rawInskranktDygnsvila = Math.min(rawInskrankt, activeWorkHours);
+  const totalInskranktDygnsvila = input.nextDayOff ? 0 : rawInskranktDygnsvila;
 
   // 3. Ytterligare inskränkt dygnsvila utöver obligatorisk vila
   // (det som "får" tas ut utöver det som "ska" tas ut)
@@ -385,6 +388,7 @@ export function calculateRest(input: CalcInput): CalcResult {
     mandatoryRestHours,
     longestContinuousRest,
     totalInskranktDygnsvila,
+    rawInskranktDygnsvila,
     additionalInskranktHours,
     totalRestHours,
     beredskapsvila,

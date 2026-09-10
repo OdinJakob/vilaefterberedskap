@@ -37,9 +37,9 @@ export default function DetailedBreakdown({ result }: DetailedBreakdownProps) {
     },
     {
       label: "Inskränkt dygnsvila (11 h krav)",
-      value: `11 h − ${formatHoursShort(result.longestContinuousRest)} = ${formatHoursShort(result.totalInskranktDygnsvila)}`,
-      detail: result.totalInskranktDygnsvila > 0
-        ? result.totalInskranktDygnsvila <= result.mandatoryRestHours
+      value: `11 h − ${formatHoursShort(result.longestContinuousRest)} = ${formatHoursShort(result.rawInskranktDygnsvila ?? result.totalInskranktDygnsvila)}`,
+      detail: (result.rawInskranktDygnsvila ?? result.totalInskranktDygnsvila) > 0
+        ? (result.rawInskranktDygnsvila ?? result.totalInskranktDygnsvila) <= result.mandatoryRestHours
           ? "Täcks redan av obligatorisk vila"
           : undefined
         : "✓ Dygnsvila uppfylld",

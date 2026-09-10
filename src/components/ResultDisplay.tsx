@@ -67,10 +67,10 @@ export default function ResultDisplay({ result, workDayStart, nextDayOff }: Resu
               Inskränkt dygnsvila
             </h3>
             <p className="text-2xl font-bold text-foreground mt-1">
-              {formatHours(result.totalInskranktDygnsvila)}
+              {formatHours(result.rawInskranktDygnsvila ?? result.totalInskranktDygnsvila)}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              Dygnsvilan inskränktes med {formatHoursShort(result.totalInskranktDygnsvila)} (längsta sammanhängande vila var {formatHoursShort(result.longestContinuousRest)} av 11 h)
+              Dygnsvilan inskränktes med {formatHoursShort(result.rawInskranktDygnsvila ?? result.totalInskranktDygnsvila)} (längsta sammanhängande vila var {formatHoursShort(result.longestContinuousRest)} av 11 h)
             </p>
             {nextDayOff && (
               <p className="text-sm text-muted-foreground mt-2">
