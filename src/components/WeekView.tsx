@@ -21,19 +21,32 @@ interface DayCol {
   ledig: boolean;
   sameAsPrev: boolean;
   disturbances: Disturbance[];
+  usedVeckoberedskap: string;
+  usedInskrankt: string;
 }
 
 function newDay(): DayCol {
-  return { workStart: "07:00", workEnd: "15:30", ledig: false, sameAsPrev: false, disturbances: [] };
+  return {
+    workStart: "07:00",
+    workEnd: "15:30",
+    ledig: false,
+    sameAsPrev: false,
+    disturbances: [],
+    usedVeckoberedskap: "",
+    usedInskrankt: "",
+  };
 }
 
 export default function WeekView() {
   const [days, setDays] = useState<DayCol[]>(() => WEEKDAYS.map(() => newDay()));
   const [disturbanceCount, setDisturbanceCount] = useState(1);
-  const [vilaUsed, setVilaUsed] = useState<number | "">("");
-  const [inskranktUsed, setInskranktUsed] = useState<number | "">("");
   const [showSummaryBreakdown, setShowSummaryBreakdown] = useState(false);
   const [dygnsbryt, setDygnsbryt] = useState<string>("06:00");
+
+  const sumField = (key: "usedVeckoberedskap" | "usedInskrankt") =>
+    days.reduce((s, d) => s + (parseFloat(d[key]) || 0), 0);
+  const vilaUsed: number = sumField("usedVeckoberedskap");
+  const inskranktUsed: number = sumField("usedInskrankt");
 
   // Ensure each day's disturbance array is at least disturbanceCount long
   const ensureDisturbances = (d: DayCol): DayCol => {
