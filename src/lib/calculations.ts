@@ -322,17 +322,21 @@ export function calculateRest(input: CalcInput): CalcResult {
 
   // Längsta vila + vila före/efter störning
   let longestMin = 0;
-  let restBeforeMin = 0;
   let restAfterMin = 0;
   let prevEnd = 0;
   for (let i = 0; i < merged.length; i++) {
     const gap = merged[i].s - prevEnd;
     longestMin = Math.max(longestMin, gap);
-    if (merged[i].kind === "dist") {
-      restBeforeMin = gap;
-    }
     prevEnd = Math.max(prevEnd, merged[i].e);
   }
+
+  // Vila före störning: från föregående pass slut (eller dygnsbryt) till störningens
+  // effektiva start. Överlappar störningens start ordinarie schema räknas störningen
+  // från schemats slut och vilan före störningen blir 0.
+  const prevInt = intervals.find((i) => i.kind === "prev");
+  const prevEndOffset = prevInt ? prevInt.e : 0;
+  const effectiveDistStart = Math.max(disturbanceStartOffset, prevEndOffset);
+  const restBeforeMin = Math.max(0, effectiveDistStart - prevEndOffset);
   const tailGap = 1440 - prevEnd;
   longestMin = Math.max(longestMin, tailGap);
 
