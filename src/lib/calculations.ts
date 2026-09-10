@@ -344,9 +344,10 @@ export function calculateRest(input: CalcInput): CalcResult {
   const restAfterHours = restAfterMin / 60;
   const longestContinuousRest = longestMin / 60;
 
-  // Inskränkt = 11 - längsta sammanhängande vila, men aldrig längre än störningens varaktighet
+  // Inskränkt = 11 - längsta sammanhängande vila, men aldrig längre än störningens varaktighet.
+  // Om man är ledig dagen efter störningen finns ingen rätt till betald vila pga inskränkt dygnsvila.
   const rawInskrankt = Math.max(0, DAILY_REST_REQUIRED - longestContinuousRest);
-  const totalInskranktDygnsvila = Math.min(rawInskrankt, activeWorkHours);
+  const totalInskranktDygnsvila = input.nextDayOff ? 0 : Math.min(rawInskrankt, activeWorkHours);
 
   // 3. Ytterligare inskränkt dygnsvila utöver obligatorisk vila
   // (det som "får" tas ut utöver det som "ska" tas ut)
