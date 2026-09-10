@@ -17,9 +17,7 @@ export default function Index() {
   const [showDetailed, setShowDetailed] = useState(false);
   const [mode, setMode] = useState<"day" | "week">("day");
 
-  const bothDaysOff = !!input.prevDayOff && !!input.nextDayOff;
   const isComplete =
-    !bothDaysOff &&
     input.activeWorkStart !== "" &&
     input.activeWorkEnd !== "" &&
     (input.prevDayOff || (input.prevWorkDayStart !== "" && input.prevWorkDayEnd !== "")) &&
