@@ -256,6 +256,7 @@ export default function WeekView() {
         mandatoryRestHours,
         longestContinuousRest,
         totalInskranktDygnsvila,
+        rawInskranktDygnsvila: Math.min(rawInskrankt, activeWorkHours),
         additionalInskranktHours,
         totalRestHours,
         beredskapsvila: Math.min(totalRestHours, 6),
