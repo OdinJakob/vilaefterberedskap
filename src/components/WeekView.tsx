@@ -526,13 +526,17 @@ export default function WeekView() {
                 <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">Slut ordinarie schema</td>
                 {days.map((d, i) => (
                   <td key={i} className="p-1">
-                    <Input
-                      type="time"
-                      value={effectiveShifts[i].end}
-                      disabled={d.ledig || d.sameAsPrev}
-                      onChange={(e) => updateDay(i, { workEnd: e.target.value })}
-                      className="h-9 text-sm px-2"
-                    />
+                    {d.ledig ? (
+                      <div className="h-9 flex items-center justify-center text-sm text-muted-foreground">—</div>
+                    ) : (
+                      <Input
+                        type="time"
+                        value={effectiveShifts[i].end}
+                        disabled={d.sameAsPrev}
+                        onChange={(e) => updateDay(i, { workEnd: e.target.value })}
+                        className="h-9 text-sm px-2"
+                      />
+                    )}
                   </td>
                 ))}
               </tr>
