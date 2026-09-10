@@ -8,11 +8,13 @@ interface ResultDisplayProps {
 }
 
 export default function ResultDisplay({ result, workDayStart, nextDayOff }: ResultDisplayProps) {
-  const paidLeaveHours = Math.min(
-    result.activeWorkHours,
-    6 + result.totalInskranktDygnsvila,
-    result.remainingWeeklyBeredskapsvila + result.beredskapsvila + result.totalInskranktDygnsvila
-  );
+  const paidLeaveHours = nextDayOff
+    ? 0
+    : Math.min(
+        result.activeWorkHours,
+        6 + result.totalInskranktDygnsvila,
+        result.remainingWeeklyBeredskapsvila + result.beredskapsvila + result.totalInskranktDygnsvila
+      );
 
   const remainingWeeklyBefore = result.remainingWeeklyBeredskapsvila + result.beredskapsvila;
   const xRaw = Math.min(6, remainingWeeklyBefore);
