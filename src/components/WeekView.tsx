@@ -590,7 +590,7 @@ export default function WeekView() {
                   </tr>
                 </Fragment>
               ))}
-              {/* Redan uttagen vila – alltid underst */}
+              {/* Redan uttagen vila – alltid underst, ej fyllbar första dagen */}
               <tr className="border-b bg-muted/20">
                 <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">
                   Uttagen veckoberedskap med lön (timmar)
@@ -602,6 +602,8 @@ export default function WeekView() {
                       min={0}
                       step={0.5}
                       value={d.usedVeckoberedskap}
+                      disabled={i === 0}
+                      placeholder={i === 0 ? "—" : undefined}
                       onChange={(e) => updateDay(i, { usedVeckoberedskap: e.target.value })}
                       className="h-9 text-sm px-2"
                     />
@@ -619,6 +621,8 @@ export default function WeekView() {
                       min={0}
                       step={0.5}
                       value={d.usedInskrankt}
+                      disabled={i === 0}
+                      placeholder={i === 0 ? "—" : undefined}
                       onChange={(e) => updateDay(i, { usedInskrankt: e.target.value })}
                       className="h-9 text-sm px-2"
                     />
