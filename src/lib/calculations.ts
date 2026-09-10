@@ -238,7 +238,9 @@ export function calculateRest(input: CalcInput): CalcResult {
       ? prevWorkEndMins - prevWorkStartMins
       : 1440 - prevWorkStartMins + prevWorkEndMins;
     const prevStartOffset = fwd(prevWorkStartMins);
-    addIntervalAt(prevStartOffset > disturbanceStartOffset ? prevStartOffset - 1440 : prevStartOffset, dur, "prev");
+    // Föregående pass måste sluta senast när störningen startar
+    const shiftBack = prevStartOffset + dur > disturbanceStartOffset;
+    addIntervalAt(shiftBack ? prevStartOffset - 1440 : prevStartOffset, dur, "prev");
   }
   if (!input.nextDayOff) {
     const dur = workEndMins >= workStartMins
