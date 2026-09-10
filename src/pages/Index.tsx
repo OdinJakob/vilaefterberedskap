@@ -91,15 +91,8 @@ export default function Index() {
               </div>
             )}
 
-            {bothDaysOff && (
-              <div className="bg-muted/50 rounded-lg p-4 border border-border/50">
-                <p className="text-sm text-foreground">
-                  Ingen vila beräknas i fliken "En dag" när du är ledig både
-                  dagen före och dagen efter störningen. Använd fliken "Hel
-                  vecka" för att beräkna vila i det här fallet.
-                </p>
-              </div>
-            )}
+
+
 
             {/* Results */}
             {result && (
