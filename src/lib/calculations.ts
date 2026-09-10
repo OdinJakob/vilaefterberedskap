@@ -237,10 +237,12 @@ export function calculateRest(input: CalcInput): CalcResult {
     const dur = prevWorkEndMins >= prevWorkStartMins
       ? prevWorkEndMins - prevWorkStartMins
       : 1440 - prevWorkStartMins + prevWorkEndMins;
-    const prevStartOffset = fwd(prevWorkStartMins);
-    // Föregående pass måste sluta senast när störningen startar
-    const shiftBack = prevStartOffset + dur > disturbanceStartOffset;
-    addIntervalAt(shiftBack ? prevStartOffset - 1440 : prevStartOffset, dur, "prev");
+    let prevStartOffset = fwd(prevWorkStartMins);
+    // Passet tillhör föregående dygn om det annars skulle börja efter störningen i fönstret
+    if (prevStartOffset >= disturbanceStartOffset) prevStartOffset -= 1440;
+    // Om passet överlappar störningens start klipps det vid störningens start
+    const clippedDur = Math.min(dur, disturbanceStartOffset - prevStartOffset);
+    addIntervalAt(prevStartOffset, clippedDur, "prev");
   }
   if (!input.nextDayOff) {
     const dur = workEndMins >= workStartMins
@@ -273,9 +275,13 @@ export function calculateRest(input: CalcInput): CalcResult {
     const prevDur = prevWorkEndMins >= prevWorkStartMins
       ? prevWorkEndMins - prevWorkStartMins
       : 1440 - prevWorkStartMins + prevWorkEndMins;
-    // Föregående pass placeras så att det slutar före (eller vid) störningens start.
+    // Normalfallet: passet slutar före (eller vid) störningens start.
     const gap = ((activeStartMins - prevWorkEndMins) % 1440 + 1440) % 1440;
-    const e = -gap;
+    let e = -gap;
+    // Om passet överlappar störningens start (slutar efter den) räknas det som samma dygn,
+    // så att störningen bara räknas från ordinarie schemats slut.
+    const eFwd = ((prevWorkEndMins - activeStartMins) % 1440 + 1440) % 1440;
+    if (eFwd > 0 && eFwd <= prevDur) e = eFwd;
     workAbs.push({ s: e - prevDur, e });
   }
   if (!input.nextDayOff) {
@@ -316,17 +322,21 @@ export function calculateRest(input: CalcInput): CalcResult {
 
   // Längsta vila + vila före/efter störning
   let longestMin = 0;
-  let restBeforeMin = 0;
   let restAfterMin = 0;
   let prevEnd = 0;
   for (let i = 0; i < merged.length; i++) {
     const gap = merged[i].s - prevEnd;
     longestMin = Math.max(longestMin, gap);
-    if (merged[i].kind === "dist") {
-      restBeforeMin = gap;
-    }
     prevEnd = Math.max(prevEnd, merged[i].e);
   }
+
+  // Vila före störning: från föregående pass slut (eller dygnsbryt) till störningens
+  // effektiva start. Överlappar störningens start ordinarie schema räknas störningen
+  // från schemats slut och vilan före störningen blir 0.
+  const prevInt = intervals.find((i) => i.kind === "prev");
+  const prevEndOffset = prevInt ? prevInt.e : 0;
+  const effectiveDistStart = Math.max(disturbanceStartOffset, prevEndOffset);
+  const restBeforeMin = Math.max(0, effectiveDistStart - prevEndOffset);
   const tailGap = 1440 - prevEnd;
   longestMin = Math.max(longestMin, tailGap);
 

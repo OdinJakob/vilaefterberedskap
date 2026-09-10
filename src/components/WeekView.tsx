@@ -191,21 +191,24 @@ export default function WeekView() {
         }
       }
 
-      // Längsta vila + vila före/efter första störning (för label)
+      // Längsta vila + vila efter sista störning (för label)
       let longestMin = 0;
-      let restBeforeMin = 0;
       let restAfterMin = 0;
       let prevEnd = 0;
-      let firstDistFound = false;
       for (let j = 0; j < merged.length; j++) {
         const gap = merged[j].absS - prevEnd;
         longestMin = Math.max(longestMin, gap);
-        if (merged[j].kind === "dist" && !firstDistFound) {
-          restBeforeMin = gap;
-          firstDistFound = true;
-        }
         prevEnd = Math.max(prevEnd, merged[j].absE);
       }
+
+      // Vila före störning: från dagens ordinarie schemas slut (eller dygnsbryt)
+      // till störningens effektiva start. Överlappar störningens start schemat
+      // räknas störningen från schemats slut och vilan före blir 0.
+      const shiftItem = items.find((it) => it.kind === "shift") ?? null;
+      const distAbsStarts = items.filter((it) => it.kind === "dist").map((it) => it.absS);
+      const firstDistS = distAbsStarts.length ? Math.min(...distAbsStarts) : 0;
+      const shiftE = shiftItem ? shiftItem.absE : 0;
+      const restBeforeMin = Math.max(0, Math.max(firstDistS, shiftE) - shiftE);
       longestMin = Math.max(longestMin, 1440 - prevEnd);
 
       const lastDistEnd = items
@@ -231,7 +234,34 @@ export default function WeekView() {
         const sM = toMin(d.start);
         const eM = toMin(d.end);
         const dur = eM > sM ? eM - sM : 1440 - sM + eM;
-        return { start: d.start, end: d.end, dur, night: nightOverlap(sM, eM) };
+        // Klipp störningen mot dagens ordinarie schema: överlappar starten
+        // räknas störningen från schemats slut, överlappar slutet räknas
+        // den till schemats start.
+        let pieces = [{ s: 0, e: dur }];
+        if (!ownShift.ledig && ownShift.start && ownShift.end) {
+          const shStartM = toMin(ownShift.start);
+          const shEndM = toMin(ownShift.end);
+          const shDur = shEndM >= shStartM ? shEndM - shStartM : 1440 - shStartM + shEndM;
+          const relS = shStartM - sM;
+          const relE = relS + shDur;
+          const next: { s: number; e: number }[] = [];
+          for (const p of pieces) {
+            const os = Math.max(p.s, relS);
+            const oe = Math.min(p.e, relE);
+            if (oe <= os) { next.push(p); continue; }
+            if (p.s < os) next.push({ s: p.s, e: os });
+            if (oe < p.e) next.push({ s: oe, e: p.e });
+          }
+          pieces = next;
+        }
+        const effDur = pieces.reduce((s, p) => s + (p.e - p.s), 0);
+        const night = pieces.reduce((sum, p) => {
+          if (p.e <= p.s) return sum;
+          const cs = ((sM + p.s) % 1440 + 1440) % 1440;
+          const ce = ((sM + p.e) % 1440 + 1440) % 1440;
+          return sum + nightOverlap(cs, ce);
+        }, 0);
+        return { start: d.start, end: d.end, dur: effDur, night };
       });
       const activeWorkHours = rawDistItems.reduce((s, it) => s + it.dur, 0) / 60;
       const nightWorkHours = rawDistItems.reduce((s, it) => s + it.night, 0) / 60;
