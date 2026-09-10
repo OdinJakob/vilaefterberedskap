@@ -85,7 +85,7 @@ export default function WeekView() {
   const resetAll = () => {
     setDays(WEEKDAYS.map(() => newDay()));
     setDisturbanceCount(1);
-    setVilaUsed("");
+    
     setDygnsbryt("06:00");
   };
 
