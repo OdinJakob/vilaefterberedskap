@@ -577,6 +577,41 @@ export default function WeekView() {
                   </tr>
                 </Fragment>
               ))}
+              {/* Redan uttagen vila – alltid underst */}
+              <tr className="border-b bg-muted/20">
+                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">
+                  Uttagen veckoberedskap med lön (timmar)
+                </td>
+                {days.map((d, i) => (
+                  <td key={i} className="p-1">
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.5}
+                      value={d.usedVeckoberedskap}
+                      onChange={(e) => updateDay(i, { usedVeckoberedskap: e.target.value })}
+                      className="h-9 text-sm px-2"
+                    />
+                  </td>
+                ))}
+              </tr>
+              <tr className="bg-muted/20">
+                <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">
+                  Uttagen betald vila pga inskränkt dygnsvila (timmar)
+                </td>
+                {days.map((d, i) => (
+                  <td key={i} className="p-1">
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.5}
+                      value={d.usedInskrankt}
+                      onChange={(e) => updateDay(i, { usedInskrankt: e.target.value })}
+                      className="h-9 text-sm px-2"
+                    />
+                  </td>
+                ))}
+              </tr>
             </tbody>
           </table>
         </div>
@@ -586,50 +621,6 @@ export default function WeekView() {
             <Plus className="mr-1.5 h-3.5 w-3.5" />
             Lägg till fler störningar
           </Button>
-        </div>
-      </div>
-
-      {/* Vila redan uttagen */}
-      <div className="bg-card rounded-lg border p-4 shadow-sm">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">
-              Redan uttagen veckoberedskap med lön denna beredskapsvecka
-            </label>
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min={0}
-                step={0.5}
-                value={vilaUsed}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setVilaUsed(v === "" ? "" : parseFloat(v) || 0);
-                }}
-                className="w-28 h-11 text-lg"
-              />
-              <span className="text-sm text-muted-foreground">timmar</span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">
-              Redan uttagen betald vila pga inskränkt dygnsvila denna beredskapsvecka
-            </label>
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min={0}
-                step={0.5}
-                value={inskranktUsed}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setInskranktUsed(v === "" ? "" : parseFloat(v) || 0);
-                }}
-                className="w-28 h-11 text-lg"
-              />
-              <span className="text-sm text-muted-foreground">timmar</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
