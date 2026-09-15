@@ -577,7 +577,14 @@ export default function WeekView() {
                   <td key={i} className="p-2 text-center">
                     <Checkbox
                       checked={d.ledig}
-                      onCheckedChange={(c) => updateDay(i, { ledig: !!c, sameAsPrev: c ? false : d.sameAsPrev })}
+                      onCheckedChange={(c) =>
+                        updateDay(i, {
+                          ledig: !!c,
+                          sameAsPrev: c ? false : d.sameAsPrev,
+                          usedVeckoberedskap: c ? "" : d.usedVeckoberedskap,
+                          usedInskrankt: c ? "" : d.usedInskrankt,
+                        })
+                      }
                     />
                   </td>
                 ))}
