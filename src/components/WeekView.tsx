@@ -577,7 +577,14 @@ export default function WeekView() {
                   <td key={i} className="p-2 text-center">
                     <Checkbox
                       checked={d.ledig}
-                      onCheckedChange={(c) => updateDay(i, { ledig: !!c, sameAsPrev: c ? false : d.sameAsPrev })}
+                      onCheckedChange={(c) =>
+                        updateDay(i, {
+                          ledig: !!c,
+                          sameAsPrev: c ? false : d.sameAsPrev,
+                          usedVeckoberedskap: c ? "" : d.usedVeckoberedskap,
+                          usedInskrankt: c ? "" : d.usedInskrankt,
+                        })
+                      }
                     />
                   </td>
                 ))}
@@ -629,23 +636,25 @@ export default function WeekView() {
                   </tr>
                 </Fragment>
               ))}
-              {/* Redan uttagen vila – alltid underst, ej fyllbar första dagen */}
+              {/* Redan uttagen vila – alltid underst, ej fyllbar första dagen eller lediga dagar */}
               <tr className="border-b bg-muted/20">
                 <td className="p-2 text-muted-foreground sticky left-0 bg-card z-10">
                   Uttagen veckoberedskap med lön (timmar)
                 </td>
                 {days.map((d, i) => (
                   <td key={i} className="p-1">
-                    <Input
-                      type="number"
-                      min={0}
-                      step={0.5}
-                      value={d.usedVeckoberedskap}
-                      disabled={i === 0}
-                      placeholder={i === 0 ? "—" : undefined}
-                      onChange={(e) => updateDay(i, { usedVeckoberedskap: e.target.value })}
-                      className="h-9 text-sm px-2"
-                    />
+                    {i === 0 || d.ledig ? (
+                      <div className="h-9 flex items-center justify-center text-sm text-muted-foreground">—</div>
+                    ) : (
+                      <Input
+                        type="number"
+                        min={0}
+                        step={0.5}
+                        value={d.usedVeckoberedskap}
+                        onChange={(e) => updateDay(i, { usedVeckoberedskap: e.target.value })}
+                        className="h-9 text-sm px-2"
+                      />
+                    )}
                   </td>
                 ))}
               </tr>
@@ -655,16 +664,18 @@ export default function WeekView() {
                 </td>
                 {days.map((d, i) => (
                   <td key={i} className="p-1">
-                    <Input
-                      type="number"
-                      min={0}
-                      step={0.5}
-                      value={d.usedInskrankt}
-                      disabled={i === 0}
-                      placeholder={i === 0 ? "—" : undefined}
-                      onChange={(e) => updateDay(i, { usedInskrankt: e.target.value })}
-                      className="h-9 text-sm px-2"
-                    />
+                    {i === 0 || d.ledig ? (
+                      <div className="h-9 flex items-center justify-center text-sm text-muted-foreground">—</div>
+                    ) : (
+                      <Input
+                        type="number"
+                        min={0}
+                        step={0.5}
+                        value={d.usedInskrankt}
+                        onChange={(e) => updateDay(i, { usedInskrankt: e.target.value })}
+                        className="h-9 text-sm px-2"
+                      />
+                    )}
                   </td>
                 ))}
               </tr>
