@@ -610,12 +610,16 @@ export default function WeekView() {
                     </td>
                     {days.map((d, i) => (
                       <td key={i} className="p-1">
-                        <Input
-                          type="time"
-                          value={d.disturbances[dIdx]?.start ?? ""}
-                          onChange={(e) => updateDisturbance(i, dIdx, { start: e.target.value })}
-                          className="h-9 text-sm px-2"
-                        />
+                        {i === days.length - 1 ? (
+                          <div className="h-9 flex items-center justify-center text-sm text-muted-foreground">—</div>
+                        ) : (
+                          <Input
+                            type="time"
+                            value={d.disturbances[dIdx]?.start ?? ""}
+                            onChange={(e) => updateDisturbance(i, dIdx, { start: e.target.value })}
+                            className="h-9 text-sm px-2"
+                          />
+                        )}
                       </td>
                     ))}
                   </tr>
@@ -625,12 +629,16 @@ export default function WeekView() {
                     </td>
                     {days.map((d, i) => (
                       <td key={i} className="p-1">
-                        <Input
-                          type="time"
-                          value={d.disturbances[dIdx]?.end ?? ""}
-                          onChange={(e) => updateDisturbance(i, dIdx, { end: e.target.value })}
-                          className="h-9 text-sm px-2"
-                        />
+                        {i === days.length - 1 ? (
+                          <div className="h-9 flex items-center justify-center text-sm text-muted-foreground">—</div>
+                        ) : (
+                          <Input
+                            type="time"
+                            value={d.disturbances[dIdx]?.end ?? ""}
+                            onChange={(e) => updateDisturbance(i, dIdx, { end: e.target.value })}
+                            className="h-9 text-sm px-2"
+                          />
+                        )}
                       </td>
                     ))}
                   </tr>
