@@ -696,9 +696,10 @@ export default function WeekView() {
                       <Input
                         type="number"
                         min={0}
+                        max={6}
                         step={0.5}
                         value={d.usedVeckoberedskap}
-                        onChange={(e) => updateDay(i, { usedVeckoberedskap: e.target.value })}
+                        onChange={(e) => setUsedVeckoberedskap(i, e.target.value)}
                         className="h-9 text-sm px-2"
                       />
                     )}
