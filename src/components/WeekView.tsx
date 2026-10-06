@@ -64,6 +64,34 @@ export default function WeekView() {
     setDays((prev) => prev.map((d, i) => (i === idx ? { ...d, ...patch } : d)));
   };
 
+  const [usedVilaError, setUsedVilaError] = useState<string | null>(null);
+
+  // Max 6 h veckoberedskap med lön per dag och max 8 h totalt per beredskapsvecka.
+  const setUsedVeckoberedskap = (idx: number, raw: string) => {
+    if (raw === "") {
+      setUsedVilaError(null);
+      updateDay(idx, { usedVeckoberedskap: "" });
+      return;
+    }
+    const val = parseFloat(raw) || 0;
+    const others = days.reduce(
+      (s, d, i) => (i === idx ? s : s + (parseFloat(d.usedVeckoberedskap) || 0)),
+      0,
+    );
+    const dayCap = Math.min(6, Math.max(0, 8 - others));
+    if (val > dayCap) {
+      setUsedVilaError(
+        dayCap < 6
+          ? "Max 8 timmar veckoberedskap med lön kan tas ut per beredskapsvecka. Fältet har justerats."
+          : "Max 6 timmar veckoberedskap med lön kan tas ut per dag. Fältet har justerats.",
+      );
+      updateDay(idx, { usedVeckoberedskap: String(dayCap) });
+    } else {
+      setUsedVilaError(null);
+      updateDay(idx, { usedVeckoberedskap: raw });
+    }
+  };
+
   const updateDisturbance = (dayIdx: number, distIdx: number, patch: Partial<Disturbance>) => {
     setDays((prev) =>
       prev.map((d, i) => {
@@ -701,6 +729,10 @@ export default function WeekView() {
             </tbody>
           </table>
         </div>
+
+        {usedVilaError && (
+          <p className="px-4 pt-3 text-sm text-destructive">{usedVilaError}</p>
+        )}
 
         <div className="p-3 border-t">
           <Button variant="outline" size="sm" onClick={addDisturbance} className="w-full">
