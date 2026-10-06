@@ -305,6 +305,9 @@ export default function WeekView() {
     }
 
     const totalEarned = totalMandatory + totalAdditional;
+    const totalDisturbance = breakdowns.reduce((s, b) => s + b.result.activeWorkHours, 0);
+    const vu = typeof vilaUsed === "number" ? vilaUsed : 0;
+    const remainingVecko = Math.max(0, Math.min(8, totalDisturbance) - vu);
     const used =
       (typeof vilaUsed === "number" ? vilaUsed : 0) +
       (typeof inskranktUsed === "number" ? inskranktUsed : 0);
@@ -327,7 +330,7 @@ export default function WeekView() {
     const availableAtEnd = restThuFri !== null
       ? Math.max(0, totalEarned - (typeof inskranktUsed === "number" ? inskranktUsed : 0) + 11 - restThuFri)
       : 0;
-    return { totalMandatory, totalAdditional, totalEarned, remaining, used, breakdowns, restThuFri, availableAtEnd };
+    return { totalDisturbance, remainingVecko, totalMandatory, totalAdditional, totalEarned, remaining, used, breakdowns, restThuFri, availableAtEnd };
   }, [days, disturbanceCount, effectiveShifts, vilaUsed, inskranktUsed, dygnsbryt]);
 
   const distIndices = Array.from({ length: disturbanceCount }, (_, i) => i);
@@ -352,7 +355,7 @@ export default function WeekView() {
           <div className="flex flex-col">
             <p className="text-xs text-muted-foreground h-[4.5rem]">Återstående veckoberedskap med lön</p>
             <p className="text-xl font-bold text-primary">
-              {formatHoursShort(Math.max(0, 8 - (typeof vilaUsed === "number" ? vilaUsed : 0)))}
+              {formatHoursShort(weekSummary.remainingVecko)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Det går inte att ta ut mer veckoberedskap med lön än vad störningen varat
@@ -392,13 +395,17 @@ export default function WeekView() {
                   <span className="font-medium text-foreground">8 h</span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-border/30">
+                  <span className="text-muted-foreground">Summa störningar utanför ordinarie schema (taket blir det lägsta av 8 h och denna summa)</span>
+                  <span className="font-medium text-foreground">{formatHoursShort(weekSummary.totalDisturbance)}</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-border/30">
                   <span className="text-muted-foreground">Redan uttagen veckoberedskap med lön</span>
                   <span className="font-medium text-foreground">− {formatHoursShort(typeof vilaUsed === "number" ? vilaUsed : 0)}</span>
                 </div>
                 <div className="flex justify-between py-1.5 bg-muted/30 -mx-2 px-2 rounded">
                   <span className="text-foreground font-medium">Återstående</span>
                   <span className="font-bold text-primary">
-                    {formatHoursShort(Math.max(0, 8 - (typeof vilaUsed === "number" ? vilaUsed : 0)))}
+                    {formatHoursShort(weekSummary.remainingVecko)}
                   </span>
                 </div>
               </div>
