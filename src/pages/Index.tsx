@@ -46,7 +46,7 @@ export default function Index() {
             <div>
               <h1 className="text-xl font-bold text-foreground">
                 Vila vid beredskap{" "}
-                <span className="text-xs font-normal text-muted-foreground">Testversion 1.8</span>
+                <span className="text-xs font-normal text-muted-foreground">Testversion 1.9</span>
               </h1>
               <p className="text-sm text-muted-foreground">
                 Räkna ut vilken vila du ska och får ta ut efter aktivt arbete under beredskap
