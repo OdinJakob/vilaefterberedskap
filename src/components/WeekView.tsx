@@ -355,7 +355,7 @@ export default function WeekView() {
           <div className="flex flex-col">
             <p className="text-xs text-muted-foreground h-[4.5rem]">Återstående veckoberedskap med lön</p>
             <p className="text-xl font-bold text-primary">
-              {formatHoursShort(weekSummary.remainingVecko)}
+              {formatHoursShort(summary.remainingVecko)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Det går inte att ta ut mer veckoberedskap med lön än vad störningen varat
@@ -396,7 +396,7 @@ export default function WeekView() {
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-border/30">
                   <span className="text-muted-foreground">Summa störningar utanför ordinarie schema (taket blir det lägsta av 8 h och denna summa)</span>
-                  <span className="font-medium text-foreground">{formatHoursShort(weekSummary.totalDisturbance)}</span>
+                  <span className="font-medium text-foreground">{formatHoursShort(summary.totalDisturbance)}</span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-border/30">
                   <span className="text-muted-foreground">Redan uttagen veckoberedskap med lön</span>
@@ -405,7 +405,7 @@ export default function WeekView() {
                 <div className="flex justify-between py-1.5 bg-muted/30 -mx-2 px-2 rounded">
                   <span className="text-foreground font-medium">Återstående</span>
                   <span className="font-bold text-primary">
-                    {formatHoursShort(weekSummary.remainingVecko)}
+                    {formatHoursShort(summary.remainingVecko)}
                   </span>
                 </div>
               </div>
