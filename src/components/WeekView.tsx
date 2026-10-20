@@ -1,5 +1,5 @@
 import { Fragment, useState, useMemo } from "react";
-import { CalcResult, formatHoursShort, isMorningDygnsbryt, restAfterLastWork } from "@/lib/calculations";
+import { CalcResult, formatHoursShort, longestDailyRestMin, restAfterLastWork } from "@/lib/calculations";
 import DetailedBreakdown from "@/components/DetailedBreakdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -232,10 +232,24 @@ export default function WeekView() {
           anchor,
         );
       }
-      const usesRestBefore = isMorningDygnsbryt(anchor);
-      const longestMin = usesRestBefore
-        ? Math.max(restBeforeMin, restAfterMin)
-        : restAfterMin;
+      // Längsta dygnsvila = längsta sammanhängande vila inom dygnet
+      // (definierat av dygnsbrytet). Vila både före och efter arbetet räknas
+      // alltid. Passerar en störning dygnsbrytet bedöms även nästa dygn
+      // (med nästa dags schema), och det sämsta dygnet gäller.
+      const absEvents = rawEvents.map((iv) => ({ s: iv.s, e: iv.e }));
+      const maxEventEnd = absEvents.reduce((m, iv) => Math.max(m, iv.e), 0);
+      if (maxEventEnd > 1440) {
+        const nextShift = effectiveShifts[i + 1];
+        if (nextShift && !nextShift.ledig && nextShift.start && nextShift.end) {
+          const sM = toMin(nextShift.start);
+          const eM = toMin(nextShift.end);
+          const dur = eM >= sM ? eM - sM : 1440 - sM + eM;
+          const absS = fwd(sM) + 1440;
+          absEvents.push({ s: absS, e: absS + dur });
+        }
+      }
+      const usesRestBefore = true;
+      const longestMin = longestDailyRestMin(absEvents, maxEventEnd);
 
       const longestContinuousRest = longestMin / 60;
       // Störningens längd och nattarbete beräknas på de råa klocktiderna,
