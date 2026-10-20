@@ -47,6 +47,12 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
       }
     }
 
+    // Är man ledig det dygn störningen inträffar finns inget ordinarie arbetspass
+    // dagen innan att ta hänsyn till.
+    if (field === "disturbanceDayOff") {
+      newInput.prevDayOff = value as boolean;
+    }
+
     // Validering
     const newErrors: Record<string, string> = {};
     if (typeof newInput.usedBeredskapsvila === "number" && newInput.usedBeredskapsvila > 8) {
@@ -92,12 +98,13 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
         />
       </div>
 
-      {/* Föregående arbetsdag */}
+      {/* Föregående arbetsdag – dolt när du är ledig det dygn störningen inträffar */}
+      {!input.disturbanceDayOff && (
       <fieldset className="space-y-3">
         <legend className="text-sm font-bold text-muted-foreground mb-1">
           Ordinarie schema dagen innan störningen inträffade
         </legend>
-        {!input.prevDayOff && (
+        <div className="grid grid-cols-2 gap-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label htmlFor="prevWorkStart" className="text-xs">Start</Label>
@@ -120,18 +127,8 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
             />
           </div>
         </div>
-        )}
-        <div className="flex items-center gap-2">
-          <Switch
-            id="prevDayOff"
-            checked={!!input.prevDayOff}
-            onCheckedChange={(checked) => update("prevDayOff", checked)}
-          />
-          <Label htmlFor="prevDayOff" className="text-sm text-muted-foreground cursor-pointer">
-            Jag var ledig enligt ordinarie schema (exempelvis helgdag)
-          </Label>
-        </div>
       </fieldset>
+      )}
 
       {/* Aktivt arbete */}
       <fieldset className="space-y-3 mt-8">
