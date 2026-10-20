@@ -24,9 +24,19 @@ describe("ledig det dygn störningen inträffar", () => {
   });
 
   it("visar fortfarande den inskränkta dygnsvilan informativt", () => {
-    const res = calculateRest({ ...base, disturbanceDayOff: true, prevDayOff: true, nextDayOff: true });
+    // Störning 09:00–23:00 på ett ledigt dygn (dygnsbryt 06) inskränker dygnsvilan
+    const res = calculateRest({
+      ...base,
+      activeWorkStart: "09:00",
+      activeWorkEnd: "23:00",
+      crossesMidnight: false,
+      disturbanceDayOff: true,
+      prevDayOff: true,
+      nextDayOff: true,
+    });
     expect(res.rawInskranktDygnsvila).toBeGreaterThan(0);
     expect(res.activeWorkHours).toBeGreaterThan(0);
+    expect(res.totalInskranktDygnsvila).toBe(0);
   });
 
   it("ger kompenserande vila på ett arbetsdygn (t.ex. natten till lördag)", () => {
