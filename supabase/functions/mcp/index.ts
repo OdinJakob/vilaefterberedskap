@@ -176,6 +176,7 @@ function calculateRest(input) {
     nightWorkHours: nightWorkHrs,
     mandatoryRestHours,
     longestContinuousRest,
+    usesRestBeforeInLongest: usesRestBefore,
     totalInskranktDygnsvila,
     rawInskranktDygnsvila,
     additionalInskranktHours,

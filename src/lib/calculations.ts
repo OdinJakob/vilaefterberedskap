@@ -411,6 +411,7 @@ export function calculateRest(input: CalcInput): CalcResult {
     nightWorkHours: nightWorkHrs,
     mandatoryRestHours,
     longestContinuousRest,
+    usesRestBeforeInLongest: usesRestBefore,
     totalInskranktDygnsvila,
     rawInskranktDygnsvila,
     additionalInskranktHours,
