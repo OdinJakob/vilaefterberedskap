@@ -132,28 +132,6 @@ export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDa
         </div>
       </div>
 
-      {/* Beredskapsvila info (only when no additional inskränkt) */}
-      {result.totalInskranktDygnsvila === 0 && result.beredskapsvila > 0 && (
-        <div className="result-card-may rounded-lg border p-5">
-          <div className="flex items-start gap-3">
-            <div className="rounded-full bg-may-rest p-2 mt-0.5">
-              <Clock className="h-4 w-4 text-may-rest-foreground" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-may-rest text-sm uppercase tracking-wide">
-                Veckoberedskap med lön
-              </h3>
-              <p className="text-2xl font-bold text-foreground mt-1">
-                {formatHours(result.beredskapsvila)}
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Du kan använda {formatHoursShort(result.beredskapsvila)} veckoberedskap med lön
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Warnings */}
       {result.warnings.length > 0 && (
         <div className="space-y-2">
