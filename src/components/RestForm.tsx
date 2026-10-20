@@ -105,7 +105,6 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
           Ordinarie schema dagen innan störningen inträffade
         </legend>
         <div className="grid grid-cols-2 gap-3">
-        <div className="grid grid-cols-2 gap-3">
           <div>
             <Label htmlFor="prevWorkStart" className="text-xs">Start</Label>
             <Input
