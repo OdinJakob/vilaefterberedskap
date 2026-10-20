@@ -49,7 +49,20 @@ describe("dygnsvila mäts från sista arbetets slut", () => {
     expect(res.totalInskranktDygnsvila).toBe(0);
   });
 
-  it("räknar inte vilan före störningen vid dygnsbryt på kvällen", () => {
+  it("räknar alltid längsta vilan inom dygnet – störning 05–07 med dygnsbryt 19 ger 10 h", () => {
+    const res = calculateRest({
+      ...base,
+      activeWorkStart: "05:00",
+      activeWorkEnd: "07:00",
+      crossesMidnight: false,
+      dygnsbryt: "19:00",
+    });
+    // Vilan 19:00–05:00 (10 h) ligger inom dygnet och räknas.
+    expect(res.longestContinuousRest).toBe(10);
+    expect(res.totalInskranktDygnsvila).toBe(1);
+  });
+
+  it("räknar vilan före störningen även vid dygnsbryt på kvällen", () => {
     const res = calculateRest({
       ...base,
       activeWorkStart: "06:00",
@@ -58,10 +71,11 @@ describe("dygnsvila mäts från sista arbetets slut", () => {
       dygnsbryt: "19:00",
       prevDayOff: true,
     });
-    expect(res.usesRestBeforeInLongest).toBe(false);
+    expect(res.usesRestBeforeInLongest).toBe(true);
     expect(res.restBeforeDisturbance).toBe(11);
     expect(res.restAfterDisturbance).toBe(0.5);
-    expect(res.longestContinuousRest).toBe(0.5);
-    expect(res.totalInskranktDygnsvila).toBe(0.5);
+    // Längsta vila inom dygnet är 19:00–06:00 = 11 h, så dygnsvilan är uppfylld.
+    expect(res.longestContinuousRest).toBe(11);
+    expect(res.totalInskranktDygnsvila).toBe(0);
   });
 });
