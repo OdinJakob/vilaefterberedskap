@@ -216,9 +216,9 @@ export default function WeekView() {
       const shiftE = shiftItem ? shiftItem.absE : 0;
       const restBeforeMin = Math.max(0, Math.max(firstDistS, shiftE) - shiftE);
 
-      // Dygnsvilan mäts från det sista arbetets slut (sista störningen, eller
-      // dagens ordinarie pass om det slutar senare) till nästa arbetspass eller
-      // dygnsbryt – vila före arbetspasset räknas inte.
+      // Vid dygnsbryt på morgonen är längsta dygnsvila det längsta av
+      // vilan före störningen och vilan efter det sista arbetet. Vid
+      // eftermiddags-/kvällsdygnsbryt räknas bara vilan efter sista arbetet.
       const lastWork = rawEvents.reduce<{ s: number; e: number } | null>(
         (latest, iv) => latest === null || iv.e > latest.e ? { s: iv.s, e: iv.e } : latest,
         null,
@@ -232,7 +232,10 @@ export default function WeekView() {
           anchor,
         );
       }
-      const longestMin = restAfterMin;
+      const usesRestBefore = isMorningDygnsbryt(anchor);
+      const longestMin = usesRestBefore
+        ? Math.max(restBeforeMin, restAfterMin)
+        : restAfterMin;
 
       const longestContinuousRest = longestMin / 60;
       // Störningens längd och nattarbete beräknas på de råa klocktiderna,
@@ -294,6 +297,7 @@ export default function WeekView() {
         nightWorkHours,
         mandatoryRestHours,
         longestContinuousRest,
+        usesRestBeforeInLongest: usesRestBefore,
         totalInskranktDygnsvila,
         rawInskranktDygnsvila: Math.min(rawInskrankt, activeWorkHours),
         additionalInskranktHours,

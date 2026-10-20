@@ -154,6 +154,11 @@ export function restAfterLastWork(
   return Math.max(0, Math.min(ws, nextDygnsbryt) - workEndOffset);
 }
 
+/** Dygnsbryt på morgonen räknas här som efter midnatt och före kl 12. */
+export function isMorningDygnsbryt(dygnsbrytMins: number): boolean {
+  return dygnsbrytMins > 0 && dygnsbrytMins < 12 * 60;
+}
+
 /**
  * Formaterar minuter till HH:mm
  */
