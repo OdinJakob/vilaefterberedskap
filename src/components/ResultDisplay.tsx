@@ -6,6 +6,7 @@ interface ResultDisplayProps {
   workDayStart: string;
   workDayEnd: string;
   nextDayOff?: boolean;
+  disturbanceDayOff?: boolean;
 }
 
 const parseTime = (t: string): number => {
@@ -13,7 +14,7 @@ const parseTime = (t: string): number => {
   return h * 60 + m;
 };
 
-export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDayOff }: ResultDisplayProps) {
+export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDayOff, disturbanceDayOff }: ResultDisplayProps) {
   // Nästa dags ordinarie arbetspass (minus 1 timme lunchrast) sätter ett tak för uttagen ledighet
   const workPassHours = Math.max(0, (parseTime(workDayEnd) - parseTime(workDayStart)) / 60 - 1);
 

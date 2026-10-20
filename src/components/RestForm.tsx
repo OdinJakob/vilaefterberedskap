@@ -26,6 +26,7 @@ const DEFAULT_INPUT: CalcInput = {
   crossesMidnight: false,
   prevDayOff: false,
   nextDayOff: false,
+  disturbanceDayOff: false,
   dygnsbryt: "06:00",
 };
 
@@ -158,6 +159,16 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
               className="mt-1 text-lg h-12"
             />
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Switch
+            id="disturbanceDayOff"
+            checked={!!input.disturbanceDayOff}
+            onCheckedChange={(checked) => update("disturbanceDayOff", checked)}
+          />
+          <Label htmlFor="disturbanceDayOff" className="text-sm text-muted-foreground cursor-pointer">
+            Jag är ledig enligt ordinarie schema det dygn störningen inträffar (exempelvis helgdag)
+          </Label>
         </div>
         <div className="flex items-center gap-2">
           <Switch
