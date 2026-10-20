@@ -168,16 +168,6 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
         </div>
         <div className="flex items-center gap-2">
           <Switch
-            id="disturbanceDayOff"
-            checked={!!input.disturbanceDayOff}
-            onCheckedChange={(checked) => update("disturbanceDayOff", checked)}
-          />
-          <Label htmlFor="disturbanceDayOff" className="text-sm text-muted-foreground cursor-pointer">
-            Jag är ledig enligt ordinarie schema det dygn störningen inträffar (exempelvis helgdag)
-          </Label>
-        </div>
-        <div className="flex items-center gap-2">
-          <Switch
             id="midnight"
             checked={input.crossesMidnight}
             onCheckedChange={(checked) => update("crossesMidnight", checked)}
