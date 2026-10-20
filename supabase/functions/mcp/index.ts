@@ -147,7 +147,8 @@ function calculateRest(input) {
     return sum + nightWorkMinutes(sClock, eClock, crosses);
   }, 0);
   const nightWorkHrs = nightMins / 60;
-  const mandatoryRestHours = nightWorkHrs;
+  const dayOffBlocked = !!input.disturbanceDayOff;
+  const mandatoryRestHours = dayOffBlocked ? 0 : nightWorkHrs;
   let longestMin = 0;
   let restAfterMin = 0;
   let prevEnd = 0;
@@ -180,7 +181,7 @@ function calculateRest(input) {
   const longestContinuousRest = longestMin / 60;
   const rawInskrankt = Math.max(0, DAILY_REST_REQUIRED - longestContinuousRest);
   const rawInskranktDygnsvila = Math.min(rawInskrankt, activeWorkHours);
-  const totalInskranktDygnsvila = rawInskranktDygnsvila;
+  const totalInskranktDygnsvila = dayOffBlocked ? 0 : rawInskranktDygnsvila;
   const additionalInskranktHours = Math.max(0, totalInskranktDygnsvila - mandatoryRestHours);
   const totalRestHours = mandatoryRestHours + additionalInskranktHours;
   const remainingWeekly = Math.max(0, WEEKLY_BEREDSKAPSVILA_MAX - input.usedBeredskapsvila);
