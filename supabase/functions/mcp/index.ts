@@ -148,7 +148,7 @@ function calculateRest(input) {
   }, 0);
   const nightWorkHrs = nightMins / 60;
   const dayOffBlocked = !!input.disturbanceDayOff;
-  const mandatoryRestHours = dayOffBlocked ? 0 : nightWorkHrs;
+  const mandatoryRestHours = nightWorkHrs;
   let longestMin = 0;
   let restAfterMin = 0;
   let prevEnd = 0;

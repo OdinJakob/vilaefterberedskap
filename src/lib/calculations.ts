@@ -323,7 +323,8 @@ export function calculateRest(input: CalcInput): CalcResult {
   // Är man ledig det dygn (enligt dygnsbryt) störningen inträffar tjänas ingen
   // kompenserande vila in – varken obligatorisk vila eller inskränkt dygnsvila.
   const dayOffBlocked = !!input.disturbanceDayOff;
-  const mandatoryRestHours = dayOffBlocked ? 0 : nightWorkHrs;
+  // Obligatorisk vila (arbete 00–06) gäller även om störningsdygnet var ledigt.
+  const mandatoryRestHours = nightWorkHrs;
 
   // Längsta vila + vila före/efter störning
   let longestMin = 0;
