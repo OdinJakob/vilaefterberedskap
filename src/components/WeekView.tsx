@@ -329,7 +329,9 @@ export default function WeekView() {
         warnings: [],
       };
       breakdowns.push({
-        label: `${WEEKDAYS[i]} (${distLabel})`,
+        label: dayOffBlocked
+          ? `${WEEKDAYS[i]} (${distLabel}) – ledig dag, ingen kompenserande vila tjänas in`
+          : `${WEEKDAYS[i]} (${distLabel})`,
         result,
       });
     }
