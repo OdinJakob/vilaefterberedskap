@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "sdk_version": "3.1.1",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "beredskapsvila-guide",
+      "version": "0.1.0",
+      "title": "Beredskapsvila Guide"
+    },
+    "tools": [
+      {
+        "name": "berakna-vila",
+        "title": "Beräkna beredskapsvila",
+        "description": "Beräknar obligatorisk vila, inskränkt dygnsvila och beredskapsvila med lön för en störning under beredskap, enligt veckoberedskapsavtalet.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "activeWorkStart": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+              "description": "Starttid för aktivt arbete under störningen (HH:mm)."
+            },
+            "activeWorkEnd": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+              "description": "Sluttid för aktivt arbete under störningen (HH:mm)."
+            },
+            "prevWorkDayStart": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+              "description": "Start ordinarie schema dagen före störningen (HH:mm)."
+            },
+            "prevWorkDayEnd": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+              "description": "Slut ordinarie schema dagen före störningen (HH:mm)."
+            },
+            "workDayStart": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+              "description": "Start ordinarie schema dagen efter störningen (HH:mm)."
+            },
+            "workDayEnd": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+              "description": "Slut ordinarie schema dagen efter störningen (HH:mm)."
+            },
+            "usedBeredskapsvila": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 8,
+              "description": "Redan uttagen betald beredskapsvila denna beredskapsvecka, i timmar."
+            },
+            "crossesMidnight": {
+              "type": "boolean",
+              "description": "Om störningens aktiva arbete passerar midnatt."
+            },
+            "prevDayOff": {
+              "type": "boolean",
+              "description": "Sant om användaren var ledig enligt ordinarie schema dagen före störningen."
+            },
+            "nextDayOff": {
+              "type": "boolean",
+              "description": "Sant om användaren är ledig enligt ordinarie schema dagen efter störningen."
+            },
+            "dygnsbryt": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+              "description": "Dygnsbryt (HH:mm), t.ex. 06:00."
+            }
+          },
+          "required": [
+            "activeWorkStart",
+            "activeWorkEnd",
+            "prevWorkDayStart",
+            "prevWorkDayEnd",
+            "workDayStart",
+            "workDayEnd",
+            "usedBeredskapsvila",
+            "crossesMidnight"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
