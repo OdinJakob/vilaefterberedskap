@@ -279,19 +279,6 @@ export function calculateRest(input: CalcInput): CalcResult {
   }
   addIntervalAt(disturbanceStartOffset, activeWorkMinutes, "dist");
 
-  // Sortera och slå ihop ev. överlapp (störning vinner som kind)
-  intervals.sort((a, b) => a.s - b.s);
-  const merged: Interval[] = [];
-  for (const iv of intervals) {
-    const last = merged[merged.length - 1];
-    if (last && iv.s <= last.e) {
-      last.e = Math.max(last.e, iv.e);
-      if (iv.kind === "dist") last.kind = "dist";
-    } else {
-      merged.push({ ...iv });
-    }
-  }
-
   // Aktivt arbete: störningens varaktighet exkl. överlapp med ordinarie schema.
   // Beräknas på störningens absoluta klocktider, oberoende av dygnsbrytet.
   // Om störningen börjar under ett ordinarie pass räknas den först från passets slut,
@@ -333,7 +320,6 @@ export function calculateRest(input: CalcInput): CalcResult {
   }
   const activeWorkHours =
     distPieces.reduce((s, i) => s + (i.e - i.s), 0) / 60;
-  const distIntervals = intervals.filter((i) => i.kind === "dist");
 
   // Natt-overlap för störningen – baseras på absoluta klocktider.
   const nightMins = distPieces.reduce((sum, p) => {

@@ -95,17 +95,6 @@ function calculateRest(input) {
     addIntervalAt(nextStartOffset <= disturbanceStartOffset ? nextStartOffset + 1440 : nextStartOffset, dur, "next");
   }
   addIntervalAt(disturbanceStartOffset, activeWorkMinutes, "dist");
-  intervals.sort((a, b) => a.s - b.s);
-  const merged = [];
-  for (const iv of intervals) {
-    const last = merged[merged.length - 1];
-    if (last && iv.s <= last.e) {
-      last.e = Math.max(last.e, iv.e);
-      if (iv.kind === "dist") last.kind = "dist";
-    } else {
-      merged.push({ ...iv });
-    }
-  }
   const workAbs = [];
   if (!input.prevDayOff) {
     const prevDur = prevWorkEndMins >= prevWorkStartMins ? prevWorkEndMins - prevWorkStartMins : 1440 - prevWorkStartMins + prevWorkEndMins;
@@ -137,7 +126,6 @@ function calculateRest(input) {
     distPieces = next;
   }
   const activeWorkHours = distPieces.reduce((s, i) => s + (i.e - i.s), 0) / 60;
-  const distIntervals = intervals.filter((i) => i.kind === "dist");
   const nightMins = distPieces.reduce((sum, p) => {
     const sClock = ((activeStartMins + p.s) % 1440 + 1440) % 1440;
     const eClock = ((activeStartMins + p.e) % 1440 + 1440) % 1440;
