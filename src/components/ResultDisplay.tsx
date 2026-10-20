@@ -4,17 +4,28 @@ import { Clock, Shield, AlertTriangle, Info, Banknote } from "lucide-react";
 interface ResultDisplayProps {
   result: CalcResult;
   workDayStart: string;
+  workDayEnd: string;
   nextDayOff?: boolean;
 }
 
-export default function ResultDisplay({ result, workDayStart, nextDayOff }: ResultDisplayProps) {
-  const paidLeaveHours = nextDayOff
-    ? 0
-    : Math.min(
-        result.activeWorkHours,
-        6 + result.totalInskranktDygnsvila,
-        result.remainingWeeklyBeredskapsvila + result.beredskapsvila + result.totalInskranktDygnsvila
-      );
+const parseTime = (t: string): number => {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+};
+
+export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDayOff }: ResultDisplayProps) {
+  // Nästa dags ordinarie arbetspass (minus 1 timme lunchrast) sätter ett tak för uttagen ledighet
+  const workPassHours = Math.max(0, (parseTime(workDayEnd) - parseTime(workDayStart)) / 60 - 1);
+
+  const uncappedPaidLeaveHours = Math.min(
+    result.activeWorkHours,
+    6 + result.totalInskranktDygnsvila,
+    result.remainingWeeklyBeredskapsvila + result.beredskapsvila + result.totalInskranktDygnsvila
+  );
+  const paidLeaveHours = nextDayOff ? 0 : Math.min(uncappedPaidLeaveHours, workPassHours);
+  const savedInPot = !nextDayOff && paidLeaveHours < uncappedPaidLeaveHours
+    ? uncappedPaidLeaveHours - paidLeaveHours
+    : 0;
 
   const remainingWeeklyBefore = result.remainingWeeklyBeredskapsvila + result.beredskapsvila;
   const xRaw = Math.min(6, remainingWeeklyBefore);
@@ -103,6 +114,11 @@ export default function ResultDisplay({ result, workDayStart, nextDayOff }: Resu
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
                   {formatHours(x)} kan registreras som Veckoberedskap med lön och {formatHours(y)} som inskränkt dygnsvila
                 </p>
+                {savedInPot > 0 && (
+                  <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                    Ledigheten begränsas av längden på ditt ordinarie arbetspass nästa dag (minus en timme för lunchrast). Resterande {formatHoursShort(savedInPot)} inskränkt dygnsvila sparas i potten och kan tas ut när beredskapsveckan är slut eller efter störningar senare under beredskapsveckan.
+                  </p>
+                )}
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
                   Om du har behov av längre vila för att återhämta dig kan ytterligare vila tas ut som veckoberedskap utan lön eller som kompensationstid från din komp bank.
                 </p>

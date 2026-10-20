@@ -97,7 +97,7 @@ export default function Index() {
             {/* Results */}
             {result && (
               <>
-                <ResultDisplay result={result} workDayStart={input.workDayStart} nextDayOff={input.nextDayOff} />
+                <ResultDisplay result={result} workDayStart={input.workDayStart} workDayEnd={input.workDayEnd} nextDayOff={input.nextDayOff} />
                 {showDetailed && <DetailedBreakdown result={result} />}
               </>
             )}
