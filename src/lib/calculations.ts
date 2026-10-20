@@ -129,6 +129,30 @@ export function minutesUntilWorkStartOrDygnsbryt(
 }
 
 /**
+ * Vila från det sista arbetets slut (störning eller ordinarie pass) till
+ * nästa arbetspass eller dygnsbryt, vilket som infaller först.
+ * Start- och slutoffset kan ligga bortom dygnsfönstret (> 1440) om
+ * störningen sträcker sig över dygnsbrytet.
+ */
+export function restAfterLastWork(
+  workStartOffset: number,
+  workEndOffset: number,
+  nextWorkStartClockMins: number | null,
+  dygnsbrytMins: number,
+): number {
+  const nextDygnsbryt = (Math.floor(workEndOffset / 1440) + 1) * 1440;
+  if (nextWorkStartClockMins === null) {
+    return Math.max(0, nextDygnsbryt - workEndOffset);
+  }
+  const ws0 = windowOffset(nextWorkStartClockMins, dygnsbrytMins);
+  // Börjar nästa arbetspass inne i det aktuella arbetet finns ingen vila.
+  if (ws0 > workStartOffset && ws0 <= workEndOffset) return 0;
+  let ws = ws0;
+  while (ws <= workEndOffset) ws += 1440;
+  return Math.max(0, Math.min(ws, nextDygnsbryt) - workEndOffset);
+}
+
+/**
  * Formaterar minuter till HH:mm
  */
 function minutesToTime(minutes: number): string {
@@ -255,19 +279,6 @@ export function calculateRest(input: CalcInput): CalcResult {
   }
   addIntervalAt(disturbanceStartOffset, activeWorkMinutes, "dist");
 
-  // Sortera och slå ihop ev. överlapp (störning vinner som kind)
-  intervals.sort((a, b) => a.s - b.s);
-  const merged: Interval[] = [];
-  for (const iv of intervals) {
-    const last = merged[merged.length - 1];
-    if (last && iv.s <= last.e) {
-      last.e = Math.max(last.e, iv.e);
-      if (iv.kind === "dist") last.kind = "dist";
-    } else {
-      merged.push({ ...iv });
-    }
-  }
-
   // Aktivt arbete: störningens varaktighet exkl. överlapp med ordinarie schema.
   // Beräknas på störningens absoluta klocktider, oberoende av dygnsbrytet.
   // Om störningen börjar under ett ordinarie pass räknas den först från passets slut,
@@ -309,7 +320,6 @@ export function calculateRest(input: CalcInput): CalcResult {
   }
   const activeWorkHours =
     distPieces.reduce((s, i) => s + (i.e - i.s), 0) / 60;
-  const distIntervals = intervals.filter((i) => i.kind === "dist");
 
   // Natt-overlap för störningen – baseras på absoluta klocktider.
   const nightMins = distPieces.reduce((sum, p) => {
@@ -326,16 +336,6 @@ export function calculateRest(input: CalcInput): CalcResult {
   // Obligatorisk vila (arbete 00–06) gäller även om störningsdygnet var ledigt.
   const mandatoryRestHours = nightWorkHrs;
 
-  // Längsta vila + vila före/efter störning
-  let longestMin = 0;
-  let restAfterMin = 0;
-  let prevEnd = 0;
-  for (let i = 0; i < merged.length; i++) {
-    const gap = merged[i].s - prevEnd;
-    longestMin = Math.max(longestMin, gap);
-    prevEnd = Math.max(prevEnd, merged[i].e);
-  }
-
   // Vila före störning: från föregående pass slut (eller dygnsbryt) till störningens
   // effektiva start. Överlappar störningens start ordinarie schema räknas störningen
   // från schemats slut och vilan före störningen blir 0.
@@ -343,22 +343,17 @@ export function calculateRest(input: CalcInput): CalcResult {
   const prevEndOffset = prevInt ? prevInt.e : 0;
   const effectiveDistStart = Math.max(disturbanceStartOffset, prevEndOffset);
   const restBeforeMin = Math.max(0, effectiveDistStart - prevEndOffset);
-  const tailGap = 1440 - prevEnd;
-  longestMin = Math.max(longestMin, tailGap);
 
-  const lastDist = distIntervals.reduce<{ s: number; e: number } | null>(
-    (latest, iv) => latest === null || iv.e > latest.e ? iv : latest,
-    null,
+  // Dygnsvilan mäts från det sista arbetets slut (störningens slut, eller
+  // dagens ordinarie pass om det slutar senare) till nästa arbetspass eller
+  // dygnsbryt – vila före arbetspasset räknas inte.
+  const restAfterMin = restAfterLastWork(
+    disturbanceStartOffset,
+    Math.max(disturbanceEndOffset, prevEndOffset),
+    input.nextDayOff ? null : workStartMins,
+    dygnsbrytMins,
   );
-  if (lastDist !== null) {
-    restAfterMin = minutesUntilWorkStartOrDygnsbryt(
-      lastDist.e,
-      input.nextDayOff ? null : workStartMins,
-      dygnsbrytMins,
-      lastDist.s,
-    );
-    longestMin = Math.max(longestMin, restAfterMin);
-  }
+  const longestMin = restAfterMin;
 
   const restBeforeHours = restBeforeMin / 60;
   const restAfterHours = restAfterMin / 60;

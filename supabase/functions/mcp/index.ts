@@ -22,17 +22,16 @@ function timeToMinutes(time) {
 function windowOffset(clockMins, dygnsbrytMins) {
   return ((clockMins - dygnsbrytMins) % 1440 + 1440) % 1440;
 }
-function minutesUntilWorkStartOrDygnsbryt(disturbanceEndOffset, workStartClockMins, dygnsbrytMins, disturbanceStartOffset) {
-  const nextDygnsbryt = 1440;
-  if (workStartClockMins === null) {
-    return Math.max(0, nextDygnsbryt - disturbanceEndOffset);
+function restAfterLastWork(workStartOffset, workEndOffset, nextWorkStartClockMins, dygnsbrytMins) {
+  const nextDygnsbryt = (Math.floor(workEndOffset / 1440) + 1) * 1440;
+  if (nextWorkStartClockMins === null) {
+    return Math.max(0, nextDygnsbryt - workEndOffset);
   }
-  const workStartOffset = windowOffset(workStartClockMins, dygnsbrytMins);
-  if (disturbanceStartOffset !== void 0 && workStartOffset > disturbanceStartOffset && workStartOffset <= disturbanceEndOffset) {
-    return 0;
-  }
-  const nextWorkStart = workStartOffset <= disturbanceEndOffset ? workStartOffset + 1440 : workStartOffset;
-  return Math.max(0, Math.min(nextWorkStart, nextDygnsbryt) - disturbanceEndOffset);
+  const ws0 = windowOffset(nextWorkStartClockMins, dygnsbrytMins);
+  if (ws0 > workStartOffset && ws0 <= workEndOffset) return 0;
+  let ws = ws0;
+  while (ws <= workEndOffset) ws += 1440;
+  return Math.max(0, Math.min(ws, nextDygnsbryt) - workEndOffset);
 }
 function minutesToTime(minutes) {
   const totalMins = (minutes % 1440 + 1440) % 1440;
@@ -96,17 +95,6 @@ function calculateRest(input) {
     addIntervalAt(nextStartOffset <= disturbanceStartOffset ? nextStartOffset + 1440 : nextStartOffset, dur, "next");
   }
   addIntervalAt(disturbanceStartOffset, activeWorkMinutes, "dist");
-  intervals.sort((a, b) => a.s - b.s);
-  const merged = [];
-  for (const iv of intervals) {
-    const last = merged[merged.length - 1];
-    if (last && iv.s <= last.e) {
-      last.e = Math.max(last.e, iv.e);
-      if (iv.kind === "dist") last.kind = "dist";
-    } else {
-      merged.push({ ...iv });
-    }
-  }
   const workAbs = [];
   if (!input.prevDayOff) {
     const prevDur = prevWorkEndMins >= prevWorkStartMins ? prevWorkEndMins - prevWorkStartMins : 1440 - prevWorkStartMins + prevWorkEndMins;
@@ -138,7 +126,6 @@ function calculateRest(input) {
     distPieces = next;
   }
   const activeWorkHours = distPieces.reduce((s, i) => s + (i.e - i.s), 0) / 60;
-  const distIntervals = intervals.filter((i) => i.kind === "dist");
   const nightMins = distPieces.reduce((sum, p) => {
     const sClock = ((activeStartMins + p.s) % 1440 + 1440) % 1440;
     const eClock = ((activeStartMins + p.e) % 1440 + 1440) % 1440;
@@ -149,33 +136,17 @@ function calculateRest(input) {
   const nightWorkHrs = nightMins / 60;
   const dayOffBlocked = !!input.disturbanceDayOff;
   const mandatoryRestHours = nightWorkHrs;
-  let longestMin = 0;
-  let restAfterMin = 0;
-  let prevEnd = 0;
-  for (let i = 0; i < merged.length; i++) {
-    const gap = merged[i].s - prevEnd;
-    longestMin = Math.max(longestMin, gap);
-    prevEnd = Math.max(prevEnd, merged[i].e);
-  }
   const prevInt = intervals.find((i) => i.kind === "prev");
   const prevEndOffset = prevInt ? prevInt.e : 0;
   const effectiveDistStart = Math.max(disturbanceStartOffset, prevEndOffset);
   const restBeforeMin = Math.max(0, effectiveDistStart - prevEndOffset);
-  const tailGap = 1440 - prevEnd;
-  longestMin = Math.max(longestMin, tailGap);
-  const lastDist = distIntervals.reduce(
-    (latest, iv) => latest === null || iv.e > latest.e ? iv : latest,
-    null
+  const restAfterMin = restAfterLastWork(
+    disturbanceStartOffset,
+    Math.max(disturbanceEndOffset, prevEndOffset),
+    input.nextDayOff ? null : workStartMins,
+    dygnsbrytMins
   );
-  if (lastDist !== null) {
-    restAfterMin = minutesUntilWorkStartOrDygnsbryt(
-      lastDist.e,
-      input.nextDayOff ? null : workStartMins,
-      dygnsbrytMins,
-      lastDist.s
-    );
-    longestMin = Math.max(longestMin, restAfterMin);
-  }
+  const longestMin = restAfterMin;
   const restBeforeHours = restBeforeMin / 60;
   const restAfterHours = restAfterMin / 60;
   const longestContinuousRest = longestMin / 60;
