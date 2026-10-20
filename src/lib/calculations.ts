@@ -43,6 +43,8 @@ export interface CalcInput {
   prevDayOff?: boolean;
   /** Ledig nästkommande dag (ingen ordinarie arbetstid dagen efter) */
   nextDayOff?: boolean;
+  /** Ledig det dygn (enligt dygnsbryt) störningen inträffar – ingen kompenserande vila tjänas in */
+  disturbanceDayOff?: boolean;
   /** Dygnsbryt (HH:mm) – ankare för 24-timmarsperioden */
   dygnsbryt?: string;
 }
@@ -318,7 +320,10 @@ export function calculateRest(input: CalcInput): CalcResult {
     return sum + nightWorkMinutes(sClock, eClock, crosses);
   }, 0);
   const nightWorkHrs = nightMins / 60;
-  const mandatoryRestHours = nightWorkHrs;
+  // Är man ledig det dygn (enligt dygnsbryt) störningen inträffar tjänas ingen
+  // kompenserande vila in – varken obligatorisk vila eller inskränkt dygnsvila.
+  const dayOffBlocked = !!input.disturbanceDayOff;
+  const mandatoryRestHours = dayOffBlocked ? 0 : nightWorkHrs;
 
   // Längsta vila + vila före/efter störning
   let longestMin = 0;
@@ -363,7 +368,7 @@ export function calculateRest(input: CalcInput): CalcResult {
   // i samband med dygnsvila vid beredskapsperiodens slut.
   const rawInskrankt = Math.max(0, DAILY_REST_REQUIRED - longestContinuousRest);
   const rawInskranktDygnsvila = Math.min(rawInskrankt, activeWorkHours);
-  const totalInskranktDygnsvila = rawInskranktDygnsvila;
+  const totalInskranktDygnsvila = dayOffBlocked ? 0 : rawInskranktDygnsvila;
 
   // 3. Ytterligare inskränkt dygnsvila utöver obligatorisk vila
   // (det som "får" tas ut utöver det som "ska" tas ut)
