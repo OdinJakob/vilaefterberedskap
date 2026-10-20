@@ -1,5 +1,5 @@
 import { Fragment, useState, useMemo } from "react";
-import { CalcResult, formatHoursShort, minutesUntilWorkStartOrDygnsbryt } from "@/lib/calculations";
+import { CalcResult, formatHoursShort, restAfterLastWork } from "@/lib/calculations";
 import DetailedBreakdown from "@/components/DetailedBreakdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -207,28 +207,6 @@ export default function WeekView() {
         .filter((it) => it.dur > 0)
         .sort((a, b) => a.absS - b.absS);
 
-      // Slå ihop ev. överlapp (störning vinner)
-      const merged: typeof items = [];
-      for (const it of items) {
-        const last = merged[merged.length - 1];
-        if (last && it.absS <= last.absE) {
-          last.absE = Math.max(last.absE, it.absE);
-          if (it.kind === "dist") last.kind = "dist";
-        } else {
-          merged.push({ ...it });
-        }
-      }
-
-      // Längsta vila + vila efter sista störning (för label)
-      let longestMin = 0;
-      let restAfterMin = 0;
-      let prevEnd = 0;
-      for (let j = 0; j < merged.length; j++) {
-        const gap = merged[j].absS - prevEnd;
-        longestMin = Math.max(longestMin, gap);
-        prevEnd = Math.max(prevEnd, merged[j].absE);
-      }
-
       // Vila före störning: från dagens ordinarie schemas slut (eller dygnsbryt)
       // till störningens effektiva start. Överlappar störningens start schemat
       // räknas störningen från schemats slut och vilan före blir 0.
@@ -237,23 +215,24 @@ export default function WeekView() {
       const firstDistS = distAbsStarts.length ? Math.min(...distAbsStarts) : 0;
       const shiftE = shiftItem ? shiftItem.absE : 0;
       const restBeforeMin = Math.max(0, Math.max(firstDistS, shiftE) - shiftE);
-      longestMin = Math.max(longestMin, 1440 - prevEnd);
 
-      const lastDistEnd = items
-        .filter((it) => it.kind === "dist")
-        .reduce<{ absS: number; absE: number } | null>(
-          (latest, it) => latest === null || it.absE > latest.absE ? it : latest,
-          null,
-        );
-      if (lastDistEnd !== null) {
-        restAfterMin = minutesUntilWorkStartOrDygnsbryt(
-          lastDistEnd.absE,
+      // Dygnsvilan mäts från det sista arbetets slut (sista störningen, eller
+      // dagens ordinarie pass om det slutar senare) till nästa arbetspass eller
+      // dygnsbryt – vila före arbetspasset räknas inte.
+      const lastWork = rawEvents.reduce<{ s: number; e: number } | null>(
+        (latest, iv) => latest === null || iv.e > latest.e ? { s: iv.s, e: iv.e } : latest,
+        null,
+      );
+      let restAfterMin = 0;
+      if (lastWork !== null) {
+        restAfterMin = restAfterLastWork(
+          lastWork.s,
+          lastWork.e,
           ownShift.ledig || !ownShift.start ? null : toMin(ownShift.start),
           anchor,
-          lastDistEnd.absS,
         );
-        longestMin = Math.max(longestMin, restAfterMin);
       }
+      const longestMin = restAfterMin;
 
       const longestContinuousRest = longestMin / 60;
       // Störningens längd och nattarbete beräknas på de råa klocktiderna,
