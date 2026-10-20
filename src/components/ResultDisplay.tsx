@@ -45,11 +45,11 @@ export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDa
               Du måste vara ledig
             </h3>
             <p className="text-2xl font-bold text-foreground mt-1">
-              {nextDayOff ? formatHours(0) : formatHours(result.mandatoryRestHours)}
+              {formatHours(result.mandatoryRestHours)}
             </p>
             {nextDayOff && (
               <p className="text-sm text-muted-foreground mt-1">
-                Du har ej rätt till extra vila eftersom du redan är ledig enligt ordinarie schema. Vilan tas ut i samråd med chef, beredskapsledare eller samordnare.
+                Du är ledig enligt ordinarie schema nästa dag. Vilan sparas i potten och kan tas ut i samband med dygnsvila vid beredskapsperiodens slut. Vilan tas ut i samråd med chef, beredskapsledare eller samordnare.
               </p>
             )}
             {!nextDayOff && result.mandatoryRestHours > 0 && (
@@ -83,11 +83,6 @@ export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDa
             <p className="text-sm text-muted-foreground mt-1">
               Dygnsvilan inskränktes med {formatHoursShort(result.rawInskranktDygnsvila ?? result.totalInskranktDygnsvila)} (längsta sammanhängande vila var {formatHoursShort(result.longestContinuousRest)} av 11 h)
             </p>
-            {nextDayOff && (
-              <p className="text-sm text-muted-foreground mt-2">
-                Du har ej rätt till extra vila eftersom du redan är ledig enligt ordinarie schema.
-              </p>
-            )}
           </div>
         </div>
       </div>
@@ -107,7 +102,7 @@ export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDa
             </p>
             {nextDayOff ? (
               <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                Du har ej rätt till extra vila eftersom du redan är ledig enligt ordinarie schema. Vilan tas ut i samråd med chef, beredskapsledare eller samordnare.
+                Du är ledig enligt ordinarie schema nästa dag. Timmarna för inskränkt dygnsvila sparas i potten och kan tas ut i samband med dygnsvila vid beredskapsperiodens slut. Vilan tas ut i samråd med chef, beredskapsledare eller samordnare.
               </p>
             ) : (
               <>
