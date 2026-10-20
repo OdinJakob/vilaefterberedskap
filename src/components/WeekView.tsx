@@ -354,11 +354,19 @@ export default function WeekView() {
       const e = toMinLocal(thuEnd);
       const s = toMinLocal(friStart);
       const diff = s >= e ? s - e : 1440 - e + s;
-      // Om dygnsbrytet på fredag morgon infaller innan fredagens arbetspass
-      // startar räknas vilan till dygnsbrytet, inte till arbetspassets start.
       const anchorM = toMinLocal(dygnsbryt || "06:00");
       const anchorPos = ((anchorM - e) % 1440 + 1440) % 1440;
-      restThuFri = (anchorPos > 0 && anchorPos < diff ? anchorPos : diff) / 60;
+      const inGap = anchorPos > 0 && anchorPos < diff;
+      if (inGap && anchorM > 0 && anchorM < 12 * 60) {
+        // Morgondygnsbryt: vila från torsdagens pass till dygnsbrytet.
+        restThuFri = anchorPos / 60;
+      } else if (inGap) {
+        // Eftermiddags-/kvällsdygnsbryt: nästa dygn börjar vid dygnsbrytet
+        // på torsdagen, vilan räknas därifrån till fredagens arbetspass.
+        restThuFri = (diff - anchorPos) / 60;
+      } else {
+        restThuFri = diff / 60;
+      }
     }
     const availableAtEnd = restThuFri !== null
       ? Math.max(0, totalEarned - (typeof inskranktUsed === "number" ? inskranktUsed : 0) + 11 - restThuFri)
