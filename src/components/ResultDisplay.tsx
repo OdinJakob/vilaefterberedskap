@@ -48,18 +48,23 @@ export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDa
             <p className="text-2xl font-bold text-foreground mt-1">
               {formatHours(result.mandatoryRestHours)}
             </p>
-            {nextDayOff && (
+            {disturbanceDayOff && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Du är ledig enligt ordinarie schema det dygn störningen inträffar. Ingen kompenserande vila tjänas in.
+              </p>
+            )}
+            {!disturbanceDayOff && nextDayOff && (
               <p className="text-sm text-muted-foreground mt-1">
                 Du är ledig enligt ordinarie schema nästa dag. Vilan sparas i potten och kan tas ut i samband med dygnsvila vid beredskapsperiodens slut. Vilan tas ut i samråd med chef, beredskapsledare eller samordnare.
               </p>
             )}
-            {!nextDayOff && result.mandatoryRestHours > 0 && (
+            {!disturbanceDayOff && !nextDayOff && result.mandatoryRestHours > 0 && (
               <p className="text-sm text-muted-foreground mt-1">
                 Du arbetade {formatHoursShort(result.nightWorkHours)} mellan kl 00:00–06:00.
                 Vila läggs ut timme för timme antingen i början av nästa arbetspass, i slutet av nästa arbetspass eller en kombination av dem. Vilan tas ut i samråd med chef, beredskapsledare eller samordnare.
               </p>
             )}
-            {!nextDayOff && result.mandatoryRestHours === 0 && (
+            {!disturbanceDayOff && !nextDayOff && result.mandatoryRestHours === 0 && (
               <p className="text-sm text-muted-foreground mt-1">
                 Inget aktivt arbete utfördes mellan kl 00:00–06:00. Vilan tas ut i samråd med chef, beredskapsledare eller samordnare.
               </p>
@@ -84,6 +89,11 @@ export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDa
             <p className="text-sm text-muted-foreground mt-1">
               Dygnsvilan inskränktes med {formatHoursShort(result.rawInskranktDygnsvila ?? result.totalInskranktDygnsvila)} (längsta sammanhängande vila var {formatHoursShort(result.longestContinuousRest)} av 11 h)
             </p>
+            {disturbanceDayOff && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Eftersom du är ledig enligt ordinarie schema detta dygn läggs timmarna inte till potten för inskränkt dygnsvila.
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -99,9 +109,13 @@ export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDa
               Du får vara ledig med lön
             </h3>
             <p className="text-2xl font-bold text-foreground mt-1">
-              {nextDayOff ? formatHours(0) : formatHours(paidLeaveHours)}
+              {nextDayOff || disturbanceDayOff ? formatHours(0) : formatHours(paidLeaveHours)}
             </p>
-            {nextDayOff ? (
+            {disturbanceDayOff ? (
+              <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                Du är ledig enligt ordinarie schema det dygn störningen inträffar. Inga timmar för inskränkt dygnsvila läggs till potten.
+              </p>
+            ) : nextDayOff ? (
               <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
                 Du är ledig enligt ordinarie schema nästa dag. Timmarna för inskränkt dygnsvila sparas i potten och kan tas ut i samband med dygnsvila vid beredskapsperiodens slut. Vilan tas ut i samråd med chef, beredskapsledare eller samordnare.
               </p>
