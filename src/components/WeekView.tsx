@@ -357,7 +357,7 @@ export default function WeekView() {
       const anchorM = toMinLocal(dygnsbryt || "06:00");
       const anchorPos = ((anchorM - e) % 1440 + 1440) % 1440;
       const inGap = anchorPos > 0 && anchorPos < diff;
-      if (inGap && isMorningDygnsbryt(anchorM)) {
+      if (inGap && anchorM > 0 && anchorM < 12 * 60) {
         // Morgondygnsbryt: vila från torsdagens pass till dygnsbrytet.
         restThuFri = anchorPos / 60;
       } else if (inGap) {
