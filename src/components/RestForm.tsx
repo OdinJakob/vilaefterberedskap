@@ -134,7 +134,7 @@ export default function RestForm({ input, onChange, onReset, hideUsedBeredskapsv
             onCheckedChange={(checked) => update("disturbanceDayOff", checked)}
           />
           <Label htmlFor="disturbanceDayOff" className="text-sm text-muted-foreground cursor-pointer">
-            Jag är ledig enligt ordinarie schema det dygn störningen inträffar (exempelvis helgdag)
+            Jag var ledig enligt ordinarie schema det dygn störningen inträffar (exempelvis helgdag)
           </Label>
         </div>
       </fieldset>
