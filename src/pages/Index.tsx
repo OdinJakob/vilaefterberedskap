@@ -11,11 +11,14 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Shield } from "lucide-react";
+import { useWebMCP } from "use-webmcp-tool";
+import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 
 export default function Index() {
   const [input, setInput] = useState<CalcInput>({ ...DEFAULT_INPUT });
   const [showDetailed, setShowDetailed] = useState(false);
   const [mode, setMode] = useState<"day" | "week">("day");
+
 
   const isComplete =
     input.activeWorkStart !== "" &&
@@ -27,6 +30,25 @@ export default function Index() {
     if (!isComplete) return null;
     return calculateRest(input);
   }, [input, isComplete]);
+
+  useWebMCP({
+    name: "read_rest_result",
+    description:
+      "Read the rest calculation result currently shown on the 'En dag' tab: mandatory rest, restricted daily rest, and paid on-call rest hours.",
+    annotations: { readOnlyHint: true },
+    execute: () =>
+      runWebMCPTool("read_rest_result", () => {
+        if (mode !== "day") throw new Error("Beräkningen visas bara på fliken En dag.");
+        if (!result) throw new Error("Formuläret är inte komplett ifyllt ännu.");
+        return (
+          `Obligatorisk vila: ${result.mandatoryRestHours} h. ` +
+          `Inskränkt dygnsvila: ${result.totalInskranktDygnsvila} h. ` +
+          `Beredskapsvila med lön: ${result.beredskapsvila} h. ` +
+          `Tidigast åter i arbete: ${result.earliestReturn}.`
+        );
+      }),
+  });
+
 
   const handleReset = () => {
     setInput({ ...DEFAULT_INPUT });
