@@ -293,11 +293,16 @@ export default function WeekView() {
       });
       const activeWorkHours = rawDistItems.reduce((s, it) => s + it.dur, 0) / 60;
       const nightWorkHours = rawDistItems.reduce((s, it) => s + it.night, 0) / 60;
-      const mandatoryRestHours = nightWorkHours;
+      // Är man ledig det dygn (enligt dygnsbryt) störningen inträffar tjänas
+      // ingen kompenserande vila in – varken obligatorisk vila eller inskränkt
+      // dygnsvila. Störningens längd räknas dock fortfarande in i potten för
+      // veckoberedskap med lön.
+      const dayOffBlocked = ownShift.ledig;
+      const mandatoryRestHours = dayOffBlocked ? 0 : nightWorkHours;
       const rawInskrankt = Math.max(0, 11 - longestContinuousRest);
       // Är man ledig dagen efter störningen sparas timmarna för inskränkt
       // dygnsvila i potten och kan tas ut efter beredskapsveckans slut.
-      const totalInskranktDygnsvila = Math.min(rawInskrankt, activeWorkHours);
+      const totalInskranktDygnsvila = dayOffBlocked ? 0 : Math.min(rawInskrankt, activeWorkHours);
       const additionalInskranktHours = Math.max(0, totalInskranktDygnsvila - mandatoryRestHours);
       const totalRestHours = mandatoryRestHours + additionalInskranktHours;
 
