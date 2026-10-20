@@ -138,6 +138,7 @@ export default function WeekView() {
   const summary = useMemo(() => {
     let totalMandatory = 0;
     let totalAdditional = 0;
+    let totalPaidInskrankt = 0;
     const breakdowns: { label: string; result: CalcResult }[] = [];
 
     const toMin = (t: string) => {
