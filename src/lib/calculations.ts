@@ -283,6 +283,9 @@ export function calculateRest(input: CalcInput): CalcResult {
 
   type Interval = { s: number; e: number; kind: "prev" | "next" | "dist" };
   const intervals: Interval[] = [];
+  // Samma händelser utan klippning mot fönstret – används för att mäta
+  // längsta vila per dygn (även nästa dygn om störningen passerar dygnsbrytet).
+  const absEvents: { s: number; e: number }[] = [];
 
   const addIntervalAt = (
     absS: number,
@@ -291,6 +294,7 @@ export function calculateRest(input: CalcInput): CalcResult {
   ) => {
     if (durMins <= 0) return;
     const absE = absS + durMins;
+    absEvents.push({ s: absS, e: absE });
     const cs = Math.max(0, absS);
     const ce = Math.min(1440, absE);
     if (ce > cs) intervals.push({ s: cs, e: ce, kind });
@@ -393,10 +397,11 @@ export function calculateRest(input: CalcInput): CalcResult {
     input.nextDayOff ? null : workStartMins,
     dygnsbrytMins,
   );
-  const usesRestBefore = isMorningDygnsbryt(dygnsbrytMins);
-  const longestMin = usesRestBefore
-    ? Math.max(restBeforeMin, restAfterMin)
-    : restAfterMin;
+  // Längsta dygnsvila = längsta sammanhängande vila inom dygnet (definierat
+  // av dygnsbrytet). Vila både före och efter arbetet räknas alltid. Passerar
+  // störningen dygnsbrytet bedöms även nästa dygn, och det sämsta dygnet gäller.
+  const usesRestBefore = true;
+  const longestMin = longestDailyRestMin(absEvents, disturbanceEndOffset);
 
   const restBeforeHours = restBeforeMin / 60;
   const restAfterHours = restAfterMin / 60;

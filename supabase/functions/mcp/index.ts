@@ -33,6 +33,23 @@ function restAfterLastWork(workStartOffset, workEndOffset, nextWorkStartClockMin
   while (ws <= workEndOffset) ws += 1440;
   return Math.max(0, Math.min(ws, nextDygnsbryt) - workEndOffset);
 }
+function longestRestInWindow(events, winStart, winEnd) {
+  const clipped = events.map((iv) => ({ s: Math.max(winStart, iv.s), e: Math.min(winEnd, iv.e) })).filter((iv) => iv.e > iv.s).sort((a, b) => a.s - b.s);
+  let longest = 0;
+  let cursor = winStart;
+  for (const iv of clipped) {
+    if (iv.s > cursor) longest = Math.max(longest, iv.s - cursor);
+    cursor = Math.max(cursor, iv.e);
+  }
+  return Math.max(longest, winEnd - cursor);
+}
+function longestDailyRestMin(events, disturbanceEnd) {
+  let longest = longestRestInWindow(events, 0, 1440);
+  if (disturbanceEnd > 1440) {
+    longest = Math.min(longest, longestRestInWindow(events, 1440, 2880));
+  }
+  return longest;
+}
 function minutesToTime(minutes) {
   const totalMins = (minutes % 1440 + 1440) % 1440;
   const h = Math.floor(totalMins / 60);
@@ -73,9 +90,11 @@ function calculateRest(input) {
   const anchor = dygnsbrytMins;
   const fwd = (t) => windowOffset(t, anchor);
   const intervals = [];
+  const absEvents = [];
   const addIntervalAt = (absS, durMins, kind) => {
     if (durMins <= 0) return;
     const absE = absS + durMins;
+    absEvents.push({ s: absS, e: absE });
     const cs = Math.max(0, absS);
     const ce = Math.min(1440, absE);
     if (ce > cs) intervals.push({ s: cs, e: ce, kind });
@@ -146,8 +165,8 @@ function calculateRest(input) {
     input.nextDayOff ? null : workStartMins,
     dygnsbrytMins
   );
-  const usesRestBefore = isMorningDygnsbryt(dygnsbrytMins);
-  const longestMin = usesRestBefore ? Math.max(restBeforeMin, restAfterMin) : restAfterMin;
+  const usesRestBefore = true;
+  const longestMin = longestDailyRestMin(absEvents, disturbanceEndOffset);
   const restBeforeHours = restBeforeMin / 60;
   const restAfterHours = restAfterMin / 60;
   const longestContinuousRest = longestMin / 60;
