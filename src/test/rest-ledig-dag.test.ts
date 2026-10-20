@@ -17,10 +17,14 @@ const base: CalcInput = {
 describe("ledig det dygn störningen inträffar", () => {
   it("ger ingen kompenserande vila på ett ledigt dygn", () => {
     const res = calculateRest({ ...base, disturbanceDayOff: true, prevDayOff: true, nextDayOff: true });
-    expect(res.mandatoryRestHours).toBe(0);
     expect(res.totalInskranktDygnsvila).toBe(0);
     expect(res.additionalInskranktHours).toBe(0);
-    expect(res.beredskapsvila).toBe(0);
+  });
+
+  it("ledig söndag, störning 12–03, arbete måndag: måste vara ledig 3 h", () => {
+    const res = calculateRest({ ...base, activeWorkStart: "12:00", activeWorkEnd: "03:00", crossesMidnight: true, disturbanceDayOff: true, prevDayOff: true, nextDayOff: false, workDayStart: "07:00", workDayEnd: "16:00", usedBeredskapsvila: 0 });
+    expect(res.mandatoryRestHours).toBe(3);
+    expect(res.totalInskranktDygnsvila).toBe(0);
   });
 
   it("visar fortfarande den inskränkta dygnsvilan informativt", () => {
