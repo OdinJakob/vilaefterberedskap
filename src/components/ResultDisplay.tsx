@@ -132,7 +132,6 @@ export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDa
         </div>
       </div>
 
-
       {/* Warnings */}
       {result.warnings.length > 0 && (
         <div className="space-y-2">
