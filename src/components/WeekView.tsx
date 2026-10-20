@@ -138,6 +138,7 @@ export default function WeekView() {
   const summary = useMemo(() => {
     let totalMandatory = 0;
     let totalAdditional = 0;
+    let totalPaidInskrankt = 0;
     const breakdowns: { label: string; result: CalcResult }[] = [];
 
     const toMin = (t: string) => {
@@ -304,6 +305,7 @@ export default function WeekView() {
 
       totalMandatory += mandatoryRestHours;
       totalAdditional += additionalInskranktHours;
+      totalPaidInskrankt += totalInskranktDygnsvila;
 
       const distLabel = rawDistItems.map((it) => `${it.start}–${it.end}`).join(", ");
       const result: CalcResult = {
@@ -333,7 +335,8 @@ export default function WeekView() {
       });
     }
 
-    const totalEarned = totalMandatory + totalAdditional;
+    // Upparbetad vila = summan av "Vila med lön pga. inskränkt dygnsvila" per dag.
+    const totalEarned = totalPaidInskrankt;
     const totalDisturbance = breakdowns.reduce((s, b) => s + b.result.activeWorkHours, 0);
     const vu = typeof vilaUsed === "number" ? vilaUsed : 0;
     const remainingVecko = Math.max(0, Math.min(8, totalDisturbance) - vu);
