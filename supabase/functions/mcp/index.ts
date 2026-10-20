@@ -33,6 +33,9 @@ function restAfterLastWork(workStartOffset, workEndOffset, nextWorkStartClockMin
   while (ws <= workEndOffset) ws += 1440;
   return Math.max(0, Math.min(ws, nextDygnsbryt) - workEndOffset);
 }
+function isMorningDygnsbryt(dygnsbrytMins) {
+  return dygnsbrytMins > 0 && dygnsbrytMins < 12 * 60;
+}
 function minutesToTime(minutes) {
   const totalMins = (minutes % 1440 + 1440) % 1440;
   const h = Math.floor(totalMins / 60);
@@ -146,7 +149,8 @@ function calculateRest(input) {
     input.nextDayOff ? null : workStartMins,
     dygnsbrytMins
   );
-  const longestMin = restAfterMin;
+  const usesRestBefore = isMorningDygnsbryt(dygnsbrytMins);
+  const longestMin = usesRestBefore ? Math.max(restBeforeMin, restAfterMin) : restAfterMin;
   const restBeforeHours = restBeforeMin / 60;
   const restAfterHours = restAfterMin / 60;
   const longestContinuousRest = longestMin / 60;

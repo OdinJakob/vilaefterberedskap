@@ -351,16 +351,19 @@ export function calculateRest(input: CalcInput): CalcResult {
   const effectiveDistStart = Math.max(disturbanceStartOffset, prevEndOffset);
   const restBeforeMin = Math.max(0, effectiveDistStart - prevEndOffset);
 
-  // Dygnsvilan mäts från det sista arbetets slut (störningens slut, eller
-  // dagens ordinarie pass om det slutar senare) till nästa arbetspass eller
-  // dygnsbryt – vila före arbetspasset räknas inte.
+  // Vid dygnsbryt på morgonen är längsta dygnsvila det längsta av vilan
+  // före störningen och vilan efter det sista arbetet. Vid eftermiddags-/
+  // kvällsdygnsbryt räknas bara vilan efter det sista arbetet.
   const restAfterMin = restAfterLastWork(
     disturbanceStartOffset,
     Math.max(disturbanceEndOffset, prevEndOffset),
     input.nextDayOff ? null : workStartMins,
     dygnsbrytMins,
   );
-  const longestMin = restAfterMin;
+  const usesRestBefore = isMorningDygnsbryt(dygnsbrytMins);
+  const longestMin = usesRestBefore
+    ? Math.max(restBeforeMin, restAfterMin)
+    : restAfterMin;
 
   const restBeforeHours = restBeforeMin / 60;
   const restAfterHours = restAfterMin / 60;
