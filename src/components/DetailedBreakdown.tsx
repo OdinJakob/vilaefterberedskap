@@ -28,7 +28,9 @@ export default function DetailedBreakdown({ result }: DetailedBreakdownProps) {
     {
       label: "Längsta sammanhängande vila",
       value: formatHoursShort(result.longestContinuousRest),
-      detail: `max(${formatHoursShort(result.restBeforeDisturbance)}, ${formatHoursShort(result.restAfterDisturbance)})`,
+      detail: result.usesRestBeforeInLongest
+        ? `max(${formatHoursShort(result.restBeforeDisturbance)}, ${formatHoursShort(result.restAfterDisturbance)})`
+        : "Vila efter det sista arbetet till nästa arbetspass eller dygnsbryt",
     },
     {
       label: "Obligatorisk ledighet (ska vara ledig, 00–06-regeln)",
