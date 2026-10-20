@@ -33,9 +33,6 @@ function restAfterLastWork(workStartOffset, workEndOffset, nextWorkStartClockMin
   while (ws <= workEndOffset) ws += 1440;
   return Math.max(0, Math.min(ws, nextDygnsbryt) - workEndOffset);
 }
-function isMorningDygnsbryt(dygnsbrytMins) {
-  return dygnsbrytMins > 0 && dygnsbrytMins < 12 * 60;
-}
 function minutesToTime(minutes) {
   const totalMins = (minutes % 1440 + 1440) % 1440;
   const h = Math.floor(totalMins / 60);

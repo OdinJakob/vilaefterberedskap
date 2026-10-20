@@ -154,9 +154,42 @@ export function restAfterLastWork(
   return Math.max(0, Math.min(ws, nextDygnsbryt) - workEndOffset);
 }
 
-/** Dygnsbryt på morgonen räknas här som efter midnatt och före kl 12. */
-export function isMorningDygnsbryt(dygnsbrytMins: number): boolean {
-  return dygnsbrytMins > 0 && dygnsbrytMins < 12 * 60;
+/**
+ * Längsta sammanhängande vila inom fönstret [winStart, winEnd], givet
+ * arbetsintervall som kan ligga utanför fönstret (de klipps).
+ */
+export function longestRestInWindow(
+  events: { s: number; e: number }[],
+  winStart: number,
+  winEnd: number,
+): number {
+  const clipped = events
+    .map((iv) => ({ s: Math.max(winStart, iv.s), e: Math.min(winEnd, iv.e) }))
+    .filter((iv) => iv.e > iv.s)
+    .sort((a, b) => a.s - b.s);
+  let longest = 0;
+  let cursor = winStart;
+  for (const iv of clipped) {
+    if (iv.s > cursor) longest = Math.max(longest, iv.s - cursor);
+    cursor = Math.max(cursor, iv.e);
+  }
+  return Math.max(longest, winEnd - cursor);
+}
+
+/**
+ * Längsta dygnsvila i minuter. Dygnet definieras av dygnsbrytet (fönster
+ * [0, 1440)). Översträcker störningen dygnsbrytet bedöms även nästa dygn
+ * [1440, 2880) och den kortaste längsta vilan av de berörda dygnen gäller.
+ */
+export function longestDailyRestMin(
+  events: { s: number; e: number }[],
+  disturbanceEnd: number,
+): number {
+  let longest = longestRestInWindow(events, 0, 1440);
+  if (disturbanceEnd > 1440) {
+    longest = Math.min(longest, longestRestInWindow(events, 1440, 2880));
+  }
+  return longest;
 }
 
 /**
