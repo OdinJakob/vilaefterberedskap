@@ -11,11 +11,14 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Shield } from "lucide-react";
+import { useWebMCP } from "use-webmcp-tool";
+import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 
 export default function Index() {
   const [input, setInput] = useState<CalcInput>({ ...DEFAULT_INPUT });
   const [showDetailed, setShowDetailed] = useState(false);
   const [mode, setMode] = useState<"day" | "week">("day");
+
 
   const isComplete =
     input.activeWorkStart !== "" &&
