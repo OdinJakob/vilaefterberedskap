@@ -58,6 +58,8 @@ export interface CalcResult {
   mandatoryRestHours: number;
   /** Längsta sammanhängande vila under viloperioden */
   longestContinuousRest: number;
+  /** Om vilan före störningen ingår i längsta dygnsvila (morgondygnsbryt) */
+  usesRestBeforeInLongest: boolean;
   /** Total inskränkt dygnsvila (11 - längsta vila, max störningstid) */
   totalInskranktDygnsvila: number;
   /** Inskränkt dygnsvila oavsett rätt till betald vila (informativt) */
