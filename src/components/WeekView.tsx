@@ -438,10 +438,6 @@ export default function WeekView() {
                   <span className="font-medium text-foreground">8 h</span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-border/30">
-                  <span className="text-muted-foreground">Summa störningar utanför ordinarie schema (taket blir det lägsta av 8 h och denna summa)</span>
-                  <span className="font-medium text-foreground">{formatHoursShort(summary.totalDisturbance)}</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-border/30">
                   <span className="text-muted-foreground">Redan uttagen veckoberedskap med lön</span>
                   <span className="font-medium text-foreground">− {formatHoursShort(typeof vilaUsed === "number" ? vilaUsed : 0)}</span>
                 </div>
