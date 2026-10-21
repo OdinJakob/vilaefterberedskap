@@ -337,9 +337,8 @@ export default function WeekView() {
 
     // Upparbetad vila = summan av "Vila med lön pga. inskränkt dygnsvila" per dag.
     const totalEarned = totalPaidInskrankt;
-    const totalDisturbance = breakdowns.reduce((s, b) => s + b.result.activeWorkHours, 0);
     const vu = typeof vilaUsed === "number" ? vilaUsed : 0;
-    const remainingVecko = Math.max(0, Math.min(8, totalDisturbance) - vu);
+    const remainingVecko = Math.max(0, 8 - vu);
     const used =
       (typeof vilaUsed === "number" ? vilaUsed : 0) +
       (typeof inskranktUsed === "number" ? inskranktUsed : 0);
@@ -374,7 +373,7 @@ export default function WeekView() {
     const availableAtEnd = restThuFri !== null
       ? Math.max(0, totalEarned - (typeof inskranktUsed === "number" ? inskranktUsed : 0) + 11 - restThuFri)
       : 0;
-    return { totalDisturbance, remainingVecko, totalMandatory, totalAdditional, totalEarned, remaining, used, breakdowns, restThuFri, availableAtEnd };
+    return { remainingVecko, totalMandatory, totalAdditional, totalEarned, remaining, used, breakdowns, restThuFri, availableAtEnd };
   }, [days, disturbanceCount, effectiveShifts, vilaUsed, inskranktUsed, dygnsbryt]);
 
   const distIndices = Array.from({ length: disturbanceCount }, (_, i) => i);
@@ -402,7 +401,7 @@ export default function WeekView() {
               {formatHoursShort(summary.remainingVecko)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Det går inte att ta ut mer veckoberedskap med lön än vad störningen varat
+              Max 8 timmar per beredskapsvecka, minus det du redan tagit ut
             </p>
           </div>
           <div className="flex flex-col">
@@ -437,10 +436,6 @@ export default function WeekView() {
                 <div className="flex justify-between py-1.5 border-b border-border/30">
                   <span className="text-muted-foreground">Maxuttag per vecka</span>
                   <span className="font-medium text-foreground">8 h</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-border/30">
-                  <span className="text-muted-foreground">Summa störningar utanför ordinarie schema (taket blir det lägsta av 8 h och denna summa)</span>
-                  <span className="font-medium text-foreground">{formatHoursShort(summary.totalDisturbance)}</span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-border/30">
                   <span className="text-muted-foreground">Redan uttagen veckoberedskap med lön</span>
