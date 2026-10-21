@@ -338,7 +338,7 @@ export default function WeekView() {
     // Upparbetad vila = summan av "Vila med lön pga. inskränkt dygnsvila" per dag.
     const totalEarned = totalPaidInskrankt;
     const vu = typeof vilaUsed === "number" ? vilaUsed : 0;
-    const remainingVecko = Math.max(0, WEEKLY_BEREDSKAPSVILA_MAX - vu);
+    const remainingVecko = Math.max(0, 8 - vu);
     const used =
       (typeof vilaUsed === "number" ? vilaUsed : 0) +
       (typeof inskranktUsed === "number" ? inskranktUsed : 0);
@@ -401,7 +401,7 @@ export default function WeekView() {
               {formatHoursShort(summary.remainingVecko)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Det går inte att ta ut mer veckoberedskap med lön än vad störningen varat
+              Max 8 timmar per beredskapsvecka, minus det du redan tagit ut
             </p>
           </div>
           <div className="flex flex-col">
