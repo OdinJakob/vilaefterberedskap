@@ -337,9 +337,8 @@ export default function WeekView() {
 
     // Upparbetad vila = summan av "Vila med lön pga. inskränkt dygnsvila" per dag.
     const totalEarned = totalPaidInskrankt;
-    const totalDisturbance = breakdowns.reduce((s, b) => s + b.result.activeWorkHours, 0);
     const vu = typeof vilaUsed === "number" ? vilaUsed : 0;
-    const remainingVecko = Math.max(0, Math.min(8, totalDisturbance) - vu);
+    const remainingVecko = Math.max(0, WEEKLY_BEREDSKAPSVILA_MAX - vu);
     const used =
       (typeof vilaUsed === "number" ? vilaUsed : 0) +
       (typeof inskranktUsed === "number" ? inskranktUsed : 0);
@@ -374,7 +373,7 @@ export default function WeekView() {
     const availableAtEnd = restThuFri !== null
       ? Math.max(0, totalEarned - (typeof inskranktUsed === "number" ? inskranktUsed : 0) + 11 - restThuFri)
       : 0;
-    return { totalDisturbance, remainingVecko, totalMandatory, totalAdditional, totalEarned, remaining, used, breakdowns, restThuFri, availableAtEnd };
+    return { remainingVecko, totalMandatory, totalAdditional, totalEarned, remaining, used, breakdowns, restThuFri, availableAtEnd };
   }, [days, disturbanceCount, effectiveShifts, vilaUsed, inskranktUsed, dygnsbryt]);
 
   const distIndices = Array.from({ length: disturbanceCount }, (_, i) => i);
