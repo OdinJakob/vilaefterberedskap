@@ -24,14 +24,14 @@ export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDa
     result.remainingWeeklyBeredskapsvila + result.beredskapsvila + result.totalInskranktDygnsvila
   );
   const paidLeaveHours = nextDayOff ? 0 : Math.min(uncappedPaidLeaveHours, workPassHours);
-  const savedInPot = !nextDayOff && paidLeaveHours < uncappedPaidLeaveHours
-    ? uncappedPaidLeaveHours - paidLeaveHours
-    : 0;
+  const cappedByWorkPass = !nextDayOff && paidLeaveHours < uncappedPaidLeaveHours;
 
   const remainingWeeklyBefore = result.remainingWeeklyBeredskapsvila + result.beredskapsvila;
   const xRaw = Math.min(6, remainingWeeklyBefore);
   const x = Math.min(xRaw, paidLeaveHours);
   const y = paidLeaveHours - x;
+  // Potten = hela inskränkta dygnsvilan minus det som registreras som inskränkt dygnsvila nu
+  const savedInPot = nextDayOff ? 0 : Math.max(0, result.totalInskranktDygnsvila - y);
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -117,7 +117,7 @@ export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDa
                 </p>
                 {savedInPot > 0 && (
                   <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                    Ledigheten begränsas av längden på ditt ordinarie arbetspass nästa dag. Om delar av ditt ordinarie arbetspass är rast behöver du inte använda intjänad vila för att ta ledigt motsvarande tid. Resterande {formatHoursShort(savedInPot)} inskränkt dygnsvila sparas i potten och kan tas ut när beredskapsveckan är slut eller efter störningar senare under beredskapsveckan.
+                    {cappedByWorkPass && "Ledigheten begränsas av längden på ditt ordinarie arbetspass nästa dag. Om delar av ditt ordinarie arbetspass är rast behöver du inte använda intjänad vila för att ta ledigt motsvarande tid. "}Resterande {formatHoursShort(savedInPot)} inskränkt dygnsvila sparas i potten och kan tas ut när beredskapsveckan är slut eller efter störningar senare under beredskapsveckan.
                   </p>
                 )}
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
