@@ -15,8 +15,8 @@ const parseTime = (t: string): number => {
 };
 
 export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDayOff, disturbanceDayOff }: ResultDisplayProps) {
-  // Nästa dags ordinarie arbetspass (minus 1 timme lunchrast) sätter ett tak för uttagen ledighet
-  const workPassHours = Math.max(0, (parseTime(workDayEnd) - parseTime(workDayStart)) / 60 - 1);
+  // Nästa dags ordinarie arbetspass (hela dagen, utan avdrag för rast) sätter ett tak för uttagen ledighet
+  const workPassHours = Math.max(0, (parseTime(workDayEnd) - parseTime(workDayStart)) / 60);
 
   const uncappedPaidLeaveHours = Math.min(
     result.activeWorkHours,
