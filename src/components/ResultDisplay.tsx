@@ -117,7 +117,7 @@ export default function ResultDisplay({ result, workDayStart, workDayEnd, nextDa
                 </p>
                 {savedInPot > 0 && (
                   <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                    Ledigheten begränsas av längden på ditt ordinarie arbetspass nästa dag. Resterande {formatHoursShort(savedInPot)} inskränkt dygnsvila sparas i potten och kan tas ut när beredskapsveckan är slut eller efter störningar senare under beredskapsveckan.
+                    Ledigheten begränsas av längden på ditt ordinarie arbetspass nästa dag. Om delar av ditt ordinarie arbetspass är rast behöver du inte använda intjänad vila för att ta ledigt motsvarande tid. Resterande {formatHoursShort(savedInPot)} inskränkt dygnsvila sparas i potten och kan tas ut när beredskapsveckan är slut eller efter störningar senare under beredskapsveckan.
                   </p>
                 )}
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
