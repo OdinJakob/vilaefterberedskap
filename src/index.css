@@ -103,3 +103,12 @@
     @apply bg-[hsl(var(--paid-rest-bg))] border-[hsl(var(--paid-rest))]/30;
   }
 }
+
+@media print {
+  @page { size: A4 landscape; margin: 10mm; }
+  html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; }
+  main.container { padding: 0 !important; max-width: none !important; }
+  .week-print-area { font-size: 10px; }
+  .week-print-area .overflow-x-auto { overflow: visible !important; }
+  .week-print-area input { border: none; padding: 0; height: auto; }
+}

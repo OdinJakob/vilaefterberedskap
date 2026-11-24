@@ -59,7 +59,7 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card">
+      <header className="border-b bg-card print:hidden">
         <div className="container py-6">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-primary p-2.5">
@@ -80,7 +80,7 @@ export default function Index() {
 
       <main className="container py-6 space-y-6 pb-20">
         {/* Disclaimer */}
-        <div className="bg-muted/50 rounded-lg p-4 border border-border/50">
+        <div className="bg-muted/50 rounded-lg p-4 border border-border/50 print:hidden">
           <p className="text-sm text-muted-foreground">
             Det här verktyget är ett stöd för att räkna ut ledighet och vila efter störning under
             beredskap. Slutlig bedömning görs tillsammans med chef eller beredskapsledare enligt gällande regler
@@ -90,7 +90,7 @@ export default function Index() {
 
         {/* Mode tabs */}
         <Tabs value={mode} onValueChange={(v) => setMode(v as "day" | "week")}>
-          <TabsList className="w-full">
+          <TabsList className="w-full print:hidden">
             <TabsTrigger value="day" className="flex-1">En dag</TabsTrigger>
             <TabsTrigger value="week" className="flex-1">Hel vecka</TabsTrigger>
           </TabsList>
@@ -132,8 +132,10 @@ export default function Index() {
         </Tabs>
 
         {/* Info */}
-        <RestInfoBox />
-        <InfoBox />
+        <div className="print:hidden space-y-6">
+          <RestInfoBox />
+          <InfoBox />
+        </div>
       </main>
     </div>
   );

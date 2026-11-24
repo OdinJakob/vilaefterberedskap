@@ -1,10 +1,20 @@
-import { Fragment, useState, useMemo } from "react";
+import { Fragment, useState, useMemo, useEffect } from "react";
 import { CalcResult, formatHoursShort, longestDailyRestMin, restAfterLastWork } from "@/lib/calculations";
 import DetailedBreakdown from "@/components/DetailedBreakdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Info, RotateCcw } from "lucide-react";
+import { Plus, Trash2, Info, RotateCcw, Printer } from "lucide-react";
+
+const STORAGE_KEY = "vila-vid-beredskap:hel-vecka";
+const loadSaved = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
 import DygnsbrytHelp from "@/components/DygnsbrytHelp";
 
 const WEEKDAYS = ["Torsdag", "Fredag", "Lördag", "Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag"];
@@ -38,10 +48,21 @@ function newDay(): DayCol {
 }
 
 export default function WeekView() {
-  const [days, setDays] = useState<DayCol[]>(() => WEEKDAYS.map(() => newDay()));
-  const [disturbanceCount, setDisturbanceCount] = useState(1);
+  const [saved] = useState(loadSaved);
+  const [days, setDays] = useState<DayCol[]>(() =>
+    Array.isArray(saved?.days) && saved.days.length === WEEKDAYS.length ? saved.days : WEEKDAYS.map(() => newDay())
+  );
+  const [disturbanceCount, setDisturbanceCount] = useState<number>(saved?.disturbanceCount ?? 1);
   const [showSummaryBreakdown, setShowSummaryBreakdown] = useState(false);
-  const [dygnsbryt, setDygnsbryt] = useState<string>("06:00");
+  const [dygnsbryt, setDygnsbryt] = useState<string>(saved?.dygnsbryt ?? "06:00");
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ days, disturbanceCount, dygnsbryt }));
+    } catch {
+      /* lagring ej tillgänglig */
+    }
+  }, [days, disturbanceCount, dygnsbryt]);
 
   const sumField = (key: "usedVeckoberedskap" | "usedInskrankt") =>
     days.reduce((s, d) => s + (parseFloat(d[key]) || 0), 0);
@@ -115,6 +136,7 @@ export default function WeekView() {
     setDisturbanceCount(1);
     
     setDygnsbryt("06:00");
+    try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
   };
 
   // Resolve effective shift for each day (handle sameAsPrev + ledig)
@@ -379,7 +401,19 @@ export default function WeekView() {
   const distIndices = Array.from({ length: disturbanceCount }, (_, i) => i);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 week-print-area">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 print:hidden">
+        <p className="text-xs text-muted-foreground">
+          Det du fyller i sparas automatiskt på den här enheten tills du nollställer veckan.
+        </p>
+        <Button variant="outline" size="sm" onClick={() => window.print()}>
+          <Printer className="mr-1.5 h-3.5 w-3.5" />
+          Skriv ut / spara som PDF
+        </Button>
+      </div>
+      <p className="hidden print:block text-xs">
+        Vila vid beredskap – utskrift {new Date().toLocaleDateString("sv-SE")}. Beslutsstöd; slutlig bedömning görs med chef eller beredskapsledare.
+      </p>
       {/* Weekly Summary */}
       <div className="bg-card rounded-lg border p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
@@ -521,7 +555,7 @@ export default function WeekView() {
       <div className="bg-card rounded-lg border shadow-sm">
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-semibold text-foreground">Veckoschema och störningar</h2>
-          <Button variant="ghost" size="sm" onClick={resetAll} className="text-muted-foreground">
+          <Button variant="ghost" size="sm" onClick={resetAll} className="text-muted-foreground print:hidden">
             <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
             Nollställ
           </Button>
